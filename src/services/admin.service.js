@@ -643,7 +643,8 @@ const getLatestActivities = async ({ limit = 5, page = 1, type }) => {
         data: await Media.find({})
           .sort({ createdAt: -1 })
           .skip(limit * (page - 1))
-          .limit(limit),
+          .limit(limit)
+          .populate("user"),
         total: await Media.countDocuments({}),
       };
     default:
