@@ -23,6 +23,10 @@ const defaultRoutes = [
     path: "/locations",
     route: require("./location.route"),
   },
+  {
+    path: "/profile",
+    route: require("./profile.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {

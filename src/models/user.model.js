@@ -3,13 +3,27 @@ const validator = require("validator");
 const { toJSON } = require("./plugins");
 
 const soft_delete = require("mongoose-delete");
+const SocialSchema = require("./schemas/social.schema");
+const PollSchema = require("./schemas/poll.schema");
 
-module.exports = ({ Schema, model }, mongoosePaginate) => {
+module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
+  const ProfileSchema = new Schema({
+    about: { type: String, default: "" },
+    social: SocialSchema,
+    poll: PollSchema,
+  });
+
   const UserSchema = new Schema(
     {
       firstName: { type: String, required: true, trim: true },
       lastName: { type: String, required: true, trim: true },
       username: { type: String, required: true },
+      profile: ProfileSchema,
+      profilePicture: {
+        type: Schema.Types.ObjectId,
+        ref: "Media",
+        default: null,
+      },
       email: {
         type: String,
         lowercase: true,
@@ -57,17 +71,6 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
         state: { type: String },
       },
       category: { type: String, required: false },
-      profile: {
-        about: { type: String },
-        social: { type: Object },
-        notification: { type: Object },
-        avatar: { type: String },
-      },
-      profilePicture: {
-        type: Schema.Types.ObjectId,
-        ref: "Media",
-        default: null,
-      },
     },
     {
       timestamps: true,
