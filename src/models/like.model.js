@@ -4,10 +4,6 @@ const softDelete = require("mongoose-delete");
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Like = new Schema(
     {
-      document: {
-        type: Types.ObjectId,
-        ref: "Post",
-      },
       count: { type: Number, default: 0 },
       users: [
         {

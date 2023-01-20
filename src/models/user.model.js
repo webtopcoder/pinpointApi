@@ -10,7 +10,6 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
       firstName: { type: String, required: true, trim: true },
       lastName: { type: String, required: true, trim: true },
       username: { type: String, required: true },
-      birth: { type: Date },
       email: {
         type: String,
         lowercase: true,
@@ -45,12 +44,18 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
         enum: ["pending", "suspended", "banned", "active"],
         default: "active",
       },
-      role: { type: Number, default: 0 },
+      role: {
+        type: String,
+        enum: ["user", "partner"],
+        required: true,
+      },
+      dob: {
+        type: Date,
+      },
       address: {
         city: { type: String },
         state: { type: String },
       },
-      usertype: { type: String, required: true },
       category: { type: String, required: false },
       profile: {
         about: { type: String },
@@ -58,7 +63,6 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
         notification: { type: Object },
         avatar: { type: String },
       },
-
       profilePicture: {
         type: Schema.Types.ObjectId,
         ref: "Media",

@@ -17,3 +17,8 @@ module.exports.SubCategory = require("./subCategory.model")(
 );
 module.exports.Media = require("./media.model")(mongoose, mongoosePaginate);
 module.exports.Follow = require("./follow.model")(mongoose, mongoosePaginate);
+module.exports.Location = require("./location.model")(
+  mongoose,
+  mongoosePaginate
+);
+module.exports.Review = require("./review.model")(mongoose, mongoosePaginate);

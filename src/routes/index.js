@@ -19,6 +19,10 @@ const defaultRoutes = [
     path: "/follow",
     route: require("./follow.route"),
   },
+  {
+    path: "/locations",
+    route: require("./location.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {

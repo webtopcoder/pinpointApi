@@ -16,10 +16,11 @@ const express = require("express"),
   path = require("path"),
   serveStatic = require("serve-static"),
   swaggerUi = require("swagger-ui-express"),
+  expressOasGenerator = require("express-oas-generator"),
   httpContext = require("express-http-context");
 
 const app = express();
-
+expressOasGenerator.handleResponses(app, {});
 if (config.env !== "test") {
   app.use(morgan.successHandler);
   app.use(morgan.errorHandler);
@@ -70,6 +71,7 @@ app.use((req, res, next) => {
 app.use(errorConverter);
 
 app.use(errorHandler);
+expressOasGenerator.handleRequests();
 
 module.exports = {
   app,
