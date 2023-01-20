@@ -5,6 +5,8 @@ const logger = require("./config/logger");
 const { Socket } = require("./socket/socket");
 
 let server;
+
+mongoose.set("strictQuery", false);
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info("Connected to Database");
   server = app.listen(config.port, () => {

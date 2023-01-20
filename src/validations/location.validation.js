@@ -12,7 +12,6 @@ const createLocation = {
     }),
     images: Joi.array().items(Joi.string()),
     isActive: Joi.boolean(),
-    arrivalAt: Joi.date(),
   }),
 };
 
@@ -47,14 +46,20 @@ const updateLocation = {
       }),
       images: Joi.array().items(Joi.string()),
       isActive: Joi.boolean(),
-      arrivalAt: Joi.date(),
-      departureAt: Joi.date(),
     })
     .min(1),
+};
+
+const quickArrivalOrDeparture = {
+  params: Joi.object().keys({
+    locationId: Joi.required().custom(objectId),
+  }),
 };
 
 module.exports = {
   createLocation,
   getLocations,
   getLocation,
+  updateLocation,
+  quickArrivalOrDeparture,
 };

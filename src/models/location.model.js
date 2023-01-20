@@ -59,13 +59,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Boolean,
         default: true,
       },
-      arrivalAt: {
-        type: Date,
-        default: new Date().now,
-      },
-      departureAt: {
-        type: Date,
-      },
     },
     {
       timestamps: true,

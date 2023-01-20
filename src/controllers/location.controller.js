@@ -28,31 +28,6 @@ const getLocation = catchAsync(async (req, res) => {
   res.send(location);
 });
 
-const getQuickArrival = catchAsync(async (req, res) => {
-  const filter = {
-    arrivalAt: { $gte: new Date().now - 1000 * 60 * 60 * 24 },
-  };
-
-  const options = {
-    sort: "arrivalAt",
-  };
-  const location = await locationService.queryLocations(filter, options);
-  res.send(location);
-});
-
-const getQuickDeparture = catchAsync(async (req, res) => {
-  const filter = {
-    departureAt: { $gte: new Date().now - 1000 * 60 * 60 * 24 },
-  };
-
-  const options = {
-    sort: "departureAt",
-  };
-
-  const location = await locationService.queryLocations(filter, options);
-  res.send(location);
-});
-
 const updateLocation = catchAsync(async (req, res) => {
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
@@ -73,11 +48,51 @@ const updateLocation = catchAsync(async (req, res) => {
   res.send(location);
 });
 
+const quickArrival = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  if (!location.partner == req.user._id) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You don't have permission to update this location"
+    );
+  }
+
+  const updatedLocation = await locationService.updateLocationById(locationId, {
+    isActive: true,
+  });
+
+  res.send(location);
+});
+
+const quickDeparture = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  if (!location.partner == req.user._id) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You don't have permission to update this location"
+    );
+  }
+  const updatedLocation = await locationService.updateLocationById(locationId, {
+    isActive: false,
+  });
+  res.send(location);
+});
+
 module.exports = {
   createLocation,
   getLocations,
   getLocation,
-  getQuickArrival,
-  getQuickDeparture,
   updateLocation,
+  quickArrival,
+  quickDeparture,
 };

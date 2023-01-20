@@ -23,18 +23,20 @@ router
     locationController.getLocations
   );
 
-router.route("/quickArrival").get(
+router.route("/quickArrival").post(
   auth({
-    allowAnonymous: true,
+    allowAnonymous: false,
   }),
-  locationController.getQuickArrival
+  validate(locationValidation.quickArrivalOrDeparture),
+  locationController.quickArrival
 );
 
-router.route("/quickDeparture").get(
+router.route("/quickDeparture").post(
   auth({
-    allowAnonymous: true,
+    allowAnonymous: false,
   }),
-  locationController.getQuickDeparture
+  validate(locationValidation.quickArrivalOrDeparture),
+  locationController.quickDeparture
 );
 
 router
