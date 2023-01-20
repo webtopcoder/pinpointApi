@@ -64,9 +64,20 @@ const sendVerificationEmail = async (userId) => {
   await sendEmail(to, subject, html);
 };
 
+const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
+  const user = await userService.getUserById(senderId);
+
+  const subject = "Invitation";
+  const to = inviteTo;
+  const html = message;
+
+  await sendEmail(to, subject, html);
+};
+
 module.exports = {
   transport,
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
+  sendInviteEmail,
 };

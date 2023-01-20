@@ -4,3 +4,4 @@ module.exports.categoryValidation = require("./category.validation");
 module.exports.followValidation = require("./follow.validation");
 module.exports.locationValidation = require("./location.validation");
 module.exports.profileValidation = require("./profile.validation");
+module.exports.mailValidation = require("./mail.validation");

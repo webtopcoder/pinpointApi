@@ -12,6 +12,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "User",
       },
+      to_invite_email: {
+        type: String,
+      },
       subject: { type: String },
       message: { type: String },
       files: {

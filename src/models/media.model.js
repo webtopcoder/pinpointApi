@@ -28,6 +28,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         ref: "User",
         required: true,
       },
+      isPublic: {
+        type: Boolean,
+        default: false,
+      },
     },
     {
       timestamps: true,

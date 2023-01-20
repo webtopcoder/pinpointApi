@@ -8,3 +8,4 @@ module.exports.contactService = require("./contact.service");
 module.exports.mediaService = require("./media.service");
 module.exports.reviewService = require("./review.service");
 module.exports.locationService = require("./location.service");
+module.exports.mailService = require("./mail.service");

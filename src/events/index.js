@@ -1,9 +1,10 @@
 const EventEmitter = new (require("events").EventEmitter)();
 const logger = require("@configs/logger");
-const { emailService, shopService } = require("@services");
+const { emailService } = require("@services");
 
 const userEvents = {
   USER_ONLINE: "user.online",
+  SEND_INVITE: "user.sendInvite",
 };
 
 const authEvents = {
@@ -28,6 +29,9 @@ Object.keys(events).forEach((event) => {
           break;
         case events.RESET_PASSWORD:
           await emailService.sendResetPasswordEmail(data);
+          break;
+        case events.SEND_INVITE:
+          await emailService.sendInviteEmail(data);
           break;
         default:
           logger.error("Event not found");

@@ -27,6 +27,10 @@ const defaultRoutes = [
     path: "/profile",
     route: require("./profile.route"),
   },
+  {
+    path: "/mail",
+    route: require("./mail.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {
