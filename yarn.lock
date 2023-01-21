@@ -2411,7 +2411,7 @@ browserslist@^4.21.3, browserslist@^4.21.4:
     node-releases "^2.0.6"
     update-browserslist-db "^1.0.9"
 
-bson@^4.7.0:
+bson@^4.7.0, bson@^4.7.2:
   version "4.7.2"
   resolved "https://registry.yarnpkg.com/bson/-/bson-4.7.2.tgz#320f4ad0eaf5312dd9b45dc369cc48945e2a5f2e"
   integrity sha512-Ry9wCtIZ5kGqkJoi6aD8KjxFZEx78guTQDnpXWiNthsxzrxAK/i8E6pCHAIZTbaEFWcOCvbecMukfK7XUvyLpQ==
@@ -4325,6 +4325,11 @@ mongoose-paginate-v2@^1.7.1:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/mongoose-paginate-v2/-/mongoose-paginate-v2-1.7.1.tgz#0b390f5eb8e5dca55ffcb1fd7b4d8078636cb8f1"
   integrity sha512-J8DJw3zRXcXOKoZv+RvO9tt5HotRnbo2iCR3lke+TtsQsYwQvbY3EgUkPqZXw6qCX2IByvXrW5SGNdAB0od/Cw==
+
+mongoose-to-swagger@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/mongoose-to-swagger/-/mongoose-to-swagger-1.4.0.tgz#30e8b9a9766277f8ec82dbcb69e424ed288168ef"
+  integrity sha512-7O5f2bSVT7euXgMMhlxe4gz6sJW8E3GWHties2FR3B+W41yhW5dpG4RuC7rGL3tKi9nyDN/nkorkbs5v0AHLyg==
 
 mongoose@^6.8.0:
   version "6.8.4"
