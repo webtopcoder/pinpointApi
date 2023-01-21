@@ -1,3 +1,4 @@
+const config = require("@configs/config");
 const swaggerDef = {
   openapi: "3.0.0",
   info: {
@@ -7,9 +8,9 @@ const swaggerDef = {
       name: "MIT",
       url: "",
     },
-    description: "http://localhost:8080/api/v1/docs/swagger",
+    description: `${config.swagger.url}/api/v1/docs/swagger`,
   },
-  servers: [{ url: `http://localhost:8080/api/v1` }],
+  servers: [{ url: `${config.swagger.url}/api/v1` }],
 };
 
 module.exports = swaggerDef;
