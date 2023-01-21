@@ -18,3 +18,7 @@ const createContact = async ({ user, subject, content }) => {
   });
   return contact;
 };
+
+module.exports = {
+  createContact,
+};
