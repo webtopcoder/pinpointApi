@@ -6,15 +6,15 @@ const { categoryService } = require("@services");
 
 const getCategories = catchAsync(async (req, res) => {
   const categories = await categoryService.getCategories();
-  res.status(httpStatus.OK).send(categories);
+  res.status(httpStatus.OK).send({ success: true, categories });
 });
 
 const getSubCategoryByCategoryId = catchAsync(async (req, res) => {
   const { categoryId } = req.params;
-  const subCategory = await categoryService.getSubCategoryByCategoryId(
+  const subCategories = await categoryService.getSubCategoryByCategoryId(
     categoryId
   );
-  res.status(httpStatus.OK).send(subCategory);
+  res.status(httpStatus.OK).send({ success: true, subCategories });
 });
 
 module.exports = {
