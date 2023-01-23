@@ -7,20 +7,22 @@ const { profileController } = require("@controllers");
 // Route: /api/v1/profile/
 const router = express.Router();
 
-router.route("/edit").patch(
-  auth({
-    allowAnonymous: false,
-  }),
-  validate(profileValidation.editPartnerProfile),
-  profileController.editProfile
-);
+router.route("/").get(auth(), profileController.getProfile);
 
-router.route("/poll").patch(
-  auth({
-    allowAnonymous: false,
-  }),
-  validate(profileValidation.editPoll),
-  profileController.editPoll
-);
+router
+  .route("/edit")
+  .patch(
+    auth(),
+    validate(profileValidation.editPartnerProfile),
+    profileController.editProfile
+  );
+
+router
+  .route("/poll")
+  .patch(
+    auth(),
+    validate(profileValidation.editPoll),
+    profileController.editPoll
+  );
 
 module.exports = router;
