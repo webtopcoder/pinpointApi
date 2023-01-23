@@ -9,6 +9,7 @@ const register = catchAsync(async (req, res) => {
   EventEmitter.emit(events.VERIFY_EMAIL, user.id);
   res.send({
     code: httpStatus.CREATED,
+    success: true,
     message: "Verification email sent successfully",
   });
 });
@@ -19,11 +20,15 @@ const login = catchAsync(async (req, res, next) => {
   if (!user || !(Object.keys(user).length > 0)) {
     return res
       .status(httpStatus.BAD_REQUEST)
-      .json({ code: 400, message: "Unable to login." });
+      .json({ code: 400, success: true, message: "Unable to login." });
   }
   user = user.toJSON();
   const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
+  res.send({
+    success: true,
+    user,
+    tokens,
+  });
 });
 
 const logout = catchAsync(async (req, res) => {
@@ -33,7 +38,7 @@ const logout = catchAsync(async (req, res) => {
 
 const refreshTokens = catchAsync(async (req, res) => {
   const tokens = await authService.refreshAuth(req.body.refreshToken);
-  res.send({ ...tokens });
+  res.send({ success: true, ...tokens });
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
@@ -79,7 +84,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 });
 
 const getUser = catchAsync(async (req, res) => {
-  res.send({ user: req.user });
+  res.send({ success: true, user: req.user });
 });
 
 module.exports = {

@@ -127,39 +127,31 @@ const changePassword = async (userId, currentPassword, newPassword) => {
  * @returns {Promise}
  */
 const verifyEmail = async (email, otp) => {
-  try {
-    if (!email || !otp) {
-      throw new Error();
-    }
-
-    const user = await userService.getUserByEmail(email);
-    if (!user) {
-      throw Error();
-    }
-
-    const verifyOTP = await tokenService.verifyOTP(
-      user.id,
-      otp,
-      tokenTypes.VERIFY_EMAIL
-    );
-    if (!verifyOTP) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token");
-    }
-
-    await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
-
-    let updateUser = {};
-    if (["pending", "active"].includes(user.status)) {
-      updateUser = { status: "active" };
-    }
-    await userService.updateUserById(user.id, {
-      ...updateUser,
-      isEmailVerified: true,
-    });
-  } catch (error) {
-    console.log(error);
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Email verification failed");
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid Email");
   }
+
+  const verifyOTP = await tokenService.verifyOTP(
+    user.id,
+    otp,
+    tokenTypes.VERIFY_EMAIL
+  );
+  if (!verifyOTP) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token");
+  }
+
+  await Token.deleteMany({ user: user._id, type: tokenTypes.VERIFY_EMAIL });
+
+  let updateUser = {};
+  if (["pending", "active"].includes(user.status)) {
+    updateUser = { status: "active" };
+  }
+
+  await userService.updateUserById(user.id, {
+    ...updateUser,
+    isEmailVerified: true,
+  });
 };
 
 module.exports = {

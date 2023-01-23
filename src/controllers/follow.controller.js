@@ -6,19 +6,19 @@ const { followService } = require("@services");
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const followers = await followService.getFollowers(userId);
-  res.status(httpStatus.OK).send(followers);
+  res.status(httpStatus.OK).send({ success: true, followers });
 });
 
 const getFollowings = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const followings = await followService.getFollowings(userId);
-  res.status(httpStatus.OK).send(followings);
+  res.status(httpStatus.OK).send({ success: true, followings });
 });
 
 const followOrUnfollow = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const follow = await followService.followOrUnfollow(req.user.id, userId);
-  res.status(httpStatus.CREATED).send();
+  res.status(httpStatus.NO_CONTENT).send();
 });
 
 module.exports = {

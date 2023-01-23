@@ -67,6 +67,9 @@ components:
                 format: password
                 minLength: 8
                 description: At least one number and one letter
+              role:
+                type: string
+                enum: ['user', 'partner']
             example:
               firstName: Firstname
               lastName: Lastname

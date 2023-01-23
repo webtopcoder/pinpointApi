@@ -46,3 +46,9 @@ const getSubCategoryByCategoryId = async (id) => {
   }
   return subCategory;
 };
+
+module.exports = {
+  getCategories,
+  getCategoryById,
+  getSubCategoryByCategoryId,
+};
