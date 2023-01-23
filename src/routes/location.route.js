@@ -20,18 +20,18 @@ router
   );
 
 router
-  .route("/quickArrival")
+  .route("/:locationId/quick-arrival")
   .post(
     auth(),
-    validate(locationValidation.quickArrivalOrDeparture),
+    validate(locationValidation.quickArrival),
     locationController.quickArrival
   );
 
 router
-  .route("/quickDeparture")
+  .route("/:locationId/quick-departure")
   .post(
     auth(),
-    validate(locationValidation.quickArrivalOrDeparture),
+    validate(locationValidation.quickDeparture),
     locationController.quickDeparture
   );
 

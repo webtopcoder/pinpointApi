@@ -59,6 +59,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Boolean,
         default: true,
       },
+      departureAt: {
+        type: Date,
+      },
+      arrivalText: {
+        type: String,
+      },
     },
     {
       timestamps: true,
@@ -83,6 +89,13 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
 
   Location.virtual("likeCount").get(function () {
     return this.like ? this.like.count : 0;
+  });
+
+  Location.pre("save", function (next) {
+    if (this.departureAt < new Date()) {
+      this.isActive = false;
+    }
+    next();
   });
 
   Location.plugin(softDelete, {
