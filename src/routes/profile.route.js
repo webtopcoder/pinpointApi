@@ -25,4 +25,8 @@ router
     profileController.editPoll
   );
 
+router
+  .route("/:userId/header")
+  .get(auth(true), profileController.getProfileHeaderInfo);
+
 module.exports = router;

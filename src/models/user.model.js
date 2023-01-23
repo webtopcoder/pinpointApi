@@ -93,6 +93,10 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
   UserSchema.plugin(toJSON);
   UserSchema.plugin(mongoosePaginate);
 
+  UserSchema.virtual("name").get(function () {
+    return `${this.firstName} ${this.lastName}`;
+  });
+
   /**
    * Check if email is taken
    * @param {string} email - The user's email

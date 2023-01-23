@@ -3,6 +3,7 @@ const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
 const { userService } = require("@services");
 const pick = require("../utils/pick");
+const followService = require("../services/follow.service");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -27,8 +28,30 @@ const getProfile = catchAsync(async (req, res) => {
   res.json({ success: true, data: user.profile });
 });
 
+const getProfileHeaderInfo = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const followerCount = (await followService.getFollowers(userId)).length;
+
+  return res.json({
+    profile: {
+      avatar: user.profilePicture,
+      favorites: 0,
+      followers: followerCount,
+      username: user.username,
+      fullname: user.name,
+      usertype: user.role,
+      is_follow: followerCount > 0,
+    },
+  });
+});
+
 module.exports = {
   editProfile,
   editPoll,
   getProfile,
+  getProfileHeaderInfo,
 };
