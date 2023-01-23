@@ -4,6 +4,7 @@ const ApiError = require("@utils/ApiError");
 const { userService } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
+const { Post } = require("../models");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -49,9 +50,47 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
   });
 });
 
+const getProfileActivity = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { search, page } = pick(req.query, ["search", "page"]);
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const { post, images } = await userService.getUserActivity(userId, {
+    page,
+    search,
+  });
+
+  return res.json({
+    success: true,
+    about: user.profile?.about,
+    notification: user.profile?.notification,
+    social: user.profile?.social,
+    posts: post,
+    image: images,
+  });
+});
+
+const createPost = catchAsync(async (req, res) => {
+  const { content, userId } = req.body;
+
+  const to_user = await userService.getUserById(userId);
+  const newPost = Post({
+    from: req.user._id,
+    to: to_user._id,
+    content,
+  });
+
+  await newPost.save();
+  return res.json({ success: true, msg: "Post successfully!" });
+});
+
 module.exports = {
+  createPost,
   editProfile,
   editPoll,
   getProfile,
   getProfileHeaderInfo,
+  getProfileActivity,
 };

@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { objectId } = require("./custom.validation");
 
 const editPartnerProfile = {
   body: Joi.object()
@@ -32,7 +33,17 @@ const editPoll = {
     .min(1),
 };
 
+const createPost = {
+  body: Joi.object()
+    .keys({
+      content: Joi.string().required(),
+      userId: Joi.string().required().custom(objectId),
+    })
+    .min(1),
+};
+
 module.exports = {
   editPartnerProfile,
   editPoll,
+  createPost,
 };
