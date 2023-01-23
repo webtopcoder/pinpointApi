@@ -4,9 +4,10 @@ const auth = require("@middlewares/auth");
 const { profileValidation } = require("@validations");
 const { profileController } = require("@controllers");
 
+// Route: /api/v1/profile/
 const router = express.Router();
 
-router.route("/partner/edit").patch(
+router.route("/edit").patch(
   auth({
     allowAnonymous: false,
   }),
@@ -14,7 +15,7 @@ router.route("/partner/edit").patch(
   profileController.editProfile
 );
 
-router.route("/partner/poll").patch(
+router.route("/poll").patch(
   auth({
     allowAnonymous: false,
   }),

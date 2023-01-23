@@ -17,7 +17,7 @@ const getFollowings = catchAsync(async (req, res) => {
 
 const followOrUnfollow = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const follow = await followService.followOrUnfollow(req.user.id, userId);
+  await followService.followOrUnfollow(req.user.id, userId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

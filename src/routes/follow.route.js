@@ -4,6 +4,7 @@ const auth = require("@middlewares/auth");
 const { followValidation } = require("@validations");
 const { followController } = require("@controllers");
 
+// Route: /api/v1/follow/
 const router = express.Router();
 
 router
