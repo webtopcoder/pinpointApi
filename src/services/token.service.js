@@ -147,7 +147,10 @@ const generateAuthTokens = async (user) => {
  * @returns {Promise<string>}
  */
 const generateResetPasswordToken = async (user) => {
-  const expires = moment().add(config.otp.expirationTime, "minutes");
+  const expires = moment().add(
+    config.otp.resetPasswordExpirationMinutes,
+    "minutes"
+  );
   const tokenType = tokenTypes.RESET_PASSWORD;
   const token = generateOTP();
 
@@ -162,7 +165,10 @@ const generateResetPasswordToken = async (user) => {
  * @returns {Promise<string>}
  */
 const generateVerifyEmailToken = async (user) => {
-  const expires = moment().add(config.otp.expirationTime, "minutes");
+  const expires = moment().add(
+    config.otp.verifyEmailExpirationMinutes,
+    "minutes"
+  );
   const tokenType = tokenTypes.VERIFY_EMAIL;
   const token = generateOTP();
 
