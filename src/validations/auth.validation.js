@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { password } = require("@validations/custom.validation");
+const { password, objectId } = require("@validations/custom.validation");
 
 const register = {
   body: Joi.object().keys({
@@ -9,6 +9,14 @@ const register = {
     lastName: Joi.string().required(),
     role: Joi.string().required().valid("user", "partner"),
     username: Joi.string().required(),
+    address: Joi.object()
+      .keys({
+        address: Joi.string(),
+        state: Joi.string().required(),
+        city: Joi.string().required(),
+      })
+      .required(),
+    category: Joi.string().custom(objectId),
   }),
 };
 
