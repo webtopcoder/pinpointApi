@@ -3,6 +3,8 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
+const notificationService = require("./notification.service");
+const userService = require("./user.service");
 
 /**
  * Get Followers
@@ -46,12 +48,25 @@ const followOrUnfollow = async (userId, followingUser) => {
   };
   const follows = await Follow.findOne(followData);
 
+  const followingUserValid = await userService.getUserById(followingUser);
+
+  if (!followingUserValid) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
   if (follows) {
     follows.remove();
     return follows;
   }
 
   const newFollow = await Follow.create(followData);
+  await notificationService.createNotification({
+    recipient: followingUser,
+    actor: userId,
+    title: "New Follower",
+    description: `You have a new follower @${followingUserValid.username}`,
+  });
+
   return newFollow;
 };
 
