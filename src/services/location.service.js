@@ -33,7 +33,7 @@ const updateLocationById = async (locationId, updateBody) => {
 
 const queryLocations = async (filter, options) => {
   let defaultFilter = filter;
-  if (filter.isActive) {
+  /* if (filter.isActive) {
     defaultFilter = {
       ...defaultFilter,
       $or: [{ departureAt: { $gte: new Date() } }, { departureAt: null }],
@@ -43,7 +43,7 @@ const queryLocations = async (filter, options) => {
       ...defaultFilter,
       $or: [{ departureAt: { $lte: new Date() } }, { departureAt: null }],
     };
-  }
+  } */
   const locations = await Location.paginate(filter, {
     customLabels,
     sort: defaultSort,

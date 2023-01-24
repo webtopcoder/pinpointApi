@@ -54,10 +54,20 @@ const resendInvite = async (mailId) => {
   return mail;
 };
 
+const getPendingInvites = async (userId) => {
+  const mails = await queryMails({
+    from: userId,
+    type: "invite",
+    status: "pending",
+  });
+  return mails;
+};
+
 module.exports = {
   createMail,
   queryMails,
   updateMail,
   invite,
   resendInvite,
+  getPendingInvites,
 };

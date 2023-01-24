@@ -3,39 +3,57 @@ const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
 const { mailService, userService } = require("@services");
 const pick = require("../utils/pick");
+const { uploadMedia } = require("../services/media.service");
 
 const compose = catchAsync(async (req, res) => {
-  const { to, subject, message } = req.body;
+  const { to, subject, message, isNotice } = req.body;
   const from = req.user._id;
-  const to_user = await userService.queryUsers(
-    {
-      $or: [
-        { username: { $in: to.split(",") } },
-        { email: { $in: to.split(",") } },
-      ],
-    },
-    {
-      pagination: false,
-    }
+  let to_user;
+  const files = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
   );
-  if (!to_user || to_user.length === 0) {
-    return res.json({
-      success: false,
-      msg: "Not exist user or user email",
+  if (!isNotice) {
+    to_user = await userService.queryUsers(
+      { _id: to.split(",").map((id) => new Object(id)) },
+      {
+        pagination: false,
+      }
+    );
+
+    if (to_user.totalResults === 0) {
+      return res.json({
+        success: false,
+        msg: "Not exist user or user email",
+      });
+    }
+
+    const mailsToSend = to_user.results.map((user) => {
+      return {
+        from,
+        to: user._id,
+        files,
+        subject,
+        message,
+      };
     });
+
+    await mailService.createMail(mailsToSend);
+    return res.json({ success: true, msg: "Sent successfully!" });
   }
 
-  // TODO: upload files
-  const mailsToSend = to_user.map((user) => {
-    return {
-      from,
-      to: user._id,
-      subject,
-      message,
-    };
+  const mail = await mailService.createMail({
+    from,
+    files,
+    isNotice: true,
+    subject,
+    message,
   });
 
-  await mailService.createMail(mailsToSend);
+  await mailService.createMail(mail);
+
   return res.json({ success: true, msg: "Sent successfully!" });
 });
 
@@ -65,7 +83,13 @@ const getInbox = catchAsync(async (req, res) => {
       ],
     };
   }
-  options.populate = ["files", "from"];
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    "from.profile.avatar",
+    "to.profile.avatar",
+  ];
   const result = await mailService.queryMails(filter, options);
   res.send(result);
 });
@@ -96,7 +120,13 @@ const getSent = catchAsync(async (req, res) => {
       ],
     };
   }
-  options.populate = ["files", "to"];
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    "from.profile.avatar",
+    "to.profile.avatar",
+  ];
   const result = await mailService.queryMails(filter, options);
   res.send(result);
 });
@@ -133,7 +163,7 @@ const readMail = catchAsync(async (req, res) => {
   await mailService.updateMail(mailId, {
     is_read: true,
   });
-  res.send({ success: true, msg: "Read successfully!" });
+  res.send({ success: true, msg: "Read successfully!", data: mail });
 });
 
 const invite = catchAsync(async (req, res) => {
@@ -149,6 +179,43 @@ const invite = catchAsync(async (req, res) => {
   return res.json({ success: true, msg: "Invite sent successfully!" });
 });
 
+const getInvitation = catchAsync(async (req, res) => {
+  let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  if (options.sort) {
+    options.sort = Object.fromEntries(
+      options.sort.split(",").map((field) => field.split(":"))
+    );
+  } else {
+    options.sort = "-createdAt";
+  }
+
+  filter.to_invite_email = req.user.email;
+  filter.to_invite_is_deleted = false;
+  if (filter.q) {
+    const query = filter.q;
+    delete filter.q;
+    filter = {
+      ...filter,
+      $or: [
+        { email: { $regex: query, $options: "i" } },
+        {
+          subject: { $regex: query, $options: "i" },
+        },
+      ],
+    };
+  }
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    "from.profile.avatar",
+    "to.profile.avatar",
+  ];
+  const result = await mailService.queryMails(filter, options);
+  res.send(result);
+});
+
 const resendInvite = catchAsync(async (req, res) => {
   const { mailId } = req.params;
   const mail = await mailService.getMailById(mailId);
@@ -161,6 +228,49 @@ const resendInvite = catchAsync(async (req, res) => {
   return res.json({ success: true, msg: "Invite sent successfully!" });
 });
 
+const getNotices = catchAsync(async (req, res) => {
+  let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  if (options.sort) {
+    options.sort = Object.fromEntries(
+      options.sort.split(",").map((field) => field.split(":"))
+    );
+  } else {
+    options.sort = "-createdAt";
+  }
+
+  filter.to = req.user._id;
+  filter.to_is_deleted = false;
+  filter.isNotice = true;
+  if (filter.q) {
+    const query = filter.q;
+    delete filter.q;
+    filter = {
+      ...filter,
+      $or: [
+        { email: { $regex: query, $options: "i" } },
+        {
+          subject: { $regex: query, $options: "i" },
+        },
+      ],
+    };
+  }
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    "from.profile.avatar",
+    "to.profile.avatar",
+  ];
+  const result = await mailService.queryMails(filter, options);
+  res.send(result);
+});
+
+const getPendingInvites = catchAsync(async (req, res) => {
+  const result = await mailService.getPendingInvites(req.user._id);
+  res.send(result);
+});
+
 module.exports = {
   compose,
   getInbox,
@@ -169,4 +279,7 @@ module.exports = {
   readMail,
   invite,
   resendInvite,
+  getNotices,
+  getInvitation,
+  getPendingInvites,
 };

@@ -3,12 +3,18 @@ const validate = require("@middlewares/validate");
 const auth = require("@middlewares/auth");
 const { mailValidation } = require("@validations");
 const { mailController } = require("@controllers");
+const upload = require("../middlewares/upload");
 
 const router = express.Router();
 
 router
-  .route("/")
-  .post(auth(), validate(mailValidation.createMail), mailController.compose);
+  .route("/compose")
+  .post(
+    auth(),
+    upload.array("files", 5),
+    validate(mailValidation.createMail),
+    mailController.compose
+  );
 
 router
   .route("/invite")
@@ -17,6 +23,10 @@ router
 router.route("/inbox").get(auth(), mailController.getInbox);
 
 router.route("/sent").get(auth(), mailController.getSent);
+
+router.route("/notices").get(auth(), mailController.getNotices);
+
+router.route("/pending").get(auth(), mailController.getPendingInvites);
 
 router
   .route("/:mailId")

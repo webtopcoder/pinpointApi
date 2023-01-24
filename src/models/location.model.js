@@ -91,12 +91,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     return this.like ? this.like.count : 0;
   });
 
-  Location.pre("save", function (next) {
+  /* Location.pre("save", function (next) {
     if (this.departureAt < new Date()) {
       this.isActive = false;
     }
     next();
-  });
+  }); */
 
   Location.plugin(softDelete, {
     deletedBy: true,
