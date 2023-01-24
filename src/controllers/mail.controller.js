@@ -95,7 +95,13 @@ const getInbox = catchAsync(async (req, res) => {
 });
 
 const getSent = catchAsync(async (req, res) => {
-  let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
+  let filter = pick(req.query, [
+    "q",
+    "isActive",
+    "type",
+    "is_read",
+    "isNotice",
+  ]);
   let options = pick(req.query, ["sort", "limit", "page"]);
   if (options.sort) {
     options.sort = Object.fromEntries(
@@ -105,9 +111,14 @@ const getSent = catchAsync(async (req, res) => {
     options.sort = "-createdAt";
   }
 
-  filter.from = req.user._id;
-  filter.from_is_deleted = false;
-  filter.type = "usual";
+  filter = {
+    from: req.user._id,
+    from_is_deleted: false,
+    type: "usual",
+    isNotice: false,
+    ...filter,
+  };
+
   if (filter.q) {
     const query = filter.q;
     delete filter.q;
