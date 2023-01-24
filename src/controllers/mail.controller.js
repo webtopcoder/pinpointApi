@@ -4,6 +4,7 @@ const ApiError = require("@utils/ApiError");
 const { mailService, userService } = require("@services");
 const pick = require("../utils/pick");
 const { uploadMedia } = require("../services/media.service");
+const { ObjectId } = require("bson");
 
 const compose = catchAsync(async (req, res) => {
   const { to, subject, message, isNotice } = req.body;
@@ -146,22 +147,30 @@ const getSent = catchAsync(async (req, res) => {
 const deleteMail = catchAsync(async (req, res) => {
   const { mailId } = req.params;
   const userId = req.user._id;
-  const mail = await mailService.getMailById(mailId);
-  if (!mail || mail.to !== userId || mail.from !== userId) {
+  let mail = await mailService.getMailById(mailId);
+  mail = mail.toJSON();
+
+  if (!mail || (mail.to != userId && mail.from != userId)) {
+    console.log({
+      mail,
+      userId,
+    });
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
   }
 
-  if (mail.to === userId) {
+  if (mail.to == userId) {
     await mailService.updateMail(mailId, {
       to_is_deleted: true,
     });
   }
-  if (mail.from === userId) {
+
+  if (mail.from == userId) {
     await mailService.updateMail(mailId, {
       from_is_deleted: true,
     });
   }
-  res.send({ success: true, msg: "Deleted successfully!" });
+
+  res.send({ success: true, message: "Deleted successfully!" });
 });
 
 const readMail = catchAsync(async (req, res) => {
