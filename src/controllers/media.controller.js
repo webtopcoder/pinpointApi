@@ -36,8 +36,8 @@ const uploadMedia = catchAsync(async (req, res) => {
 });
 
 const download = catchAsync(async (req, res) => {
-  const file = req.params;
-  const directoryPath = path.join(__dirname, "../public/avatar/");
+  const { file } = req.params;
+  const directoryPath = path.join(__dirname, "../../public/avatar/");
 
   res.download(directoryPath + file, (err) => {
     if (err) {
