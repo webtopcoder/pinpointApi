@@ -5,11 +5,13 @@ const { mailService, userService } = require("@services");
 const pick = require("../utils/pick");
 const { uploadMedia } = require("../services/media.service");
 const { ObjectId } = require("bson");
+const followService = require("../services/follow.service");
 
 const compose = catchAsync(async (req, res) => {
   const { to, subject, message, isNotice } = req.body;
   const from = req.user._id;
   let to_user;
+  let mailsToSend;
   const files = await Promise.all(
     req.files.map(async (file) => {
       const media = await uploadMedia(file, req.user._id);
@@ -31,7 +33,7 @@ const compose = catchAsync(async (req, res) => {
       });
     }
 
-    const mailsToSend = to_user.results.map((user) => {
+    mailsToSend = to_user.results.map((user) => {
       return {
         from,
         to: user._id,
@@ -40,20 +42,24 @@ const compose = catchAsync(async (req, res) => {
         message,
       };
     });
-
-    await mailService.createMail(mailsToSend);
-    return res.json({ success: true, msg: "Sent successfully!" });
   }
 
-  const mail = await mailService.createMail({
-    from,
-    files,
-    isNotice: true,
-    subject,
-    message,
-  });
+  mailsToSend = await followService
+    .getFollowers(req.user._id)
+    .then((follows) => {
+      return follows.map((follow) => {
+        return {
+          from,
+          to: follow.follower._id,
+          isNotice: true,
+          files,
+          subject,
+          message,
+        };
+      });
+    });
 
-  await mailService.createMail(mail);
+  await mailService.createMail(mailsToSend);
 
   return res.json({ success: true, msg: "Sent successfully!" });
 });
@@ -88,8 +94,24 @@ const getInbox = catchAsync(async (req, res) => {
     "files",
     "from",
     "to",
-    "from.profile.avatar",
-    "to.profile.avatar",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
   ];
   const result = await mailService.queryMails(filter, options);
   res.send(result);
@@ -260,8 +282,8 @@ const getNotices = catchAsync(async (req, res) => {
     options.sort = "-createdAt";
   }
 
-  filter.to = req.user._id;
-  filter.to_is_deleted = false;
+  filter.from = req.user._id;
+  filter.from_is_deleted = false;
   filter.isNotice = true;
   if (filter.q) {
     const query = filter.q;
@@ -276,6 +298,7 @@ const getNotices = catchAsync(async (req, res) => {
       ],
     };
   }
+
   options.populate = [
     "files",
     "from",
@@ -283,6 +306,7 @@ const getNotices = catchAsync(async (req, res) => {
     "from.profile.avatar",
     "to.profile.avatar",
   ];
+
   const result = await mailService.queryMails(filter, options);
   res.send(result);
 });
@@ -294,14 +318,21 @@ const getPendingInvites = catchAsync(async (req, res) => {
 
 const updateMail = catchAsync(async (req, res) => {
   const { mailId } = req.params;
-  const mail = await mailService.getMailById(mailId);
-  if (!mail || mail.to !== req.user._id || mail.from !== req.user._id) {
+  const userId = req.user._id;
+  let mail = await mailService.getMailById(mailId);
+  mail = mail.toJSON();
+
+  if (!mail || (mail.to != userId && mail.from != userId)) {
+    console.log({
+      mail,
+      userId,
+    });
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
   }
 
   await mailService.updateMail(mailId, req.body);
 
-  return res.json({ success: true, msg: "Mail updated successfully!" });
+  return res.json({ success: true, message: "Mail updated successfully!" });
 });
 
 module.exports = {

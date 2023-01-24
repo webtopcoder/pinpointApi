@@ -62,7 +62,7 @@ const getPendingInvites = async (userId) => {
   const mails = await queryMails({
     from: userId,
     type: "invite",
-    status: "pending",
+    is_read: false,
   });
   return mails;
 };
