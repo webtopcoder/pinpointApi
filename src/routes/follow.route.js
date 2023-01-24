@@ -8,15 +8,23 @@ const { followController } = require("@controllers");
 const router = express.Router();
 
 router
-  .route("/:userId", validate(followValidation.followUnfollow))
-  .post(auth({ anonymous: false }), followController.followOrUnfollow)
-  .delete(auth({ anonymous: false }), followController.followOrUnfollow);
+  .route("/:userId")
+  .post(
+    auth(),
+    validate(followValidation.followUnfollow),
+    followController.followOrUnfollow
+  )
+  .delete(
+    auth(),
+    validate(followValidation.followUnfollow),
+    followController.followOrUnfollow
+  );
 
 router
   .route("/:userId/following")
-  .get(auth({ anonymous: true }), followController.getFollowings);
+  .get(auth(true), followController.getFollowings);
 router
   .route("/:userId/follower")
-  .get(auth({ anonymous: true }), followController.getFollowers);
+  .get(auth(true), followController.getFollowers);
 
 module.exports = router;

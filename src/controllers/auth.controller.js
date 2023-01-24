@@ -17,10 +17,10 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res, next) => {
   const { email, password, role } = req.body;
   let user = await authService.loginUserWithEmailAndPassword(email, password);
-  if (!user || !(Object.keys(user).length > 0) || !user.role == role) {
+  if (!user || !(Object.keys(user).length > 0) || user.role !== role) {
     return res
       .status(httpStatus.BAD_REQUEST)
-      .json({ code: 400, success: true, message: "Unable to login." });
+      .json({ code: 400, message: "Unable to login." });
   }
   user = user.toJSON();
   const tokens = await tokenService.generateAuthTokens(user);

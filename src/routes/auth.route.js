@@ -30,17 +30,13 @@ router.post(
 );
 router.post(
   "/change-password",
-  auth({
-    allowAnonymous: false,
-  }),
+  auth(),
   validate(authValidation.changePassword),
   authController.changePassword
 );
 router.post(
   "/send-verification-email",
-  auth({
-    allowAnonymous: true,
-  }),
+  auth(true),
   validate(authValidation.sendVerificationEmail),
   authController.sendVerificationEmail
 );
@@ -49,12 +45,6 @@ router.post(
   validate(authValidation.verifyEmail),
   authController.verifyEmail
 );
-router.get(
-  "/me",
-  auth({
-    allowAnonymous: false,
-  }),
-  authController.getUser
-);
+router.get("/me", auth(), authController.getUser);
 
 module.exports = router;

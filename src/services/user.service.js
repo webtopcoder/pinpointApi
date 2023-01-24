@@ -1,9 +1,10 @@
 const httpStatus = require("http-status"),
-  { User } = require("../models"),
+  { User, Post } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
   mediaService = require("./media.service");
+const { ObjectId } = require("bson");
 
 /**
  * Create a user
@@ -99,6 +100,132 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const getUserActivity = async (userId, { page, search }) => {
+  let post = await Post.aggregate([
+    {
+      $match: {
+        $or: [
+          {
+            from: new ObjectId(userId),
+          },
+          {
+            to: new ObjectId(userId),
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "from",
+        foreignField: "_id",
+        as: "from_user",
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "to",
+        foreignField: "_id",
+        as: "to_user",
+      },
+    },
+    {
+      $unwind: "$from_user",
+    },
+    {
+      $unwind: "$to_user",
+    },
+    {
+      $project: {
+        from_user: {
+          username: "$from_user.username",
+          avatar: "$from_user.profile.profilePicture",
+          _id: "$from_user._id",
+        },
+        to_user: {
+          username: "$to_user.username",
+          avatar: "$to_user.profile.profilePicture",
+          _id: "$to_user._id",
+        },
+        content: "$content",
+        image: "$images",
+        createdAt: "$createdAt",
+        type: "$type",
+        like: "$like",
+      },
+    },
+    {
+      $match: {
+        $or: [
+          { "from.username": new RegExp(search, "i") },
+          { "to.username": new RegExp(search, "i") },
+          { content: new RegExp(search, "i") },
+        ],
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+    {
+      $skip: (parseInt(page) - 1) * 5,
+    },
+    {
+      $limit: 5,
+    },
+  ]);
+  let image = await Post.aggregate([
+    {
+      $match: {
+        $or: [
+          {
+            to: new ObjectId(userId),
+          },
+          {
+            from: new ObjectId(userId),
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        image: "$image",
+      },
+    },
+    {
+      $unwind: "$image",
+    },
+    {
+      $group: {
+        _id: "",
+        image: {
+          $push: "$image",
+        },
+      },
+    },
+    {
+      $unwind: "$image",
+    },
+    {
+      $limit: 8,
+    },
+    {
+      $group: {
+        _id: "",
+        image: {
+          $push: "$image",
+        },
+      },
+    },
+  ]);
+  const images = image.length > 0 ? image[0].image : [];
+
+  return {
+    post,
+    images,
+  };
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -107,4 +234,5 @@ module.exports = {
   updateUserById,
   deleteUserById,
   checkUser,
+  getUserActivity,
 };

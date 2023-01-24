@@ -1,11 +1,12 @@
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const config = require("./config");
 const { tokenTypes } = require("./tokens");
+const { userService } = require("@services");
 
 const jwtOptions = {
   secretOrKey: config.jwt.secret,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  passReqToCallback: true,
+  passReqToCallback: false,
 };
 
 const jwtVerify = async (payload, done) => {

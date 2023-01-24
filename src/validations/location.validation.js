@@ -3,13 +3,15 @@ const { objectId } = require("./custom.validation");
 
 const createLocation = {
   body: Joi.object().keys({
-    name: Joi.string().required(),
+    title: Joi.string().required(),
     description: Joi.string().required(),
-    mapLocation: Joi.object().keys({
-      latitude: Joi.number().required(),
-      longitude: Joi.number().required(),
-      address: Joi.string().required(),
-    }),
+    mapLocation: Joi.object()
+      .keys({
+        latitude: Joi.number(),
+        longitude: Joi.number(),
+        address: Joi.string(),
+      })
+      .optional(),
     images: Joi.array().items(Joi.string()),
     isActive: Joi.boolean(),
   }),
@@ -22,6 +24,8 @@ const getLocations = {
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     sort: Joi.string(),
+    pagination: Joi.boolean(),
+    partner: Joi.string().custom(objectId),
   }),
 };
 
@@ -50,7 +54,17 @@ const updateLocation = {
     .min(1),
 };
 
-const quickArrivalOrDeparture = {
+const quickArrival = {
+  params: Joi.object().keys({
+    locationId: Joi.required().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    departureAt: Joi.date(),
+    arrivalText: Joi.string().allow("").optional().default(""),
+  }),
+};
+
+const quickDeparture = {
   params: Joi.object().keys({
     locationId: Joi.required().custom(objectId),
   }),
@@ -61,5 +75,6 @@ module.exports = {
   getLocations,
   getLocation,
   updateLocation,
-  quickArrivalOrDeparture,
+  quickArrival,
+  quickDeparture,
 };

@@ -9,49 +9,41 @@ const router = express.Router();
 router
   .route("/")
   .post(
-    auth({
-      allowAnonymous: false,
-    }),
+    auth(),
     validate(locationValidation.createLocation),
     locationController.createLocation
   )
   .get(
-    auth({
-      allowAnonymous: true,
-    }),
+    auth(true),
     validate(locationValidation.getLocations),
     locationController.getLocations
   );
 
-router.route("/quickArrival").post(
-  auth({
-    allowAnonymous: false,
-  }),
-  validate(locationValidation.quickArrivalOrDeparture),
-  locationController.quickArrival
-);
+router
+  .route("/:locationId/quick-arrival")
+  .post(
+    auth(),
+    validate(locationValidation.quickArrival),
+    locationController.quickArrival
+  );
 
-router.route("/quickDeparture").post(
-  auth({
-    allowAnonymous: false,
-  }),
-  validate(locationValidation.quickArrivalOrDeparture),
-  locationController.quickDeparture
-);
+router
+  .route("/:locationId/quick-departure")
+  .post(
+    auth(),
+    validate(locationValidation.quickDeparture),
+    locationController.quickDeparture
+  );
 
 router
   .route("/:locationId")
   .get(
-    auth({
-      allowAnonymous: true,
-    }),
+    auth(true),
     validate(locationValidation.getLocation),
     locationController.getLocation
   )
   .patch(
-    auth({
-      allowAnonymous: false,
-    }),
+    auth(),
     validate(locationValidation.updateLocation),
     locationController.updateLocation
   );

@@ -7,11 +7,15 @@ const SocialSchema = require("./schemas/social.schema");
 const PollSchema = require("./schemas/poll.schema");
 
 module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
-  const ProfileSchema = new Schema({
-    about: { type: String, default: "" },
-    social: SocialSchema,
-    poll: PollSchema,
-  });
+  const ProfileSchema = new Schema(
+    {
+      about: { type: String, default: "" },
+      social: SocialSchema,
+      poll: PollSchema,
+      notification: { type: Object },
+    },
+    { _id: false }
+  );
 
   const UserSchema = new Schema(
     {
@@ -88,6 +92,10 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
   });
   UserSchema.plugin(toJSON);
   UserSchema.plugin(mongoosePaginate);
+
+  UserSchema.virtual("name").get(function () {
+    return `${this.firstName} ${this.lastName}`;
+  });
 
   /**
    * Check if email is taken

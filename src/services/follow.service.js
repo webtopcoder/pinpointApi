@@ -44,13 +44,19 @@ const followOrUnfollow = async (userId, followingUser) => {
     follower: userId,
     following: followingUser,
   };
-  const follows = await Follow.find(followData);
+  const follows = await Follow.findOne(followData);
 
   if (follows) {
-    follows.delete();
+    follows.remove();
     return follows;
   }
 
   const newFollow = await Follow.create(followData);
   return newFollow;
+};
+
+module.exports = {
+  getFollowers,
+  getFollowings,
+  followOrUnfollow,
 };

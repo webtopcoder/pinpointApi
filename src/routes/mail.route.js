@@ -6,56 +6,25 @@ const { mailController } = require("@controllers");
 
 const router = express.Router();
 
-router.route("/").post(
-  auth({
-    allowAnonymous: false,
-  }),
-  validate(mailValidation.createMail),
-  mailController.compose
-);
+router
+  .route("/")
+  .post(auth(), validate(mailValidation.createMail), mailController.compose);
 
-router.route("/invite").post(
-  auth({
-    allowAnonymous: false,
-  }),
-  validate(mailValidation.invite),
-  mailController.invite
-);
+router
+  .route("/invite")
+  .post(auth(), validate(mailValidation.invite), mailController.invite);
 
-router.route("/inbox").get(
-  auth({
-    allowAnonymous: false,
-  }),
-  mailController.getInbox
-);
+router.route("/inbox").get(auth(), mailController.getInbox);
 
-router.route("/sent").get(
-  auth({
-    allowAnonymous: false,
-  }),
-  mailController.getSent
-);
+router.route("/sent").get(auth(), mailController.getSent);
 
 router
   .route("/:mailId")
-  .delete(
-    auth({
-      allowAnonymous: false,
-    }),
-    mailController.deleteMail
-  )
-  .get(
-    auth({
-      allowAnonymous: false,
-    }),
-    mailController.readMail
-  );
+  .delete(auth(), mailController.deleteMail)
+  .get(auth(), mailController.readMail);
 
-router.route("/:mailId/resend-invite").post(
-  auth({
-    allowAnonymous: false,
-  }),
-  mailController.resendInvite
-);
+router
+  .route("/:mailId/resend-invite")
+  .post(auth(), mailController.resendInvite);
 
 module.exports = router;
