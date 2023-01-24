@@ -5,42 +5,38 @@ const { mailService, userService } = require("@services");
 const pick = require("../utils/pick");
 
 const compose = catchAsync(async (req, res) => {
-  try {
-    const { to, subject, message } = req.body;
-    const from = req.user._id;
-    const to_user = await userService.queryUsers(
-      {
-        $or: [
-          { username: { $in: to.split(",") } },
-          { email: { $in: to.split(",") } },
-        ],
-      },
-      {
-        pagination: false,
-      }
-    );
-    if (!to_user || to_user.length === 0) {
-      return res.json({
-        success: false,
-        msg: "Not exist user or user email",
-      });
+  const { to, subject, message } = req.body;
+  const from = req.user._id;
+  const to_user = await userService.queryUsers(
+    {
+      $or: [
+        { username: { $in: to.split(",") } },
+        { email: { $in: to.split(",") } },
+      ],
+    },
+    {
+      pagination: false,
     }
-
-    // TODO: upload files
-    const mailsToSend = to_user.map((user) => {
-      return {
-        from,
-        to: user._id,
-        subject,
-        message,
-      };
+  );
+  if (!to_user || to_user.length === 0) {
+    return res.json({
+      success: false,
+      msg: "Not exist user or user email",
     });
-
-    const mails = await mailService.createMail(mailsToSend);
-    return res.json({ success: true, msg: "Sent successfully!" });
-  } catch (error) {
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERRORm, "Server error");
   }
+
+  // TODO: upload files
+  const mailsToSend = to_user.map((user) => {
+    return {
+      from,
+      to: user._id,
+      subject,
+      message,
+    };
+  });
+
+  await mailService.createMail(mailsToSend);
+  return res.json({ success: true, msg: "Sent successfully!" });
 });
 
 const getInbox = catchAsync(async (req, res) => {

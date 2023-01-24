@@ -5,10 +5,11 @@ const { userService } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
 const { Post } = require("../models");
+const { uploadMedia, createMedia } = require("../services/media.service");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
-    profile: req.body,
+    profile: { ...req.user.profile, ...req.body },
   });
   res.send(user);
 });
@@ -16,7 +17,7 @@ const editProfile = catchAsync(async (req, res) => {
 const editPoll = catchAsync(async (req, res) => {
   const { poll } = req.body;
   const user = await userService.updateUserById(req.user._id, {
-    profile: { poll },
+    profile: { ...req.user.profile, poll },
   });
   res.send(user.profile.poll);
 });
@@ -39,7 +40,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
 
   return res.json({
     profile: {
-      avatar: user.profilePicture,
+      avatar: user.profile.avatar,
       favorites: 0,
       followers: followerCount,
       username: user.username,
@@ -86,6 +87,18 @@ const createPost = catchAsync(async (req, res) => {
   return res.json({ success: true, msg: "Post successfully!" });
 });
 
+const addProfilePicture = catchAsync(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
+  }
+  const media = await uploadMedia(req.file, req.user._id, true);
+  await userService.updateUserById(req.user._id, {
+    profile: { ...req.user.profile, avatar: media._id },
+  });
+
+  return res.json({ success: true, avatar: media });
+});
+
 module.exports = {
   createPost,
   editProfile,
@@ -93,4 +106,5 @@ module.exports = {
   getProfile,
   getProfileHeaderInfo,
   getProfileActivity,
+  addProfilePicture,
 };

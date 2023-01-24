@@ -31,6 +31,10 @@ const defaultRoutes = [
     path: "/mail",
     route: require("./mail.route"),
   },
+  {
+    path: "/media",
+    route: require("./media.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {

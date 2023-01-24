@@ -28,16 +28,17 @@ if (config.env !== "test") {
 app.use(httpContext.middleware);
 
 app.use(helmet());
-app.use(cors());
-app.use(xss());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(mongoSanitize());
 app.use(compression());
-
-app.options("*", cors());
 
 app.use(passport.initialize());
 passport.use(new AnonymousStrategy());
@@ -47,10 +48,17 @@ app.get("/health", (req, res) => {
   res.status(200).send("ok");
 });
 app.use(cookieParser());
+app.all("*", (req, res, next) => {
+  res.header(
+    "Cross-Origin-Resource-Policy",
+    "same-site | same-origin | cross-origin"
+  );
+  next();
+});
 
 const routes = require("./routes");
 app.use("/api/v1", routes);
-app.use(serveStatic(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // const swaggerDocument = require("./config/swagger.json");
 // const options = {

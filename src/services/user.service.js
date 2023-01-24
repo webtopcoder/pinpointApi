@@ -43,7 +43,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = (id) => {
-  return User.findById(id).populate("profilePicture");
+  return User.findById(id).populate("profile.avatar");
 };
 
 /**
