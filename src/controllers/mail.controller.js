@@ -107,6 +107,7 @@ const getSent = catchAsync(async (req, res) => {
 
   filter.from = req.user._id;
   filter.from_is_deleted = false;
+  filter.type = "usual";
   if (filter.q) {
     const query = filter.q;
     delete filter.q;
@@ -271,6 +272,18 @@ const getPendingInvites = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const updateMail = catchAsync(async (req, res) => {
+  const { mailId } = req.params;
+  const mail = await mailService.getMailById(mailId);
+  if (!mail || mail.to !== req.user._id || mail.from !== req.user._id) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
+  }
+
+  await mailService.updateMail(mailId, req.body);
+
+  return res.json({ success: true, msg: "Mail updated successfully!" });
+});
+
 module.exports = {
   compose,
   getInbox,
@@ -282,4 +295,5 @@ module.exports = {
   getNotices,
   getInvitation,
   getPendingInvites,
+  updateMail,
 };

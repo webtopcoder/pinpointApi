@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
 const { mediaService } = require("@services");
+const path = require("path");
 
 const getMedia = catchAsync(async (req, res) => {
   const { mediaId } = req.params;
@@ -34,7 +35,21 @@ const uploadMedia = catchAsync(async (req, res) => {
   return res.status(httpStatus.CREATED).send(media);
 });
 
+const download = catchAsync(async (req, res) => {
+  const file = req.params;
+  const directoryPath = path.join(__dirname, "../public/avatar/");
+
+  res.download(directoryPath + file, (err) => {
+    if (err) {
+      res.status(500).send({
+        message: "Could not download the file. " + err,
+      });
+    }
+  });
+});
+
 module.exports = {
   getMedia,
   uploadMedia,
+  download,
 };

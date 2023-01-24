@@ -11,4 +11,6 @@ router
 
 router.route("/:mediaId").get(auth(true), mediaController.getMedia);
 
+router.route("/:file").get(auth(true), mediaController.download);
+
 module.exports = router;

@@ -31,7 +31,12 @@ router.route("/pending").get(auth(), mailController.getPendingInvites);
 router
   .route("/:mailId")
   .delete(auth(), mailController.deleteMail)
-  .get(auth(), mailController.readMail);
+  .get(auth(), mailController.readMail)
+  .patch(
+    auth(),
+    validate(mailValidation.updateMail),
+    mailController.updateMail
+  );
 
 router
   .route("/:mailId/resend-invite")
