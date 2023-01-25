@@ -4,7 +4,6 @@ const ApiError = require("@utils/ApiError");
 const { mailService, userService } = require("@services");
 const pick = require("../utils/pick");
 const { uploadMedia } = require("../services/media.service");
-const { ObjectId } = require("bson");
 const followService = require("../services/follow.service");
 
 const compose = catchAsync(async (req, res) => {
@@ -44,22 +43,22 @@ const compose = catchAsync(async (req, res) => {
         message,
       };
     });
-  }
-
-  mailsToSend = await followService
-    .getFollowers(req.user._id)
-    .then((follows) => {
-      return follows.map((follow) => {
-        return {
-          from,
-          to: follow.follower._id,
-          isNotice: true,
-          files,
-          subject,
-          message,
-        };
+  } else {
+    mailsToSend = await followService
+      .getFollowers(req.user._id)
+      .then((follows) => {
+        return follows.map((follow) => {
+          return {
+            from,
+            to: follow.follower._id,
+            isNotice: true,
+            files,
+            subject,
+            message,
+          };
+        });
       });
-    });
+  }
 
   await mailService.createMail(mailsToSend);
 
@@ -165,7 +164,6 @@ const getSent = catchAsync(async (req, res) => {
     "to.profile.avatar",
   ];
   const result = await mailService.queryMails(filter, options);
-
 
   res.send(result);
 });
