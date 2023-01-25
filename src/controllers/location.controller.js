@@ -66,11 +66,11 @@ const quickArrival = catchAsync(async (req, res) => {
   }
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
-    isActive: true,
     ...req.body,
+    isActive: true,
   });
 
-  res.send(location);
+  res.send(updatedLocation);
 });
 
 const quickDeparture = catchAsync(async (req, res) => {
@@ -89,9 +89,8 @@ const quickDeparture = catchAsync(async (req, res) => {
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     isActive: false,
-    departureAt: Date.now(),
   });
-  res.send(location);
+  res.send(updatedLocation);
 });
 
 module.exports = {

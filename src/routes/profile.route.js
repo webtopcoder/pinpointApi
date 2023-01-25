@@ -3,11 +3,16 @@ const validate = require("@middlewares/validate");
 const auth = require("@middlewares/auth");
 const { profileValidation } = require("@validations");
 const { profileController } = require("@controllers");
+const upload = require("../middlewares/upload");
 
 // Route: /api/v1/profile/
 const router = express.Router();
 
 router.route("/").get(auth(), profileController.getProfile);
+
+router
+  .route("/avatar")
+  .post(auth(), upload.single("avatar"), profileController.addProfilePicture);
 
 router
   .route("/edit")

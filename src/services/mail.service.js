@@ -10,6 +10,10 @@ const createMail = async (mailBody) => {
   return mail;
 };
 
+const getMailById = async (mailId) => {
+  return Mail.findById(mailId);
+};
+
 const queryMails = async (filter, options) => {
   const mails = await Mail.paginate(filter, {
     customLabels,
@@ -54,10 +58,21 @@ const resendInvite = async (mailId) => {
   return mail;
 };
 
+const getPendingInvites = async (userId) => {
+  const mails = await queryMails({
+    from: userId,
+    type: "invite",
+    is_read: false,
+  });
+  return mails;
+};
+
 module.exports = {
   createMail,
   queryMails,
   updateMail,
   invite,
   resendInvite,
+  getPendingInvites,
+  getMailById,
 };

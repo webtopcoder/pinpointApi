@@ -9,6 +9,11 @@ const PollSchema = require("./schemas/poll.schema");
 module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
   const ProfileSchema = new Schema(
     {
+      avatar: {
+        type: Schema.Types.ObjectId,
+        ref: "Media",
+        default: null,
+      },
       about: { type: String, default: "" },
       social: SocialSchema,
       poll: PollSchema,
@@ -23,11 +28,6 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
       lastName: { type: String, required: true, trim: true },
       username: { type: String, required: true },
       profile: ProfileSchema,
-      profilePicture: {
-        type: Schema.Types.ObjectId,
-        ref: "Media",
-        default: null,
-      },
       email: {
         type: String,
         lowercase: true,

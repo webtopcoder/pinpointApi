@@ -4,6 +4,8 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 
+const fs = require("fs/promises");
+
 /**
  * Create a media
  * @param {Object} mediaBody
@@ -42,15 +44,6 @@ const getMediaById = async (id) => {
 };
 
 /**
- * Get media by name
- * @param {string} name
- * @returns {Promise<Media>}
- */
-const getMediaByName = async (name) => {
-  return Media.findOne({ name });
-};
-
-/**
  * Update media by id
  * @param {ObjectId} mediaId
  * @param {Object} updateBody
@@ -80,11 +73,22 @@ const deleteMediaById = async (mediaId) => {
   return media;
 };
 
+const uploadMedia = async (file, userId, isPublic = true) => {
+  const media = await createMedia({
+    filepath: file.path.replace("public/avatar/", ""),
+    mimetype: file.mimetype,
+    size: file.size,
+    user: userId,
+    isPublic,
+  });
+  return media;
+};
+
 module.exports = {
   createMedia,
   queryMedias,
   getMediaById,
-  getMediaByName,
   updateMediaById,
   deleteMediaById,
+  uploadMedia,
 };

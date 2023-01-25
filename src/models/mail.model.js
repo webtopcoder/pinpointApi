@@ -8,6 +8,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "User",
       },
+      isNotice: {
+        type: Boolean,
+        default: false,
+      },
       to: {
         type: Types.ObjectId,
         ref: "User",

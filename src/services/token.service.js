@@ -165,10 +165,7 @@ const generateResetPasswordToken = async (user) => {
  * @returns {Promise<string>}
  */
 const generateVerifyEmailToken = async (user) => {
-  const expires = moment().add(
-    config.otp.verifyEmailExpirationMinutes,
-    "minutes"
-  );
+  const expires = moment().add(config.otp.expirationTime, "minutes");
   const tokenType = tokenTypes.VERIFY_EMAIL;
   const token = generateOTP();
 

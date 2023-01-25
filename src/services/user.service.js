@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Post } = require("../models"),
+  { User, Post, Media } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -43,7 +43,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = (id) => {
-  return User.findById(id).populate("profilePicture");
+  return User.findById(id).populate("profile.avatar");
 };
 
 /**
@@ -140,12 +140,12 @@ const getUserActivity = async (userId, { page, search }) => {
       $project: {
         from_user: {
           username: "$from_user.username",
-          avatar: "$from_user.profile.profilePicture",
+          avatar: "$from_user.profile.avatar",
           _id: "$from_user._id",
         },
         to_user: {
           username: "$to_user.username",
-          avatar: "$to_user.profile.profilePicture",
+          avatar: "$to_user.profile.avatar",
           _id: "$to_user._id",
         },
         content: "$content",
@@ -153,6 +153,34 @@ const getUserActivity = async (userId, { page, search }) => {
         createdAt: "$createdAt",
         type: "$type",
         like: "$like",
+      },
+    },
+    {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "from_user.avatar",
+        foreignField: "_id",
+        as: "from_user.avatar",
+      },
+    },
+    {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "to_user.avatar",
+        foreignField: "_id",
+        as: "to_user.avatar",
+      },
+    },
+    {
+      $unwind: {
+        path: "$from_user.avatar",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$to_user.avatar",
+        preserveNullAndEmptyArrays: true,
       },
     },
     {

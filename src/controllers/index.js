@@ -5,3 +5,4 @@ module.exports.followController = require("./follow.controller");
 module.exports.locationController = require("./location.controller");
 module.exports.profileController = require("./profile.controller");
 module.exports.mailController = require("./mail.controller");
+module.exports.mediaController = require("./media.controller");

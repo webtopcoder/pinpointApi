@@ -1,21 +1,35 @@
 const Joi = require("joi");
+const { objectId } = require("./custom.validation");
 
 const createMail = {
-  body: Joi.object().keys({
-    to: Joi.string().required(),
-    subject: Joi.string().required(),
-    message: Joi.string().required(),
-  }),
+  body: Joi.object()
+    .keys({
+      isNotice: Joi.boolean().valid(true),
+      to: Joi.string(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+    })
+    .xor("isNotice", "to"),
 };
 
 const invite = {
   body: Joi.object().keys({
     email: Joi.string().required(),
-    message: Joi.string().required(),
+    message: Joi.string(),
+  }),
+};
+
+const updateMail = {
+  params: Joi.object().keys({
+    mailId: Joi.string().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    is_read: Joi.boolean(),
   }),
 };
 
 module.exports = {
   createMail,
   invite,
+  updateMail,
 };
