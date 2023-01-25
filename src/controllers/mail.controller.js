@@ -160,8 +160,24 @@ const getSent = catchAsync(async (req, res) => {
     "files",
     "from",
     "to",
-    "from.profile.avatar",
-    "to.profile.avatar",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
   ];
   const result = await mailService.queryMails(filter, options);
 
@@ -254,8 +270,24 @@ const getInvitation = catchAsync(async (req, res) => {
     "files",
     "from",
     "to",
-    "from.profile.avatar",
-    "to.profile.avatar",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
   ];
   const result = await mailService.queryMails(filter, options);
   res.send(result);
@@ -305,8 +337,24 @@ const getNotices = catchAsync(async (req, res) => {
     "files",
     "from",
     "to",
-    "from.profile.avatar",
-    "to.profile.avatar",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
   ];
 
   const result = await mailService.queryMails(filter, options);

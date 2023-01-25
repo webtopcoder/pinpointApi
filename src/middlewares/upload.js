@@ -4,7 +4,37 @@ const multer = require("multer");
 const fileFilter = (req, file, cb) => {
   const parsedPath = path.parse(file.originalname);
   const ext = parsedPath.ext;
-  if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png") {
+  const allowedExt = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".ico",
+    ".mp4",
+    ".m4v",
+    ".mov",
+    ".wmv",
+    ".avi",
+    ".mpg",
+    ".ogv",
+    ".3gp",
+    ".3g2",
+    ".pdf",
+    ".doc",
+    ".ppt",
+    ".pptx",
+    ".pps",
+    ".ppsx",
+    ".odt",
+    ".xls",
+    ".xlsx",
+    ".psd",
+    ".mp3",
+    ".m4a",
+    ".ogg",
+    ".wav",
+  ];
+  if (!allowedExt.includes(ext)) {
     cb(new Error("File type is not supported"), false);
     return;
   }
