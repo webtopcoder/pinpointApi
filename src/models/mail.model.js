@@ -19,6 +19,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       to_invite_email: {
         type: String,
       },
+      invite_count: {
+        type: Number,
+        default: 0,
+      },
       subject: { type: String },
       message: { type: String },
       files: {

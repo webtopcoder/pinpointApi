@@ -3,6 +3,8 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
+const notificationService = require("./notification.service");
+const userService = require("./user.service");
 
 /**
  * Get Followers
@@ -45,18 +47,52 @@ const followOrUnfollow = async (userId, followingUser) => {
     following: followingUser,
   };
   const follows = await Follow.findOne(followData);
+  const followingUserValid = await userService.getUserById(followingUser);
+  const followerUserValid = await userService.getUserById(userId);
+
+  if (!followingUserValid || !followerUserValid) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
 
   if (follows) {
-    follows.remove();
+    follows.delete();
     return follows;
   }
 
-  const newFollow = await Follow.create(followData);
-  return newFollow;
+  let follow = await Follow.findOneDeleted(followData);
+
+  if (follow) {
+    follow.restore();
+  } else {
+    follow = await Follow.create(followData);
+  }
+
+  await notificationService.createNotification({
+    recipient: followingUser,
+    actor: userId,
+    title: "New Follower",
+    description: `You have a new follower @${followerUserValid.username}`,
+    url: `/profile/${userId}/activity`,
+    type: "follow",
+  });
+
+  return follow;
+};
+
+const getFollowStatus = async (userId, followingUser) => {
+  const followData = {
+    follower: userId,
+    following: followingUser,
+  };
+
+  const follows = await Follow.findOne(followData);
+
+  return !!follows;
 };
 
 module.exports = {
   getFollowers,
   getFollowings,
   followOrUnfollow,
+  getFollowStatus,
 };

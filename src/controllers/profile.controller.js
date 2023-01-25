@@ -37,6 +37,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   const followerCount = (await followService.getFollowers(userId)).length;
+  const is_followed = await followService.getFollowStatus(req.user._id, userId);
 
   return res.json({
     profile: {
@@ -46,7 +47,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
       username: user.username,
       fullname: user.name,
       usertype: user.role,
-      is_follow: followerCount > 0,
+      is_follow: is_followed,
     },
   });
 });

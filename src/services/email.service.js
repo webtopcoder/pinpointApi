@@ -67,9 +67,11 @@ const sendVerificationEmail = async (userId) => {
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
 
+  const defaultMessage = "hello is this invitation?";
+
   const subject = "Invitation";
   const to = inviteTo;
-  const html = message;
+  const html = message ? message : defaultMessage;
 
   await sendEmail(to, subject, html);
 };

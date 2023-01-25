@@ -262,7 +262,7 @@ const getInvitation = catchAsync(async (req, res) => {
 const resendInvite = catchAsync(async (req, res) => {
   const { mailId } = req.params;
   const mail = await mailService.getMailById(mailId);
-  if (!mail || mail.to_invite_email === null || mail.from !== req.user._id) {
+  if (!mail || mail.from != req.user._id) {
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
   }
 

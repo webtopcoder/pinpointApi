@@ -35,6 +35,10 @@ const defaultRoutes = [
     path: "/media",
     route: require("./media.route"),
   },
+  {
+    path: "/notification",
+    route: require("./notification.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {
