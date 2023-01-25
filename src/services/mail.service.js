@@ -4,6 +4,7 @@ const httpStatus = require("http-status"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
 const { EventEmitter, events } = require("../events");
+const userService = require("./user.service");
 
 const createMail = async (mailBody) => {
   const mail = await Mail.create(mailBody);
@@ -34,6 +35,11 @@ const updateMail = async (mailId, updateBody) => {
 };
 
 const invite = async (mailBody) => {
+  const to_user = await userService.getUserByEmail(mailBody.to_invite_email);
+  if (to_user) {
+    throw new ApiError(httpStatus.CONFLICT, "User with this email exists");
+  }
+
   const mail = await createMail({ ...mailBody, type: "invite" });
 
   EventEmitter.emit(events.SEND_INVITE, {
@@ -46,8 +52,14 @@ const invite = async (mailBody) => {
 
 const resendInvite = async (mailId) => {
   const mail = await Mail.findById(mailId);
+
   if (!mail || mail.type !== "invite") {
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
+  }
+
+  const to_user = await userService.getUserByEmail(mail.to_invite_email);
+  if (to_user) {
+    throw new ApiError(httpStatus.CONFLICT, "User with this email exists");
   }
 
   await updateMail(mailId, {
