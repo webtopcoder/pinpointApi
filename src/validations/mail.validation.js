@@ -28,8 +28,16 @@ const updateMail = {
   }),
 };
 
+const bulkActions = {
+  body: Joi.object().keys({
+    action: Joi.string().valid("read", "unread", "delete").required(),
+    mailIds: Joi.array().items(Joi.string().custom(objectId)).required(),
+  }),
+};
+
 module.exports = {
   createMail,
   invite,
   updateMail,
+  bulkActions,
 };

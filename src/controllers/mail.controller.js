@@ -335,6 +335,25 @@ const updateMail = catchAsync(async (req, res) => {
   return res.json({ success: true, message: "Mail updated successfully!" });
 });
 
+const bulkActions = catchAsync(async (req, res) => {
+  const { action, mailIds } = req.body;
+  const userId = req.user._id;
+
+  if (action === "delete") {
+    await mailService.bulkDelete(mailIds, userId);
+  }
+
+  if (action === "read") {
+    await mailService.bulkUpdate(mailIds, { $set: { is_read: true } }, userId);
+  }
+
+  if (action === "unread") {
+    await mailService.bulkUpdate(mailIds, { $set: { is_read: false } }, userId);
+  }
+
+  return res.json({ success: true, message: "Action performed successfully!" });
+});
+
 module.exports = {
   compose,
   getInbox,
@@ -347,4 +366,5 @@ module.exports = {
   getInvitation,
   getPendingInvites,
   updateMail,
+  bulkActions,
 };

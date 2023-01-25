@@ -29,6 +29,14 @@ router.route("/notices").get(auth(), mailController.getNotices);
 router.route("/pending").get(auth(), mailController.getPendingInvites);
 
 router
+  .route("/bulk-actions")
+  .post(
+    auth(),
+    validate(mailValidation.bulkActions),
+    mailController.bulkActions
+  );
+
+router
   .route("/:mailId")
   .delete(auth(), mailController.deleteMail)
   .get(auth(), mailController.readMail)
