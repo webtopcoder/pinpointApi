@@ -1,5 +1,6 @@
 const { toJSON } = require("./plugins");
 const softDelete = require("mongoose-delete");
+const { Action } = require("../socket/socket");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Notification = new Schema(
@@ -26,7 +27,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       type: {
         type: String,
-        enum: ["follow", "like", "comment", "mention"],
+        enum: ["follow", "like", "comment", "mention", "mail"],
         required: true,
       },
       url: {
@@ -40,9 +41,21 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Notification.pre("save", async function (next) {
-    console.log({ notification: this });
-    next();
+  Notification.post("save", async function () {
+    const notification = this.toJSON();
+    let { actor, recipient, type } = notification;
+    actor = actor._id.toString();
+    recipient = recipient._id.toString();
+    switch (type) {
+      case "follow":
+        await Action.follow(actor, recipient);
+        break;
+      case "mail":
+        await Action.mail(actor, recipient);
+        break;
+      default:
+        break;
+    }
   });
 
   Notification.plugin(softDelete, {

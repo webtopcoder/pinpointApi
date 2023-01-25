@@ -1,10 +1,12 @@
 const EventEmitter = new (require("events").EventEmitter)();
 const logger = require("@configs/logger");
 const { emailService } = require("@services");
+const notificationService = require("@services/notification.service");
 
 const userEvents = {
   USER_ONLINE: "user.online",
   SEND_INVITE: "user.sendInvite",
+  SEND_NOTIFICATION: "user.sendNotification",
 };
 
 const authEvents = {
@@ -32,6 +34,9 @@ Object.keys(events).forEach((event) => {
           break;
         case events.SEND_INVITE:
           await emailService.sendInviteEmail(data);
+          break;
+        case events.SEND_NOTIFICATION:
+          await notificationService.sendNotification(data);
           break;
         default:
           logger.error("Event not found");

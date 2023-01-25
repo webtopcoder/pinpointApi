@@ -3,6 +3,7 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
+const { EventEmitter, events } = require("../events");
 
 const getReviewById = async (id) => {
   return Review.findById(id)
@@ -19,7 +20,18 @@ const getReviewByLocationId = async (locationId, filter) => {
 };
 
 const createReview = async (reviewBody) => {
-  return Review.create(reviewBody);
+  const review = await Review.create(reviewBody);
+
+  /* EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: mail.to,
+    actor: mail.from,
+    title: "New message",
+    description: `You have a new message from @${from_user.username}`,
+    url: `/message/${mail._id}`,
+    type: "mail",
+  }); */
+
+  return review;
 };
 
 const updateReviewById = async (reviewId, updateBody) => {

@@ -4,21 +4,26 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 
+const createNotification = async (notificationBody) => {
+  const notification = await Notification.create(notificationBody);
+  return notification;
+};
+
 const getPrevNotification = async ({ actor, recipient, type }) => {
   const notification = await Notification.findOne({ actor, recipient, type });
   return notification;
 };
 
-const createNotification = async (notificationBody) => {
+const sendNotification = async (notificationBody) => {
+  let notification;
   const prevNotification = await getPrevNotification(notificationBody);
   if (prevNotification) {
-    const updatedNotification = await updateNotificationById(
-      prevNotification._id,
-      notificationBody
-    );
-    return updatedNotification;
+    notification = Object.assign(prevNotification, notificationBody);
+    await notification.save();
+  } else {
+    notification = await createNotification(notificationBody);
   }
-  const notification = await Notification.create(notificationBody);
+
   return notification;
 };
 
@@ -60,6 +65,7 @@ const deleteNotificationById = async (notificationId) => {
 
 module.exports = {
   createNotification,
+  sendNotification,
   queryNotifications,
   getNotificationById,
   updateNotificationById,

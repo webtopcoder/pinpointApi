@@ -1,8 +1,38 @@
 const socketIo = require("socket.io");
 const _ = require("lodash");
 const uuid = require("node-uuid");
-var UserList = [];
-var socketHandle = null;
+const { User } = require("../models");
+const UserList = [];
+let socketHandle = null;
+const Action = {
+  follow: async (from, to) => {
+    const from_user = await User.findById(from);
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      message: from_user.username + " is following you!",
+      to,
+    });
+  },
+  mail: async (from, to) => {
+    const from_user = await User.findById(from);
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      message: from_user.username + " has sent you a message!",
+      to,
+    });
+  },
+};
+
 module.exports = {
   Socket: (app) => {
     const io = socketIo(app, {
@@ -10,46 +40,31 @@ module.exports = {
         origin: "http://localhost:3000",
       },
     });
-    //Add this before the app.get() block
+    // Add this before the app.get() block
     io.on("connection", (socket) => {
       console.log("connected", socket.rooms);
       socketHandle = socket;
-      socket.on("login", (val) => {
-        if (!_.find(UserList, { userid: val.userid }))
+      socket.on("login", ({ userid }) => {
+        if (!userid) {
+          return;
+        }
+
+        if (!_.find(UserList, { userid: userid }))
           UserList.push({
-            userid: val.userid,
+            userid: userid,
             roomId: socket.id,
           });
         else {
-          _.find(UserList, { userid: val.userid }).roomId = socket.id;
+          _.find(UserList, { userid: userid }).roomId = socket.id;
         }
-        console.log(UserList);
+
         socket.emit("roomId", socket.id);
       });
+
       socket.on("disconnect", function (reason) {
         console.log(reason);
       });
     });
   },
-  Action: {
-    follow: (from, to) => {
-      var to_user = _.find(UserList, { userid: to });
-      if (to_user) {
-        socketHandle.id = _.find(UserList, { userid: from.id })["roomId"];
-        socketHandle
-          .to(to_user.roomId)
-          .emit("follow", { msg: from.username + " is following you!", to });
-      }
-    },
-    post: (from, to) => {
-      var to_user = _.find(UserList, { userid: to });
-      if (to_user) {
-        socketHandle.id = _.find(UserList, { userid: from.id })["roomId"];
-        socketHandle
-          .to(to_user.roomId)
-          .emit("post", { msg: from.username + " shoot out!", to });
-        // socketHandle.emit('follow', from.username + ' is following you!');
-      }
-    },
-  },
+  Action,
 };

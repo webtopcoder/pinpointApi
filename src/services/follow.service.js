@@ -5,6 +5,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("@utils/defaultSort");
 const notificationService = require("./notification.service");
 const userService = require("./user.service");
+const { EventEmitter, events } = require("../events");
 
 /**
  * Get Followers
@@ -67,7 +68,8 @@ const followOrUnfollow = async (userId, followingUser) => {
     follow = await Follow.create(followData);
   }
 
-  await notificationService.createNotification({
+  // TODO: make template for notification
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
     recipient: followingUser,
     actor: userId,
     title: "New Follower",
