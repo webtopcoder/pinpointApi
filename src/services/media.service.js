@@ -69,7 +69,7 @@ const deleteMediaById = async (mediaId) => {
   if (!media) {
     throw new ApiError(httpStatus.NOT_FOUND, "Media not found");
   }
-  await media.remove();
+  await media.delete();
   return media;
 };
 

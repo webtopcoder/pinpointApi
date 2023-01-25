@@ -4,7 +4,20 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 
+const getPrevNotification = async ({ actor, recipient, type }) => {
+  const notification = await Notification.findOne({ actor, recipient, type });
+  return notification;
+};
+
 const createNotification = async (notificationBody) => {
+  const prevNotification = await getPrevNotification(notificationBody);
+  if (prevNotification) {
+    const updatedNotification = await updateNotificationById(
+      prevNotification._id,
+      notificationBody
+    );
+    return updatedNotification;
+  }
   const notification = await Notification.create(notificationBody);
   return notification;
 };
@@ -41,7 +54,7 @@ const deleteNotificationById = async (notificationId) => {
   if (!notification) {
     throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
   }
-  await notification.remove();
+  await notification.delete();
   return notification;
 };
 

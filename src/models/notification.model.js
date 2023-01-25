@@ -1,4 +1,4 @@
-const { toJSON, diffHistory } = require("./plugins");
+const { toJSON } = require("./plugins");
 const softDelete = require("mongoose-delete");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
@@ -24,6 +24,14 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Boolean,
         default: false,
       },
+      type: {
+        type: String,
+        enum: ["follow", "like", "comment", "mention"],
+        required: true,
+      },
+      url: {
+        type: String,
+      },
     },
     {
       timestamps: true,
@@ -31,6 +39,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       toObject: { virtuals: true },
     }
   );
+
+  Notification.pre("save", async function (next) {
+    console.log({ notification: this });
+    next();
+  });
 
   Notification.plugin(softDelete, {
     deletedBy: true,

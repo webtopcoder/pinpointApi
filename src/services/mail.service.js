@@ -50,6 +50,10 @@ const resendInvite = async (mailId) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
   }
 
+  await updateMail(mailId, {
+    invite_count: mail.invite_count + 1,
+  });
+
   EventEmitter.emit(events.SEND_INVITE, {
     senderId: mail.from,
     inviteTo: mail.to_invite_email,
@@ -63,6 +67,7 @@ const getPendingInvites = async (userId) => {
     from: userId,
     type: "invite",
     is_read: false,
+    from_is_deleted: false,
   });
   return mails;
 };
