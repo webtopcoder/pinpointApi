@@ -5,6 +5,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("@utils/defaultSort");
 const { EventEmitter, events } = require("../events");
 const userService = require("./user.service");
+const mongoose = require("mongoose-fill");
 
 const createMail = async (mailBody) => {
   const mail = await Mail.create(mailBody);
@@ -84,6 +85,67 @@ const getPendingInvites = async (userId) => {
   return mails;
 };
 
+const bulkDelete = async (mailIds, userId) => {
+  const objectMailIds = mailIds.map((id) => mongoose.Types.ObjectId(id));
+  const objectUserId = mongoose.Types.ObjectId(userId);
+  const mails = await Mail.find({
+    _id: { $in: objectMailIds },
+    $or: [{ to: objectUserId }, { from: objectUserId }],
+  });
+
+  const bulkOps = mails.map((mail) => {
+    if (mail.to == userId) {
+      return {
+        updateOne: {
+          filter: { _id: mail._id },
+          update: { $set: { to_is_deleted: true } },
+        },
+      };
+    }
+
+    if (mail.from == userId) {
+      return {
+        updateOne: {
+          filter: { _id: mail._id },
+          update: { $set: { from_is_deleted: true } },
+        },
+      };
+    }
+  });
+
+  Mail.bulkWrite(bulkOps, (err, result) => {
+    if (err) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err);
+    }
+  });
+};
+
+const bulkUpdate = async (mailIds, updateBody, userId) => {
+  const objectMailIds = mailIds.map((id) => mongoose.Types.ObjectId(id));
+  const objectUserId = mongoose.Types.ObjectId(userId);
+  const mails = await Mail.find({
+    _id: { $in: objectMailIds },
+    $or: [{ to: objectUserId }, { from: objectUserId }],
+  });
+
+  console.log({ mails });
+
+  const bulkOps = mails.map((mail) => {
+    return {
+      updateOne: {
+        filter: { _id: mail._id },
+        update: updateBody,
+      },
+    };
+  });
+
+  Mail.bulkWrite(bulkOps, (err, result) => {
+    if (err) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err);
+    }
+  });
+};
+
 module.exports = {
   createMail,
   queryMails,
@@ -92,4 +154,6 @@ module.exports = {
   resendInvite,
   getPendingInvites,
   getMailById,
+  bulkDelete,
+  bulkUpdate,
 };
