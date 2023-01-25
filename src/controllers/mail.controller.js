@@ -18,6 +18,7 @@ const compose = catchAsync(async (req, res) => {
       return media._id;
     })
   );
+
   if (!isNotice) {
     to_user = await userService.queryUsers(
       { _id: to.split(",").map((id) => new Object(id)) },
@@ -36,6 +37,7 @@ const compose = catchAsync(async (req, res) => {
     mailsToSend = to_user.results.map((user) => {
       return {
         from,
+        isNotice: false,
         to: user._id,
         files,
         subject,
@@ -163,6 +165,8 @@ const getSent = catchAsync(async (req, res) => {
     "to.profile.avatar",
   ];
   const result = await mailService.queryMails(filter, options);
+
+
   res.send(result);
 });
 
