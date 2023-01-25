@@ -16,6 +16,12 @@ const editProfile = catchAsync(async (req, res) => {
 
 const editPoll = catchAsync(async (req, res) => {
   const { poll } = req.body;
+  if (poll.options.filter((option) => option !== "").length < 2) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Poll must have at least 2 options"
+    );
+  }
   const user = await userService.updateUserById(req.user._id, {
     profile: { ...req.user.profile, poll },
   });

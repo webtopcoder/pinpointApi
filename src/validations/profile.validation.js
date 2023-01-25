@@ -26,7 +26,11 @@ const editPoll = {
       poll: Joi.object()
         .keys({
           question: Joi.string().required(),
-          options: Joi.array().items(Joi.string()).min(2).max(4).required(),
+          options: Joi.array()
+            .items(Joi.string().allow(""))
+            .min(2)
+            .max(4)
+            .required(),
         })
         .required(),
     })
