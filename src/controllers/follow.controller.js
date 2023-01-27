@@ -5,7 +5,9 @@ const { followService } = require("@services");
 
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
+  console.log(userId);
   const followers = await followService.getFollowers(userId);
+  console.log(followers)
   res.status(httpStatus.OK).send({ success: true, followers });
 });
 
