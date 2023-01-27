@@ -3,7 +3,6 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
-const notificationService = require("./notification.service");
 const userService = require("./user.service");
 const { EventEmitter, events } = require("../events");
 
@@ -92,9 +91,19 @@ const getFollowStatus = async (userId, followingUser) => {
   return !!follows;
 };
 
+const queryFollows = async (filters, options) => {
+  const follows = await Follow.paginate(filters, {
+    sort: defaultSort,
+    customLabels,
+    ...options,
+  });
+  return follows;
+};
+
 module.exports = {
   getFollowers,
   getFollowings,
   followOrUnfollow,
   getFollowStatus,
+  queryFollows,
 };
