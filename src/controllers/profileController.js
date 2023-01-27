@@ -51,7 +51,7 @@ const profileController = {
           files.name.length
         );
         const filename = req.user.id + new Date().getTime() + "-" + ext;
-        files.mv(path.join(__dirname, "../public/avatar/" + filename));
+        files.mv(path.join(__dirname, filename));
         let { email } = req.user;
         let user = await User.findOne({ email });
         let update = await User.updateOne(
