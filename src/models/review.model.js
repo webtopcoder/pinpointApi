@@ -32,6 +32,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Boolean,
         default: true,
       },
+      user: {
+        type: Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
     },
     {
       timestamps: true,

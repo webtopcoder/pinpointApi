@@ -22,6 +22,15 @@ router
   );
 
 router
+  .route("/:locationId/review")
+  .post(
+    auth(),
+    upload.array("images", 5),
+    validate(locationValidation.reviewLocation),
+    locationController.reviewLocation
+  );
+
+router
   .route("/:locationId/quick-arrival")
   .post(
     auth(),
@@ -46,6 +55,7 @@ router
   )
   .patch(
     auth(),
+    upload.array("images", 5),
     validate(locationValidation.updateLocation),
     locationController.updateLocation
   );

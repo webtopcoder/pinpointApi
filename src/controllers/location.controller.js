@@ -4,6 +4,7 @@ const ApiError = require("@utils/ApiError");
 const { locationService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
+const { Review, Like } = require("../models");
 
 const createLocation = catchAsync(async (req, res) => {
   const images = await Promise.all(
@@ -15,7 +16,13 @@ const createLocation = catchAsync(async (req, res) => {
   const location = await locationService.createLocation({
     partner: req.user._id,
     images,
-    ...req.body,
+    title: req.body.title,
+    description: req.body.description,
+    mapLocation: {
+      address: req.body.address,
+      city: req.body.city,
+      state: req.body.state,
+    },
   });
   res.status(httpStatus.CREATED).send(location);
 });
@@ -53,10 +60,17 @@ const updateLocation = catchAsync(async (req, res) => {
       "You don't have permission to update this location"
     );
   }
-  const updatedLocation = await locationService.updateLocationById(
-    locationId,
-    req.body
-  );
+  const data = {
+    title: req.body.title,
+    description: req.body.description,
+    mapLocation: {
+      address: req.body.address,
+      city: req.body.city,
+      state: req.body.state,
+    },
+  };
+
+  await locationService.updateLocationById(locationId, data);
   res.send(location);
 });
 
@@ -102,6 +116,39 @@ const quickDeparture = catchAsync(async (req, res) => {
   res.send(updatedLocation);
 });
 
+const reviewLocation = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
+  const like = await Like.create({
+    count: 0,
+  });
+
+  const review = await Review.create({
+    location: locationId,
+    user: req.user._id,
+    images,
+    like,
+    ...req.body,
+  });
+
+  await locationService.updateLocationById(locationId, {
+    reviews: [...location.reviews, review._id],
+  });
+
+  res.send(review);
+});
+
 module.exports = {
   createLocation,
   getLocations,
@@ -109,4 +156,5 @@ module.exports = {
   updateLocation,
   quickArrival,
   quickDeparture,
+  reviewLocation,
 };
