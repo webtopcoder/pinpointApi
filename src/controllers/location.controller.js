@@ -27,7 +27,7 @@ const getLocations = catchAsync(async (req, res) => {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
   }
-  options.populate = ["partner", "like", "reviews"];
+  options.populate = ["partner", "like", "reviews", "images"];
   const result = await locationService.queryLocations(filter, options);
   res.send(result);
 });
