@@ -3,6 +3,7 @@ const validate = require("@middlewares/validate");
 const auth = require("@middlewares/auth");
 const { locationValidation } = require("@validations");
 const { locationController } = require("@controllers");
+const upload = require("../middlewares/upload");
 
 const router = express.Router();
 
@@ -10,6 +11,7 @@ router
   .route("/")
   .post(
     auth(),
+    upload.array("images", 5),
     validate(locationValidation.createLocation),
     locationController.createLocation
   )

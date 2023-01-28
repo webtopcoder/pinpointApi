@@ -2,11 +2,19 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
 const { locationService } = require("@services");
+const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 
 const createLocation = catchAsync(async (req, res) => {
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
   const location = await locationService.createLocation({
     partner: req.user._id,
+    images,
     ...req.body,
   });
   res.status(httpStatus.CREATED).send(location);
@@ -19,6 +27,7 @@ const getLocations = catchAsync(async (req, res) => {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
   }
+  options.populate = ["partner", "like", "reviews"];
   const result = await locationService.queryLocations(filter, options);
   res.send(result);
 });

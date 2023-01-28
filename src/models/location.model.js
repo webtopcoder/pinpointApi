@@ -87,10 +87,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     return this.reviews.length;
   });
 
-  Location.virtual("likeCount").get(function () {
-    return this.like ? this.like.count : 0;
-  });
-
   /* Location.pre("save", function (next) {
     if (this.departureAt < new Date()) {
       this.isActive = false;

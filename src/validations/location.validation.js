@@ -4,7 +4,7 @@ const { objectId } = require("./custom.validation");
 const createLocation = {
   body: Joi.object().keys({
     title: Joi.string().required(),
-    description: Joi.string().required(),
+    description: Joi.string(),
     mapLocation: Joi.object()
       .keys({
         latitude: Joi.number(),
@@ -12,8 +12,6 @@ const createLocation = {
         address: Joi.string(),
       })
       .optional(),
-    images: Joi.array().items(Joi.string()),
-    isActive: Joi.boolean(),
   }),
 };
 
