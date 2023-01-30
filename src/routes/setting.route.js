@@ -4,8 +4,11 @@ const { settingController } = require("@controllers");
 
 const router = express.Router();
 
-router.route("/").get(settingController.getSettings);
-router.route("/").post(settingController.createSetting);
+router
+  .route("/")
+  .get(settingController.getSettings)
+  .post(settingController.createSetting);
+router.route("/:userId").get(settingController.getUserSettings);
 router.route("/:settingid").get(settingController.getSettingById);
 router.route("/edit/:settingid").patch(settingController.updateSetting);
 

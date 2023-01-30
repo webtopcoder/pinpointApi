@@ -17,18 +17,22 @@ const getSettingById = catchAsync(async (req, res) => {
 });
 
 const getSettings = catchAsync(async (req, res) => {
-  let filter = pick(req.query, []);
+  let filter = {};
+
   let options = pick(req.query, ["limit", "page", "sort"]);
-  if (filter.q) {
-    filter.title = { $regex: filter.q, $options: "i" };
-    delete filter.q;
-  }
-  filter = {
-    ...filter,
-    recipient: req.user._id,
-  };
-  options.populate = ["key", "value"];
+
   const result = await settingService.querySettings(filter, options);
+  res.send(result);
+});
+const getUserSettings = catchAsync(async (req, res) => {
+  let filter = {};
+  let options = pick(req.query, ["limit", "page", "sort"]);
+  const { userId } = req.params;
+
+  const result = await notificationService.querySettings(
+    { ...filter, user: userId },
+    options
+  );
   res.send(result);
 });
 
@@ -39,10 +43,7 @@ const updateSetting = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
   }
 
-  const data = {
-    key: req.body.key,
-    value: req.body.value,
-  };
+  const data = req.body;
 
   await settingService.updateSettingById(settingid, data);
   res.send(setting);
@@ -50,7 +51,6 @@ const updateSetting = catchAsync(async (req, res) => {
 const deleteSetting = catchAsync(async (req, res) => {
   const settingid = req.params;
   let setting = await settingService.getSettingById(settingid);
-  setting = setting.toJSON();
 
   if (!setting) {
     console.log({
@@ -67,6 +67,7 @@ module.exports = {
   createSetting,
   getSettingById,
   getSettings,
+  getUserSettings,
   updateSetting,
   deleteSetting,
 };

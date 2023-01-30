@@ -1,7 +1,7 @@
 const { toJSON } = require("./plugins");
 const softDelete = require("mongoose-delete");
 
-module.exports = ({ Schema, model }, mongoosePaginate) => {
+module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Setting = new Schema(
     {
       key: {
@@ -11,6 +11,10 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
       value: {
         type: String,
         required: true,
+      },
+      user: {
+        type: Types.ObjectId,
+        ref: "User",
       },
     },
     {
