@@ -41,6 +41,11 @@ const updateSettingById = async (settingId, updateBody) => {
   return setting;
 };
 
+const updateSetting = async (setting, updateBody) => {
+  Object.assign(setting, updateBody);
+  await setting.save();
+  return setting;
+};
 const deleteSettingById = async (settingId) => {
   const setting = await getSettingById(settingId);
   if (!setting) {
@@ -57,4 +62,5 @@ module.exports = {
   getSettingById,
   updateSettingById,
   deleteSettingById,
+  updateSetting,
 };

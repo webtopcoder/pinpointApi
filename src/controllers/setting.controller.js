@@ -27,13 +27,42 @@ const getSettings = catchAsync(async (req, res) => {
 const getUserSettings = catchAsync(async (req, res) => {
   let filter = {};
   let options = pick(req.query, ["limit", "page", "sort"]);
-  const { userId } = req.params;
+  const { userId } = req.user._id;
 
-  const result = await notificationService.querySettings(
+  const result = await settingService.querySettings(
     { ...filter, user: userId },
     options
   );
   res.send(result);
+});
+const createOrUpdateSetting = catchAsync(async (req, res) => {
+  let filter = {};
+  let options = pick(req.query, ["limit", "page", "sort"]);
+
+  const result = await settingService.querySettings(
+    { ...filter, key: req.body.key },
+    options
+  );
+  console.log(typeof result);
+  if (result.totalResults === 0) {
+    const setting = await settingService.createSetting(req.body);
+    res.status(httpStatus.CREATED).send({ success: true, setting });
+  } else {
+    const updateBody = req.body;
+    console.log(result);
+    let updatedResult = await Promise.all(
+      result.results.map(async (setting) => {
+        let updatedSetting;
+        updatedSetting = await settingService.updateSetting(
+          setting,
+          updateBody
+        );
+        return updatedSetting;
+      })
+    );
+
+    res.send({ success: true, updatedResult });
+  }
 });
 
 const updateSetting = catchAsync(async (req, res) => {
@@ -70,4 +99,5 @@ module.exports = {
   getUserSettings,
   updateSetting,
   deleteSetting,
+  createOrUpdateSetting,
 };
