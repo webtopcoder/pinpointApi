@@ -39,6 +39,10 @@ const defaultRoutes = [
     path: "/notification",
     route: require("./notification.route"),
   },
+  {
+    path: "/setting",
+    route: require("./setting.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {
