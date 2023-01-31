@@ -1,17 +1,8 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { shoutoutService } = require("@services");
+const { shoutoutService, userService } = require("@services");
 const pick = require("../utils/pick");
-const createShoutout = catchAsync(async (req, res) => {
-  const data = {
-    from: req.user._id,
-    to: req.params.to_userid,
-    content: req.body.content,
-  };
-  const shoutout = await shoutoutService.createShoutout(data);
-  res.status(httpStatus.CREATED).send({ success: true, shoutout });
-});
 
 const getShoutoutsByUserId = catchAsync(async (req, res) => {
   let filter = pick(req.query, ["q"]);
@@ -70,7 +61,6 @@ const deleteShoutout = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  createShoutout,
   getShoutoutsByUserId,
   deleteShoutout,
 };
