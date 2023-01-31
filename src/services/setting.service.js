@@ -13,6 +13,10 @@ const getSettingByKey = async ({ key }) => {
   const setting = await Setting.findOne({ key });
   return setting;
 };
+const getSettings = async (filter) => {
+  const settings = await Setting.find(filter);
+  return settings;
+};
 
 const querySettings = async (filter, options) => {
   const settings = await Setting.paginate(filter, {
@@ -57,6 +61,7 @@ const deleteSettingById = async (settingId) => {
 
 module.exports = {
   createSetting,
+  getSettings,
   querySettings,
   getSettingByKey,
   getSettingById,

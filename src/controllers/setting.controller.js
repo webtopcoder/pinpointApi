@@ -4,19 +4,10 @@ const ApiError = require("@utils/ApiError");
 const { settingService } = require("@services");
 const pick = require("../utils/pick");
 
-const getSettingById = catchAsync(async (req, res) => {
-  const setting = await settingService.getSettingById(req.params.settingid);
-  if (!setting) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
-  }
-  res.send(setting);
-});
-
 const getUserSettings = catchAsync(async (req, res) => {
   let filter = {};
   let options = pick(req.query, ["limit", "page", "sort"]);
-  const { userId } = req.user._id;
-
+  const userId = req.user._id;
   const result = await settingService.querySettings(
     { ...filter, user: userId },
     options
@@ -24,27 +15,25 @@ const getUserSettings = catchAsync(async (req, res) => {
   res.send(result);
 });
 const createOrUpdateSetting = catchAsync(async (req, res) => {
-  let filter = {};
-  let options = pick(req.query, ["limit", "page", "sort"]);
-
-  const result = await settingService.querySettings(
-    { ...filter, key: req.body.key },
-    options
-  );
-  console.log(typeof result);
-  if (result.totalResults === 0) {
-    const setting = await settingService.createSetting(req.body);
+  const result = await settingService.getSettings({
+    key: req.body.key,
+    user: req.user._id,
+  });
+  console.log(result);
+  if (result.length == 0) {
+    const createBody = { ...req.body, user: req.user._id };
+    const setting = await settingService.createSetting(createBody);
     res.status(httpStatus.CREATED).send({ success: true, setting });
   } else {
     const updateBody = req.body;
     console.log(result);
     let updatedResult = await Promise.all(
-      result.results.map(async (setting) => {
+      result.map(async (setting) => {
         let updatedSetting;
-        updatedSetting = await settingService.updateSetting(
-          setting,
-          updateBody
-        );
+        updatedSetting = await settingService.updateSetting(setting, {
+          ...updateBody,
+          user: req.user._id,
+        });
         return updatedSetting;
       })
     );
@@ -53,22 +42,7 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
   }
 });
 
-const updateSetting = catchAsync(async (req, res) => {
-  const { settingid } = req.params;
-  const setting = await settingService.getSettingById(settingid);
-  if (!setting) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
-  }
-
-  const data = req.body;
-
-  await settingService.updateSettingById(settingid, data);
-  res.send(setting);
-});
-
 module.exports = {
-  getSettingById,
   getUserSettings,
-  updateSetting,
   createOrUpdateSetting,
 };
