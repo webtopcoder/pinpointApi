@@ -11,3 +11,4 @@ module.exports.locationService = require("./location.service");
 module.exports.mailService = require("./mail.service");
 module.exports.notificationService = require("./notification.service");
 module.exports.settingService = require("./setting.service");
+module.exports.shoutoutService = require("./shoutout.service");
