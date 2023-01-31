@@ -13,9 +13,8 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         required: true,
       },
       applyIn: {
-        years: { type: String, required: true },
-        months: { type: String, required: true },
-        weeks: { type: String, required: true },
+        type: String,
+        required: true,
       },
     },
     {
