@@ -9,7 +9,6 @@ const createShoutout = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   } else {
     const to_userid = to_user._id;
-    console.log(to_userid);
     const data = {
       from: req.user._id,
       to: to_userid,
