@@ -39,6 +39,10 @@ const defaultRoutes = [
     path: "/notification",
     route: require("./notification.route"),
   },
+  {
+    path: "/profile/shoutout",
+    route: require("./shoutout.route.js"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {

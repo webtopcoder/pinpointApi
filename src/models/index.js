@@ -26,3 +26,8 @@ module.exports.Notification = require("./notification.model")(
   mongoose,
   mongoosePaginate
 );
+
+module.exports.Shoutout = require("./shoutout.model")(
+  mongoose,
+  mongoosePaginate
+);
