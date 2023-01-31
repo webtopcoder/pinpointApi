@@ -40,6 +40,8 @@ const defaultRoutes = [
     route: require("./notification.route"),
   },
   {
+    path: "/setting",
+    route: require("./setting.route"),
     path: "/profile/shoutout",
     route: require("./shoutout.route.js"),
   },
