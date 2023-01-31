@@ -94,26 +94,24 @@ const createPost = catchAsync(async (req, res) => {
   const pattern = /\B@[a-z0-9_-]+/gi;
   const mentions = content.match(pattern);
   if (mentions && mentions.length) {
-    console.log(mentions);
-    mentions.map(async (mention) => {
-      mention = mention.slice(1);
-      console.log(mention);
-      const to_user = await userService.getUserByUsername(mention);
+    await Promise.all(
+      mentions.map(async (mention) => {
+        mention = mention.slice(1);
+        const to_user = await userService.getUserByUsername(mention);
 
-      if (!to_user) {
-        throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-      } else {
-        const shoutout_data = {
-          from: req.user._id,
-          to: to_user._id,
-          content: req.body.content,
-        };
+        if (to_user) {
+          const shoutout_data = {
+            from: req.user._id,
+            to: to_user._id,
+            content: req.body.content,
+          };
 
-        const shoutout = await shoutoutService.createShoutout(shoutout_data);
-        console.log(shoutout);
-      }
-    });
+          await shoutoutService.createShoutout(shoutout_data);
+        }
+      })
+    );
   }
+
   await newPost.save();
   return res.json({ success: true, msg: "Post successfully!" });
 });
