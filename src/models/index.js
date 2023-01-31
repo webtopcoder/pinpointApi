@@ -29,9 +29,11 @@ module.exports.Notification = require("./notification.model")(
 
 module.exports.Setting = require("./setting.model")(mongoose, mongoosePaginate);
 
-
 module.exports.Shoutout = require("./shoutout.model")(
   mongoose,
   mongoosePaginate
 );
-
+module.exports.Partnership = require("./partnership.model")(
+  mongoose,
+  mongoosePaginate
+);

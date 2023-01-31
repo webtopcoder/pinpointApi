@@ -42,8 +42,14 @@ const defaultRoutes = [
   {
     path: "/setting",
     route: require("./setting.route"),
+  },
+  {
     path: "/profile/shoutout",
     route: require("./shoutout.route.js"),
+  },
+  {
+    path: "/partnership",
+    route: require("./partnership.route.js"),
   },
 ];
 
