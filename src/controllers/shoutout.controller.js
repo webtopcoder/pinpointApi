@@ -1,16 +1,23 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { shoutoutService } = require("@services");
+const { shoutoutService, userService } = require("@services");
 const pick = require("../utils/pick");
 const createShoutout = catchAsync(async (req, res) => {
-  const data = {
-    from: req.user._id,
-    to: req.params.to_userid,
-    content: req.body.content,
-  };
-  const shoutout = await shoutoutService.createShoutout(data);
-  res.status(httpStatus.CREATED).send({ success: true, shoutout });
+  const to_user = await userService.getUserByUsername(req.params.to_username);
+  if (!to_user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  } else {
+    const to_userid = to_user._id;
+    console.log(to_userid);
+    const data = {
+      from: req.user._id,
+      to: to_userid,
+      content: req.body.content,
+    };
+    const shoutout = await shoutoutService.createShoutout(data);
+    res.status(httpStatus.CREATED).send({ success: true, shoutout });
+  }
 });
 
 const getShoutoutsByUserId = catchAsync(async (req, res) => {
