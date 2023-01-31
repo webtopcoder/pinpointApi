@@ -9,7 +9,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         required: true,
       },
       value: {
-        type: String,
+        type: Schema.Types.Mixed,
         required: true,
       },
       user: {
