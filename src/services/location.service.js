@@ -6,10 +6,29 @@ const httpStatus = require("http-status"),
 
 const getLocationById = async (id) => {
   return Location.findById(id)
-    .populate("partner")
+    .populate({
+      path: "partner",
+      populate: { path: "profile.avatar" },
+    })
     .populate("images")
     .populate("like")
-    .populate("reviews");
+    .populate({
+      path: "reviews",
+      populate: [
+        {
+          path: "user",
+          populate: {
+            path: "profile.avatar",
+          },
+        },
+        {
+          path: "like",
+        },
+        {
+          path: "images",
+        },
+      ],
+    });
 };
 
 const getLocationsByPartnerId = async (partnerId, filter) => {

@@ -4,16 +4,10 @@ const { objectId } = require("./custom.validation");
 const createLocation = {
   body: Joi.object().keys({
     title: Joi.string().required(),
-    description: Joi.string().required(),
-    mapLocation: Joi.object()
-      .keys({
-        latitude: Joi.number(),
-        longitude: Joi.number(),
-        address: Joi.string(),
-      })
-      .optional(),
-    images: Joi.array().items(Joi.string()),
-    isActive: Joi.boolean(),
+    description: Joi.string().allow(""),
+    address: Joi.string().allow(""),
+    city: Joi.string().allow(""),
+    state: Joi.string().allow(""),
   }),
 };
 
@@ -41,15 +35,11 @@ const updateLocation = {
   }),
   body: Joi.object()
     .keys({
-      name: Joi.string().required(),
-      description: Joi.string().required(),
-      mapLocation: Joi.object().keys({
-        latitude: Joi.number().required(),
-        longitude: Joi.number().required(),
-        address: Joi.string().required(),
-      }),
-      images: Joi.array().items(Joi.string()),
-      isActive: Joi.boolean(),
+      title: Joi.string().required(),
+      description: Joi.string().allow(""),
+      address: Joi.string().allow(""),
+      city: Joi.string().allow(""),
+      state: Joi.string().allow(""),
     })
     .min(1),
 };
@@ -70,6 +60,16 @@ const quickDeparture = {
   }),
 };
 
+const reviewLocation = {
+  params: Joi.object().keys({
+    locationId: Joi.required().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    rating: Joi.number().required(),
+    text: Joi.string().required(),
+  }),
+};
+
 module.exports = {
   createLocation,
   getLocations,
@@ -77,4 +77,5 @@ module.exports = {
   updateLocation,
   quickArrival,
   quickDeparture,
+  reviewLocation,
 };

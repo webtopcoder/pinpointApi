@@ -26,3 +26,21 @@ module.exports.Notification = require("./notification.model")(
   mongoose,
   mongoosePaginate
 );
+
+module.exports.Setting = require("./setting.model")(mongoose, mongoosePaginate);
+
+module.exports.Shoutout = require("./shoutout.model")(
+  mongoose,
+  mongoosePaginate
+);
+module.exports.Partnership = require("./partnership.model")(
+  mongoose,
+  mongoosePaginate
+);
+
+module.exports.Transaction = require("./transaction.model")(
+  mongoose,
+  mongoosePaginate
+);
+
+module.exports.Order = require("./order.model")(mongoose, mongoosePaginate);

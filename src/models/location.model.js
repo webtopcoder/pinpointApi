@@ -6,15 +6,18 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     {
       latitude: {
         type: Number,
-        required: true,
       },
       longitude: {
         type: Number,
-        required: true,
       },
       address: {
         type: String,
-        required: true,
+      },
+      city: {
+        type: String,
+      },
+      state: {
+        type: String,
       },
     },
     {
@@ -85,10 +88,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
 
   Location.virtual("reviewCount").get(function () {
     return this.reviews.length;
-  });
-
-  Location.virtual("likeCount").get(function () {
-    return this.like ? this.like.count : 0;
   });
 
   /* Location.pre("save", function (next) {

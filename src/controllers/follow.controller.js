@@ -5,12 +5,13 @@ const pick = require("@utils/pick");
 
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  let filter = pick(req.query, ["q"]);
+  let filter = {};
   let options = pick(req.query, ["limit", "page", "sort"]);
   options.populate = [
     "follower",
     { path: "follower", populate: "profile.avatar" },
   ];
+
   const followers = await followService.queryFollows(
     {
       ...filter,
@@ -23,7 +24,7 @@ const getFollowers = catchAsync(async (req, res) => {
 
 const getFollowings = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  let filter = pick(req.query, ["q"]);
+  let filter = {};
   let options = pick(req.query, ["limit", "page", "sort"]);
   options.populate = [
     "follower",
