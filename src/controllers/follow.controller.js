@@ -1,20 +1,43 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
-const ApiError = require("@utils/ApiError");
 const { followService } = require("@services");
+const pick = require("@utils/pick");
 
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  console.log(userId);
-  const followers = await followService.getFollowers(userId);
-  console.log(followers)
-  res.status(httpStatus.OK).send({ success: true, followers });
+  let filter = pick(req.query, ["q"]);
+  let options = pick(req.query, ["limit", "page", "sort"]);
+  options.populate = [
+    "follower",
+    { path: "follower", populate: "profile.avatar" },
+  ];
+  const followers = await followService.queryFollows(
+    {
+      ...filter,
+      following: userId,
+    },
+    options
+  );
+  res.status(httpStatus.OK).send({ success: true, data: followers });
 });
 
 const getFollowings = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const followings = await followService.getFollowings(userId);
-  res.status(httpStatus.OK).send({ success: true, followings });
+  let filter = pick(req.query, ["q"]);
+  let options = pick(req.query, ["limit", "page", "sort"]);
+  options.populate = [
+    "follower",
+    { path: "follower", populate: "profile.avatar" },
+  ];
+
+  const followings = await followService.queryFollows(
+    {
+      ...filter,
+      follower: userId,
+    },
+    options
+  );
+  res.status(httpStatus.OK).send({ success: true, data: followings });
 });
 
 const followOrUnfollow = catchAsync(async (req, res) => {
