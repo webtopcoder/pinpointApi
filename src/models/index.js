@@ -37,3 +37,10 @@ module.exports.Partnership = require("./partnership.model")(
   mongoose,
   mongoosePaginate
 );
+
+module.exports.Transaction = require("./transaction.model")(
+  mongoose,
+  mongoosePaginate
+);
+
+module.exports.Order = require("./order.model")(mongoose, mongoosePaginate);

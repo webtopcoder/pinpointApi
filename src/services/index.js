@@ -13,3 +13,5 @@ module.exports.notificationService = require("./notification.service");
 module.exports.settingService = require("./setting.service");
 module.exports.shoutoutService = require("./shoutout.service");
 module.exports.partnershipService = require("./partnership.service");
+module.exports.orderService = require("./order.service");
+module.exports.transactionService = require("./transaction.service");
