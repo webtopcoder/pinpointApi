@@ -20,6 +20,7 @@ const queryShoutouts = async (filter, options) => {
 
 const getShoutoutById = async (id, populate) => {
   const shoutout = await Shoutout.findById(id).populate(populate);
+  console.log(shoutout);
   if (!shoutout) {
     throw new ApiError(httpStatus.NOT_FOUND, "Shoutout not found");
   }

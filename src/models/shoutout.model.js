@@ -15,8 +15,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       content: {
         type: String,
       },
-      to_is_deleted: { type: Boolean, default: false },
-      from_is_deleted: { type: Boolean, default: false },
     },
 
     {
