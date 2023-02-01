@@ -16,6 +16,18 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: String,
         required: true,
       },
+      title: {
+        type: String,
+        required: true,
+      },
+      features: {
+        type: [
+          {
+            type: String,
+            required: true,
+          },
+        ],
+      },
     },
     {
       timestamps: true,
