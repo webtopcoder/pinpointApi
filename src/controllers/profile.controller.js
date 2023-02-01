@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { userService } = require("@services");
+const { userService, shoutoutService } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
 const { Post } = require("../models");
@@ -81,14 +81,36 @@ const getProfileActivity = catchAsync(async (req, res) => {
 });
 
 const createPost = catchAsync(async (req, res) => {
-  const { content, userId } = req.body;
-
+  const { content } = req.body;
+  const { userId } = req.params;
   const to_user = await userService.getUserById(userId);
+  console.log(to_user);
   const newPost = Post({
     from: req.user._id,
     to: to_user._id,
     content,
   });
+
+  const pattern = /\B@[a-z0-9_-]+/gi;
+  const mentions = content.match(pattern);
+  if (mentions && mentions.length) {
+    await Promise.all(
+      mentions.map(async (mention) => {
+        mention = mention.slice(1);
+        const to_user = await userService.getUserByUsername(mention);
+
+        if (to_user) {
+          const shoutout_data = {
+            from: req.user._id,
+            to: to_user._id,
+            content: req.body.content,
+          };
+
+          await shoutoutService.createShoutout(shoutout_data);
+        }
+      })
+    );
+  }
 
   await newPost.save();
   return res.json({ success: true, msg: "Post successfully!" });

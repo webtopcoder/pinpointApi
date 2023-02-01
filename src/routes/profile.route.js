@@ -38,12 +38,6 @@ router
   .route("/:userId/activity")
   .get(auth(true), profileController.getProfileActivity);
 
-router
-  .route("/:userId/post")
-  .post(
-    auth(),
-    validate(profileValidation.createPost),
-    profileController.createPost
-  );
+router.route("/:userId/post").post(auth(), profileController.createPost);
 
 module.exports = router;

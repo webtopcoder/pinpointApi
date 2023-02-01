@@ -66,7 +66,9 @@ const checkUser = (fieldName, fieldValue) => {
 const getUserByEmail = (email) => {
   return User.findOne({ email });
 };
-
+const getUserByUsername = (username) => {
+  return User.findOne({ username });
+};
 /**
  * Update user by id
  * @param {ObjectId} userId
@@ -263,4 +265,5 @@ module.exports = {
   deleteUserById,
   checkUser,
   getUserActivity,
+  getUserByUsername,
 };
