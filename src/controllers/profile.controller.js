@@ -128,6 +128,15 @@ const addProfilePicture = catchAsync(async (req, res) => {
   return res.json({ success: true, avatar: media });
 });
 
+const editProfileData = catchAsync(async (req, res) => {
+  const { address, ...rest } = req.body;
+  const user = await userService.updateUserById(req.user._id, {
+    ...rest,
+    address: { ...req.user.address, ...address },
+  });
+  return res.json({ success: true, data: user });
+});
+
 module.exports = {
   createPost,
   editProfile,
@@ -136,4 +145,5 @@ module.exports = {
   getProfileHeaderInfo,
   getProfileActivity,
   addProfilePicture,
+  editProfileData,
 };

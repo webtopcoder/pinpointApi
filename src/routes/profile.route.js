@@ -8,7 +8,14 @@ const upload = require("../middlewares/upload");
 // Route: /api/v1/profile/
 const router = express.Router();
 
-router.route("/").get(auth(), profileController.getProfile);
+router
+  .route("/")
+  .get(auth(), profileController.getProfile)
+  .patch(
+    auth(),
+    validate(profileValidation.editProfileData),
+    profileController.editProfileData
+  );
 
 router
   .route("/avatar")

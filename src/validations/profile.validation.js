@@ -37,6 +37,22 @@ const editPoll = {
     .min(1),
 };
 
+const editProfileData = {
+  body: Joi.object()
+    .keys({
+      email: Joi.string().email(),
+      firstName: Joi.string(),
+      lastName: Joi.string(),
+      username: Joi.string(),
+      address: Joi.object().keys({
+        address: Joi.string(),
+        state: Joi.string(),
+        city: Joi.string(),
+      }),
+    })
+    .min(1),
+};
+
 const createPost = {
   body: Joi.object()
     .keys({
@@ -50,4 +66,5 @@ module.exports = {
   editPartnerProfile,
   editPoll,
   createPost,
+  editProfileData,
 };
