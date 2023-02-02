@@ -76,6 +76,14 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         state: { type: String },
       },
       category: { type: Types.ObjectId, ref: "Category", required: false },
+      activePartnership: {
+        type: Types.ObjectId,
+        ref: "Partnership",
+        default: null,
+      },
+      partnershipPriceRenewalDate: {
+        type: String,
+      },
     },
     {
       timestamps: true,

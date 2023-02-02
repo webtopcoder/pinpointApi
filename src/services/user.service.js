@@ -64,10 +64,10 @@ const checkUser = (fieldName, fieldValue) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = (email) => {
-  return User.findOne({ email });
+  return User.findOne({ email }).populate("profile.avatar");
 };
 const getUserByUsername = (username) => {
-  return User.findOne({ username });
+  return User.findOne({ username }).populate("profile.avatar");
 };
 /**
  * Update user by id
