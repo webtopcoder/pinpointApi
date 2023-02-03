@@ -8,6 +8,8 @@ const createLocation = {
     address: Joi.string().allow(""),
     city: Joi.string().allow(""),
     state: Joi.string().allow(""),
+    lat: Joi.string().allow(""),
+    lng: Joi.string().allow(""),
   }),
 };
 
@@ -40,6 +42,8 @@ const updateLocation = {
       address: Joi.string().allow(""),
       city: Joi.string().allow(""),
       state: Joi.string().allow(""),
+      lat: Joi.string().allow(""),
+      lng: Joi.string().allow(""),
     })
     .min(1),
 };

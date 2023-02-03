@@ -31,6 +31,18 @@ const getLocationById = async (id) => {
     });
 };
 
+const deleteLocationByID = async (id, updateBody) => {
+
+  const location = await getLocationById(id);
+
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+  Object.assign(location, updateBody);
+  await location.save();
+  return location;
+};
+
 const getLocationsByPartnerId = async (partnerId, filter) => {
   return Location.find({ ...filter, partner: partnerId }).populate("images");
 };
@@ -77,4 +89,5 @@ module.exports = {
   createLocation,
   updateLocationById,
   queryLocations,
+  deleteLocationByID
 };
