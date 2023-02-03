@@ -75,7 +75,7 @@ const deleteMediaById = async (mediaId) => {
 
 const uploadMedia = async (file, userId, isPublic = true) => {
   const media = await createMedia({
-    filepath: file.path.replace("public/avatar/", ""),
+    filepath: file.path.replace("public\\avatar\\", ""),
     mimetype: file.mimetype,
     size: file.size,
     user: userId,
