@@ -53,11 +53,15 @@ router
     validate(locationValidation.getLocation),
     locationController.getLocation
   )
-  .patch(
+  .post(
     auth(),
     upload.array("images", 5),
     validate(locationValidation.updateLocation),
     locationController.updateLocation
+  )
+  .put(
+    auth(),
+    locationController.deleteLocation
   );
 
 module.exports = router;
