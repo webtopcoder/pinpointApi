@@ -155,6 +155,29 @@ const createPost = catchAsync(async (req, res) => {
     await Promise.all(
       mentions.map(async (mention) => {
         mention = mention.slice(1);
+        const followerOrFollowing = await followService.getFollowAndFollowings(
+          req.user._id
+        );
+
+        const followAndFollowingList = Array.from(
+          new Set(
+            followerOrFollowing?.map((item) => {
+              let user;
+              if (item.following) {
+                user = item.following;
+              }
+
+              if (item.follower) {
+                user = item.follower;
+              }
+              return user.username;
+            })
+          )
+        );
+
+        if (!followAndFollowingList.includes(mention)) {
+          return;
+        }
         const to_user = await userService.getUserByUsername(mention);
 
         if (to_user) {

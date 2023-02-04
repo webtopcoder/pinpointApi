@@ -10,3 +10,4 @@ module.exports.notificationController = require("./notification.controller");
 module.exports.settingController = require("./setting.controller");
 module.exports.shoutoutController = require("./shoutout.controller");
 module.exports.partnershipController = require("./partnership.controller");
+module.exports.postController = require("./post.controller");

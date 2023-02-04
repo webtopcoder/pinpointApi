@@ -38,9 +38,14 @@ const getShoutoutsByUserId = catchAsync(async (req, res) => {
     },
     {
       path: "post",
-      populate: {
-        path: "images",
-      },
+      populate: [
+        {
+          path: "images",
+        },
+        {
+          path: "like",
+        },
+      ],
     },
   ];
 
