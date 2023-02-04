@@ -6,6 +6,7 @@ const { followController } = require("@controllers");
 
 // Route: /api/v1/follow/
 const router = express.Router();
+router.route("/").get(auth(), followController.getOwnFollowerAndFollowing);
 
 router
   .route("/:userId")

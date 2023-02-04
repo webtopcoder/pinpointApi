@@ -47,8 +47,18 @@ const followOrUnfollow = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getOwnFollowerAndFollowing = catchAsync(async (req, res) => {
+  const { _id: userId } = req.user;
+  const followAndFollowing = await followService.getFollowAndFollowings(userId);
+  res.status(httpStatus.OK).send({
+    success: true,
+    data: followAndFollowing,
+  });
+});
+
 module.exports = {
   getFollowers,
   getFollowings,
   followOrUnfollow,
+  getOwnFollowerAndFollowing,
 };
