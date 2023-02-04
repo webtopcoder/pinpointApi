@@ -54,6 +54,13 @@ router
   .route("/:userId/activity")
   .get(auth(true), profileController.getProfileActivity);
 
-router.route("/:userId/post").post(auth(), profileController.createPost);
+router
+  .route("/:userId/post")
+  .post(
+    auth(),
+    upload.array("images", 5),
+    validate(profileValidation.createPost),
+    profileController.createPost
+  );
 
 module.exports = router;

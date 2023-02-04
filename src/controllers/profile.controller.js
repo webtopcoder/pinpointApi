@@ -130,13 +130,24 @@ const getProfileActivity = catchAsync(async (req, res) => {
 const createPost = catchAsync(async (req, res) => {
   const { content } = req.body;
   const { userId } = req.params;
+
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
   const to_user = await userService.getUserById(userId);
-  console.log(to_user);
+
   const newPost = Post({
     from: req.user._id,
     to: to_user._id,
     content,
+    images,
   });
+
+  await newPost.save();
 
   const pattern = /\B@[a-z0-9_-]+/gi;
   const mentions = content.match(pattern);
@@ -150,7 +161,7 @@ const createPost = catchAsync(async (req, res) => {
           const shoutout_data = {
             from: req.user._id,
             to: to_user._id,
-            content: req.body.content,
+            post: newPost._id,
           };
 
           await shoutoutService.createShoutout(shoutout_data);
@@ -159,7 +170,6 @@ const createPost = catchAsync(async (req, res) => {
     );
   }
 
-  await newPost.save();
   return res.json({ success: true, msg: "Post successfully!" });
 });
 

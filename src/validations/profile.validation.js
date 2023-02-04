@@ -54,12 +54,12 @@ const editProfileData = {
 };
 
 const createPost = {
-  body: Joi.object()
-    .keys({
-      content: Joi.string().required(),
-      userId: Joi.string().required().custom(objectId),
-    })
-    .min(1),
+  params: Joi.object().keys({
+    userId: Joi.string().required().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    content: Joi.string().required(),
+  }),
 };
 
 const votePoll = {

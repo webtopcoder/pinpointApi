@@ -139,6 +139,17 @@ const getUserActivity = async (userId, { page, search }) => {
       $unwind: "$to_user",
     },
     {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "images",
+        foreignField: "_id",
+        as: "images",
+      },
+    },
+    {
+      $unwind: "$from_user",
+    },
+    {
       $project: {
         from_user: {
           username: "$from_user.username",
@@ -204,6 +215,7 @@ const getUserActivity = async (userId, { page, search }) => {
       $limit: 5,
     },
   ]);
+
   let image = await Post.aggregate([
     {
       $match: {
