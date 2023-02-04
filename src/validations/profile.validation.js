@@ -62,9 +62,21 @@ const createPost = {
     .min(1),
 };
 
+const votePoll = {
+  params: Joi.object().keys({
+    userId: Joi.string().required().custom(objectId),
+  }),
+  body: Joi.object()
+    .keys({
+      option: Joi.number().required().min(0).max(3),
+    })
+    .required(),
+};
+
 module.exports = {
   editPartnerProfile,
   editPoll,
   createPost,
   editProfileData,
+  votePoll,
 };

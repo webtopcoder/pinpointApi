@@ -38,6 +38,15 @@ router
   );
 
 router
+  .route("/:userId/poll")
+  .get(profileController.getPollForProfile)
+  .post(
+    auth(),
+    validate(profileValidation.votePoll),
+    profileController.votePoll
+  );
+
+router
   .route("/:userId/header")
   .get(auth(true), profileController.getProfileHeaderInfo);
 

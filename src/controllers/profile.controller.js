@@ -22,9 +22,53 @@ const editPoll = catchAsync(async (req, res) => {
       "Poll must have at least 2 options"
     );
   }
+
+  poll.votes = Array(4).fill(0);
+  poll.usersVoted = [];
+
   const user = await userService.updateUserById(req.user._id, {
     profile: { ...req.user.profile, poll },
   });
+  res.send(user.profile.poll);
+});
+
+const votePoll = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { option } = req.body;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  if (!user?.profile?.poll) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User has no poll");
+  }
+
+  const poll = user.profile.poll;
+
+  if (poll.usersVoted.includes(req.user._id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "You already voted");
+  }
+
+  poll.votes[option] += 1;
+  poll.usersVoted.push(req.user._id);
+
+  await userService.updateUserById(userId, {
+    profile: { ...user.profile, poll },
+  });
+
+  res.send(poll);
+});
+
+const getPollForProfile = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  if (!user?.profile?.poll) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User has no poll");
+  }
+
   res.send(user.profile.poll);
 });
 
@@ -43,7 +87,10 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   const followerCount = (await followService.getFollowers(userId)).length;
-  const is_followed = await followService.getFollowStatus(req.user._id, userId);
+  let is_followed = false;
+  if (req.user) {
+    is_followed = await followService.getFollowStatus(req.user._id, userId);
+  }
 
   return res.json({
     profile: {
@@ -146,4 +193,6 @@ module.exports = {
   getProfileActivity,
   addProfilePicture,
   editProfileData,
+  votePoll,
+  getPollForProfile,
 };
