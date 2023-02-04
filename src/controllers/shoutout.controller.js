@@ -36,6 +36,17 @@ const getShoutoutsByUserId = catchAsync(async (req, res) => {
         },
       },
     },
+    {
+      path: "post",
+      populate: [
+        {
+          path: "images",
+        },
+        {
+          path: "like",
+        },
+      ],
+    },
   ];
 
   const shoutout = await shoutoutService.queryShoutouts(filter, options);
@@ -45,22 +56,6 @@ const getShoutoutsByUserId = catchAsync(async (req, res) => {
   res.send(shoutout);
 });
 
-const deleteShoutout = catchAsync(async (req, res) => {
-  const { shoutoutid } = req.params;
-  const userId = req.user._id;
-  const shoutout = await shoutoutService.getShoutoutById(shoutoutid);
-  if (!shoutout || shoutout.from != userId) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Shoutout not found");
-  }
-
-  if (shoutout.from == userId) {
-    await shoutoutService.deleteShoutoutById(shoutoutid);
-  }
-
-  res.send({ success: true, message: "Deleted successfully!" });
-});
-
 module.exports = {
   getShoutoutsByUserId,
-  deleteShoutout,
 };

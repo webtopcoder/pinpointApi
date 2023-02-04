@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { userService, shoutoutService } = require("@services");
+const { userService, shoutoutService, likeService } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
 const { Post } = require("../models");
@@ -22,9 +22,53 @@ const editPoll = catchAsync(async (req, res) => {
       "Poll must have at least 2 options"
     );
   }
+
+  poll.votes = Array(4).fill(0);
+  poll.usersVoted = [];
+
   const user = await userService.updateUserById(req.user._id, {
     profile: { ...req.user.profile, poll },
   });
+  res.send(user.profile.poll);
+});
+
+const votePoll = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { option } = req.body;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  if (!user?.profile?.poll) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User has no poll");
+  }
+
+  const poll = user.profile.poll;
+
+  if (poll.usersVoted.includes(req.user._id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "You already voted");
+  }
+
+  poll.votes[option] += 1;
+  poll.usersVoted.push(req.user._id);
+
+  await userService.updateUserById(userId, {
+    profile: { ...user.profile, poll },
+  });
+
+  res.send(poll);
+});
+
+const getPollForProfile = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  if (!user?.profile?.poll) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User has no poll");
+  }
+
   res.send(user.profile.poll);
 });
 
@@ -43,7 +87,10 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   const followerCount = (await followService.getFollowers(userId)).length;
-  const is_followed = await followService.getFollowStatus(req.user._id, userId);
+  let is_followed = false;
+  if (req.user) {
+    is_followed = await followService.getFollowStatus(req.user._id, userId);
+  }
 
   return res.json({
     profile: {
@@ -83,13 +130,27 @@ const getProfileActivity = catchAsync(async (req, res) => {
 const createPost = catchAsync(async (req, res) => {
   const { content } = req.body;
   const { userId } = req.params;
+
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
   const to_user = await userService.getUserById(userId);
-  console.log(to_user);
+
+  const like = await likeService.createLike();
+
   const newPost = Post({
     from: req.user._id,
     to: to_user._id,
     content,
+    images,
+    like,
   });
+
+  await newPost.save();
 
   const pattern = /\B@[a-z0-9_-]+/gi;
   const mentions = content.match(pattern);
@@ -97,13 +158,36 @@ const createPost = catchAsync(async (req, res) => {
     await Promise.all(
       mentions.map(async (mention) => {
         mention = mention.slice(1);
+        const followerOrFollowing = await followService.getFollowAndFollowings(
+          req.user._id
+        );
+
+        const followAndFollowingList = Array.from(
+          new Set(
+            followerOrFollowing?.map((item) => {
+              let user;
+              if (item.following) {
+                user = item.following;
+              }
+
+              if (item.follower) {
+                user = item.follower;
+              }
+              return user.username;
+            })
+          )
+        );
+
+        if (!followAndFollowingList.includes(mention)) {
+          return;
+        }
         const to_user = await userService.getUserByUsername(mention);
 
         if (to_user) {
           const shoutout_data = {
             from: req.user._id,
             to: to_user._id,
-            content: req.body.content,
+            post: newPost._id,
           };
 
           await shoutoutService.createShoutout(shoutout_data);
@@ -112,7 +196,6 @@ const createPost = catchAsync(async (req, res) => {
     );
   }
 
-  await newPost.save();
   return res.json({ success: true, msg: "Post successfully!" });
 });
 
@@ -128,6 +211,15 @@ const addProfilePicture = catchAsync(async (req, res) => {
   return res.json({ success: true, avatar: media });
 });
 
+const editProfileData = catchAsync(async (req, res) => {
+  const { address, ...rest } = req.body;
+  const user = await userService.updateUserById(req.user._id, {
+    ...rest,
+    address: { ...req.user.address, ...address },
+  });
+  return res.json({ success: true, data: user });
+});
+
 module.exports = {
   createPost,
   editProfile,
@@ -136,4 +228,7 @@ module.exports = {
   getProfileHeaderInfo,
   getProfileActivity,
   addProfilePicture,
+  editProfileData,
+  votePoll,
+  getPollForProfile,
 };

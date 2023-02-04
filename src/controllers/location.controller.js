@@ -13,6 +13,8 @@ const createLocation = catchAsync(async (req, res) => {
       return media._id;
     })
   );
+  console.log(req.body)
+
   const location = await locationService.createLocation({
     partner: req.user._id,
     images,
@@ -22,10 +24,32 @@ const createLocation = catchAsync(async (req, res) => {
       address: req.body.address,
       city: req.body.city,
       state: req.body.state,
+      latitude: req.body.lat,
+      longitude: req.body.lng,
     },
   });
   res.status(httpStatus.CREATED).send(location);
 });
+
+const deleteLocation = catchAsync(async (req, res) => {
+
+  const { locationId } = req.params;
+
+  console.log(locationId)
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  const data = {
+    deleted: true
+  };
+
+  await locationService.deleteLocationByID(locationId, data);
+
+  res.send(location);
+});
+
 
 const getLocations = catchAsync(async (req, res) => {
   let filter = pick(req.query, ["isActive", "partner"]);
@@ -48,6 +72,13 @@ const getLocation = catchAsync(async (req, res) => {
 });
 
 const updateLocation = catchAsync(async (req, res) => {
+  // console.log(req.params)
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
   if (!location) {
@@ -60,15 +91,20 @@ const updateLocation = catchAsync(async (req, res) => {
       "You don't have permission to update this location"
     );
   }
+
   const data = {
     title: req.body.title,
     description: req.body.description,
+    images,
     mapLocation: {
       address: req.body.address,
       city: req.body.city,
       state: req.body.state,
+      latitude: req.body.lat,
+      longitude: req.body.lng,
     },
   };
+
 
   await locationService.updateLocationById(locationId, data);
   res.send(location);
@@ -157,4 +193,5 @@ module.exports = {
   quickArrival,
   quickDeparture,
   reviewLocation,
+  deleteLocation
 };

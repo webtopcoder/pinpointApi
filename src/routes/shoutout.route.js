@@ -5,6 +5,5 @@ const { shoutoutController } = require("@controllers");
 const router = express.Router();
 
 router.route("/:userid").get(auth(), shoutoutController.getShoutoutsByUserId);
-router.route("/:shoutoutid").delete(auth(), shoutoutController.deleteShoutout);
 
 module.exports = router;

@@ -12,8 +12,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "User",
       },
-      content: {
-        type: String,
+      post: {
+        type: Types.ObjectId,
+        ref: "Post",
       },
     },
 

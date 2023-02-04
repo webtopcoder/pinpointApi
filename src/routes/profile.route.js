@@ -8,7 +8,14 @@ const upload = require("../middlewares/upload");
 // Route: /api/v1/profile/
 const router = express.Router();
 
-router.route("/").get(auth(), profileController.getProfile);
+router
+  .route("/")
+  .get(auth(), profileController.getProfile)
+  .patch(
+    auth(),
+    validate(profileValidation.editProfileData),
+    profileController.editProfileData
+  );
 
 router
   .route("/avatar")
@@ -31,6 +38,15 @@ router
   );
 
 router
+  .route("/:userId/poll")
+  .get(profileController.getPollForProfile)
+  .post(
+    auth(),
+    validate(profileValidation.votePoll),
+    profileController.votePoll
+  );
+
+router
   .route("/:userId/header")
   .get(auth(true), profileController.getProfileHeaderInfo);
 
@@ -38,6 +54,13 @@ router
   .route("/:userId/activity")
   .get(auth(true), profileController.getProfileActivity);
 
-router.route("/:userId/post").post(auth(), profileController.createPost);
+router
+  .route("/:userId/post")
+  .post(
+    auth(),
+    upload.array("images", 5),
+    validate(profileValidation.createPost),
+    profileController.createPost
+  );
 
 module.exports = router;

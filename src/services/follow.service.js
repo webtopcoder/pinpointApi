@@ -5,6 +5,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("@utils/defaultSort");
 const userService = require("./user.service");
 const { EventEmitter, events } = require("../events");
+const { ObjectId } = require("bson");
 
 /**
  * Get Followers
@@ -100,10 +101,62 @@ const queryFollows = async (filters, options) => {
   return follows;
 };
 
+const getFollowAndFollowings = async (userId) => {
+  const followAndFollowing = await Follow.aggregate([
+    {
+      $match: {
+        $or: [
+          { follower: new ObjectId(userId) },
+          { following: new ObjectId(userId) },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        let: { follower: "$follower" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$$follower", "$_id"] },
+              _id: { $ne: new ObjectId(userId) },
+            },
+          },
+        ],
+        as: "follower",
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        let: { following: "$following" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$$following", "$_id"] },
+              _id: { $ne: new ObjectId(userId) },
+            },
+          },
+        ],
+        as: "following",
+      },
+    },
+    {
+      $project: {
+        follower: { $arrayElemAt: ["$follower", 0] },
+        following: { $arrayElemAt: ["$following", 0] },
+      },
+    },
+  ]);
+
+  return followAndFollowing;
+};
+
 module.exports = {
   getFollowers,
   getFollowings,
   followOrUnfollow,
   getFollowStatus,
   queryFollows,
+  getFollowAndFollowings,
 };

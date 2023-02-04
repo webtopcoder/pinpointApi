@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Post, Media } = require("../models"),
+  { User, Post, Media, Like } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -64,10 +64,10 @@ const checkUser = (fieldName, fieldValue) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = (email) => {
-  return User.findOne({ email });
+  return User.findOne({ email }).populate("profile.avatar");
 };
 const getUserByUsername = (username) => {
-  return User.findOne({ username });
+  return User.findOne({ username }).populate("profile.avatar");
 };
 /**
  * Update user by id
@@ -139,6 +139,28 @@ const getUserActivity = async (userId, { page, search }) => {
       $unwind: "$to_user",
     },
     {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "images",
+        foreignField: "_id",
+        as: "images",
+      },
+    },
+    {
+      $unwind: "$from_user",
+    },
+    {
+      $lookup: {
+        from: Like.collection.name,
+        localField: "like",
+        foreignField: "_id",
+        as: "like",
+      },
+    },
+    {
+      $unwind: "$like",
+    },
+    {
       $project: {
         from_user: {
           username: "$from_user.username",
@@ -204,6 +226,7 @@ const getUserActivity = async (userId, { page, search }) => {
       $limit: 5,
     },
   ]);
+
   let image = await Post.aggregate([
     {
       $match: {
@@ -218,8 +241,16 @@ const getUserActivity = async (userId, { page, search }) => {
       },
     },
     {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "images",
+        foreignField: "_id",
+        as: "images",
+      },
+    },
+    {
       $project: {
-        image: "$image",
+        image: "$images",
       },
     },
     {

@@ -37,17 +37,46 @@ const editPoll = {
     .min(1),
 };
 
-const createPost = {
+const editProfileData = {
   body: Joi.object()
     .keys({
-      content: Joi.string().required(),
-      userId: Joi.string().required().custom(objectId),
+      email: Joi.string().email(),
+      firstName: Joi.string(),
+      lastName: Joi.string(),
+      username: Joi.string(),
+      address: Joi.object().keys({
+        address: Joi.string(),
+        state: Joi.string(),
+        city: Joi.string(),
+      }),
     })
     .min(1),
+};
+
+const createPost = {
+  params: Joi.object().keys({
+    userId: Joi.string().required().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    content: Joi.string().required(),
+  }),
+};
+
+const votePoll = {
+  params: Joi.object().keys({
+    userId: Joi.string().required().custom(objectId),
+  }),
+  body: Joi.object()
+    .keys({
+      option: Joi.number().required().min(0).max(3),
+    })
+    .required(),
 };
 
 module.exports = {
   editPartnerProfile,
   editPoll,
   createPost,
+  editProfileData,
+  votePoll,
 };

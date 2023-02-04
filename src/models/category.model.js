@@ -13,6 +13,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
+  Category.virtual("subCategories", {
+    ref: "SubCategory",
+    localField: "_id",
+    foreignField: "category",
+  });
+
   Category.plugin(softDelete, {
     deletedBy: true,
     deletedAt: true,
