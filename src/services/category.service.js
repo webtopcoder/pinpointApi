@@ -9,7 +9,10 @@ const httpStatus = require("http-status"),
  * @returns {Promise<Category[]>}
  */
 const getCategories = async () => {
-  const categories = await Category.find();
+  const categories = await Category.find().populate("subCategories");
+  if (!categories) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
   return categories;
 };
 
@@ -22,14 +25,6 @@ const getCategories = async () => {
 
 const getCategoryById = async (id) => {
   const category = await Category.findById(id);
-  if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-  }
-  return category;
-};
-
-const getAllSubCategories = async () => {
-  const category = await Category.find().populate("subCategories");
   if (!category) {
     throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
   }
@@ -59,5 +54,4 @@ module.exports = {
   getCategories,
   getCategoryById,
   getSubCategoryByCategoryId,
-  getAllSubCategories,
 };

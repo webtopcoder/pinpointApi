@@ -8,8 +8,6 @@ const router = express.Router();
 
 router.get("/", categoryController.getCategories);
 
-router.get("/subcategories", categoryController.getAllSubCategories);
-
 router.get(
   "/:categoryId/subcategories",
   validate(categoryValidation.getSubCategories),
