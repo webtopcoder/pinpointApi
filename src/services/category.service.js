@@ -9,7 +9,7 @@ const httpStatus = require("http-status"),
  * @returns {Promise<Category[]>}
  */
 const getCategories = async () => {
-  const categories = await Category.find().populate("subCategories");
+  const categories = await Category.find();
   if (!categories) {
     throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
   }
