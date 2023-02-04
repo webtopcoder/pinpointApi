@@ -9,6 +9,11 @@ const getCategories = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ success: true, categories });
 });
 
+const getallsubCategories = catchAsync(async (req, res) => {
+  const categories = await categoryService.getCategories();
+  res.status(httpStatus.OK).send({ success: true, categories });
+});
+
 const getSubCategoryByCategoryId = catchAsync(async (req, res) => {
   const { categoryId } = req.params;
   const subCategories = await categoryService.getSubCategoryByCategoryId(
@@ -20,4 +25,5 @@ const getSubCategoryByCategoryId = catchAsync(async (req, res) => {
 module.exports = {
   getCategories,
   getSubCategoryByCategoryId,
+  getallsubCategories
 };

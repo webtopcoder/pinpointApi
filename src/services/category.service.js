@@ -28,6 +28,14 @@ const getCategoryById = async (id) => {
   return category;
 };
 
+const getallSubCategories = async () => {
+  const category = await Category.findById(id);
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+  return category;
+};
+
 /**
  * Get subCategory of a category
  * @param {ObjectId} ObjectId
@@ -51,4 +59,5 @@ module.exports = {
   getCategories,
   getCategoryById,
   getSubCategoryByCategoryId,
+  getallSubCategories
 };
