@@ -147,15 +147,15 @@ const getUserActivity = async (userId, { page, search }) => {
       },
     },
     {
+      $unwind: "$from_user",
+    },
+    {
       $lookup: {
         from: Like.collection.name,
         localField: "like",
         foreignField: "_id",
         as: "like",
       },
-    },
-    {
-      $unwind: "$from_user",
     },
     {
       $unwind: "$like",
@@ -241,8 +241,16 @@ const getUserActivity = async (userId, { page, search }) => {
       },
     },
     {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "images",
+        foreignField: "_id",
+        as: "images",
+      },
+    },
+    {
       $project: {
-        image: "$image",
+        image: "$images",
       },
     },
     {
