@@ -51,6 +51,10 @@ const defaultRoutes = [
     path: "/partnership",
     route: require("./partnership.route.js"),
   },
+  {
+    path: "/post",
+    route: require("./post.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {
