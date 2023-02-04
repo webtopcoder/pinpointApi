@@ -20,6 +20,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: String,
         required: true,
       },
+      plan: {
+        type: Schema.Types.Mixed,
+        required: true,
+      }
       features: {
         type: [
           {

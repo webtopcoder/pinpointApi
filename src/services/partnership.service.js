@@ -17,7 +17,7 @@ const queryPartnerships = async (filter, options) => {
   });
   return partnerships;
 };
-
+const getPartnerships = async () => Partnership.find();
 const getPartnershipById = async (id, populate) => {
   const partnership = await Partnership.findById(id).populate(populate);
   console.log(partnership);
@@ -52,4 +52,5 @@ module.exports = {
   getPartnershipById,
   updatePartnershipById,
   deletePartnershipById,
+  getPartnerships,
 };
