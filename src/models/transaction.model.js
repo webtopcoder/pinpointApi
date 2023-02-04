@@ -5,8 +5,8 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Transaction = new Schema(
     {
       order: {
-        type: Types.ObjectId,
-        ref: "Order",
+        type: Schema.Types.Mixed,
+        required: true,
       },
       amount: {
         type: String,
