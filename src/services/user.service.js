@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Post, Media } = require("../models"),
+  { User, Post, Media, Like } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -147,7 +147,18 @@ const getUserActivity = async (userId, { page, search }) => {
       },
     },
     {
+      $lookup: {
+        from: Like.collection.name,
+        localField: "like",
+        foreignField: "_id",
+        as: "like",
+      },
+    },
+    {
       $unwind: "$from_user",
+    },
+    {
+      $unwind: "$like",
     },
     {
       $project: {
