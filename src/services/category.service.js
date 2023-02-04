@@ -28,8 +28,8 @@ const getCategoryById = async (id) => {
   return category;
 };
 
-const getallSubCategories = async () => {
-  const category = await Category.findById(id);
+const getAllSubCategories = async () => {
+  const category = await Category.find().populate("subCategories");
   if (!category) {
     throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
   }
@@ -59,5 +59,5 @@ module.exports = {
   getCategories,
   getCategoryById,
   getSubCategoryByCategoryId,
-  getallSubCategories
+  getAllSubCategories,
 };
