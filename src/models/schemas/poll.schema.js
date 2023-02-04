@@ -11,6 +11,16 @@ const PollSchema = new mongoose.Schema(
       default: Array(4).fill(""),
     },
     votes: { type: [Number], required: true, default: Array(4).fill(0) },
+    usersVoted: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+      required: true,
+      default: [],
+    },
   },
   { _id: false }
 );
