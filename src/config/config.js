@@ -33,6 +33,7 @@ const envVariableSchema = Joi.object()
     EMAIL_FROM: Joi.string().description(
       "the from field in the emails sent by the app"
     ),
+    STRIPE_SECRET_KEY: Joi.string().required().description("Stripe Secret Key"),
     SWAGGER_URL: Joi.string()
       .description("Swagger URL")
       .default("http://localhost:8080"),
@@ -78,5 +79,8 @@ module.exports = {
   },
   swagger: {
     url: envVars.SWAGGER_URL,
+  },
+  stripe: {
+    secretKey: envVars.STRIPE_SECRET_KEY,
   },
 };
