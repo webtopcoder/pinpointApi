@@ -7,7 +7,9 @@ const {
   userService,
 } = require("@services");
 const pick = require("../utils/pick");
+
 const Stripe = require("stripe");
+
 const getPartnerships = catchAsync(async (req, res) => {
   let filter = pick(req.query, ["q"]);
   let options = pick(req.query, ["sort", "limit", "page"]);
@@ -45,11 +47,12 @@ const createCustomer = async (req, res) => {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: "2020-08-27",
     });
-    console.log(req.user);
+
     const data = {
       email: req.user.email,
       name: req.user.username,
     };
+
     const customer = await stripe.customers.create(data);
 
     // Optional but recommended
@@ -67,6 +70,7 @@ const createCustomer = async (req, res) => {
     });
   }
 };
+
 const subscribePartnership = catchAsync(async (req, res) => {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -104,6 +108,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
     });
   }
 });
+
 const createTransaction = catchAsync(async (req, res) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2020-08-27",
@@ -114,7 +119,6 @@ const createTransaction = catchAsync(async (req, res) => {
     currency: req.body.currency,
     user: req.user,
   };
-  res.send(await transactionService.createTransaction(data));
 
   const plans = await stripe.prices.list({
     lookup_keys: [req.body.lookup_key],
@@ -132,7 +136,9 @@ const createTransaction = catchAsync(async (req, res) => {
     activePartnership: updatedPartnership,
   };
   await userService.updateUserById(req.user._id, updateUser);
+  res.send(await transactionService.createTransaction(data));
 });
+
 const getUserTransactions = catchAsync(async (req, res) => {
   let filter = {};
   let options = pick(req.query, ["limit", "page", "sort"]);
@@ -143,6 +149,7 @@ const getUserTransactions = catchAsync(async (req, res) => {
   );
   res.send(result);
 });
+
 const cancelSubscription = async (req, res) => {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -164,6 +171,7 @@ const cancelSubscription = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   createCustomer,
   getPartnerships,
