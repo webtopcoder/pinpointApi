@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { userService, shoutoutService } = require("@services");
+const { userService, shoutoutService, likeService } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
 const { Post } = require("../models");
@@ -140,11 +140,14 @@ const createPost = catchAsync(async (req, res) => {
 
   const to_user = await userService.getUserById(userId);
 
+  const like = await likeService.createLike();
+
   const newPost = Post({
     from: req.user._id,
     to: to_user._id,
     content,
     images,
+    like,
   });
 
   await newPost.save();
