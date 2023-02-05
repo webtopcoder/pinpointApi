@@ -34,6 +34,7 @@ router
   .route("/:locationId/quick-arrival")
   .post(
     auth(),
+    upload.array("images", 5),
     validate(locationValidation.quickArrival),
     locationController.quickArrival
   );
@@ -59,9 +60,6 @@ router
     validate(locationValidation.updateLocation),
     locationController.updateLocation
   )
-  .put(
-    auth(),
-    locationController.deleteLocation
-  );
+  .put(auth(), locationController.deleteLocation);
 
 module.exports = router;

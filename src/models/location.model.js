@@ -60,13 +60,21 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       ],
       isActive: {
         type: Boolean,
-        default: true,
+        default: false,
       },
       departureAt: {
         type: Date,
       },
       arrivalText: {
         type: String,
+      },
+      arrivalImages: {
+        type: [
+          {
+            type: Types.ObjectId,
+            ref: "Media",
+          },
+        ],
       },
     },
     {
