@@ -28,11 +28,13 @@ const getLocationById = async (id) => {
           path: "images",
         },
       ],
+    })
+    .populate({
+      path: "arrivalImages",
     });
 };
 
 const deleteLocationByID = async (id, updateBody) => {
-
   const location = await getLocationById(id);
 
   if (!location) {
@@ -89,5 +91,5 @@ module.exports = {
   createLocation,
   updateLocationById,
   queryLocations,
-  deleteLocationByID
+  deleteLocationByID,
 };
