@@ -81,6 +81,10 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         ref: "Partnership",
         default: null,
       },
+      activeSubscription: {
+        type: Schema.Types.Mixed,
+        default: null,
+      },
       partnershipPriceRenewalDate: {
         type: String,
       },

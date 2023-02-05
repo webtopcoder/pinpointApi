@@ -89,12 +89,12 @@ const subscribePartnership = catchAsync(async (req, res) => {
       expand: ["latest_invoice.payment_intent"],
     });
     console.log(subscription);
-    // const data = {
-    //   order: subscription,
-    //   amount:
-    // };
-    // const transaction = await transactionService.createTransaction(data);
 
+    const updateBody = {
+      ...req.user,
+      activeSubscription: subscription,
+    };
+    await userService.updateUserById(req.user._id, updateBody);
     res.status(200).json({
       code: "subscription_created",
       subscriptionId: subscription.id,
@@ -124,6 +124,7 @@ const createTransaction = catchAsync(async (req, res) => {
     lookup_keys: [req.body.lookup_key],
     expand: ["data.product"],
   });
+  console.log(plans);
   const userUpdatedPlan = plans.data.find(
     (plan) => plan.id == req.body.priceId
   );
@@ -159,6 +160,12 @@ const cancelSubscription = async (req, res) => {
 
     const deletedSubscription = await stripe.subscriptions.del(subscriptionId);
 
+    const updateUser = {
+      ...req.user,
+      activePartnership: null,
+      activeSubscription: null,
+    };
+    await userService.updateUserById(req.user._id, updateUser);
     res.status(200).json({
       code: "subscription_deleted",
       deletedSubscription,
