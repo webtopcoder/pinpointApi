@@ -19,6 +19,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       state: {
         type: String,
       },
+      checkIn: {
+        type: Types.ObjectId,
+        ref: "User",
+      },
     },
     {
       _id: false,
