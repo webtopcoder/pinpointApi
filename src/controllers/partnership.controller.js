@@ -7,6 +7,7 @@ const {
   userService,
 } = require("@services");
 const pick = require("../utils/pick");
+const env = require("../config/config");
 
 const Stripe = require("stripe");
 
@@ -44,7 +45,7 @@ const getPartnershipById = catchAsync(async (req, res) => {
 
 const createCustomer = async (req, res) => {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    const stripe = new Stripe(env.stripe.secretKey, {
       apiVersion: "2020-08-27",
     });
 
@@ -73,7 +74,7 @@ const createCustomer = async (req, res) => {
 
 const subscribePartnership = catchAsync(async (req, res) => {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    const stripe = new Stripe(env.stripe.secretKey, {
       apiVersion: "2020-08-27",
     });
     const { customerId, priceId } = req.body;
@@ -110,7 +111,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
 });
 
 const createTransaction = catchAsync(async (req, res) => {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  const stripe = new Stripe(env.stripe.secretKey, {
     apiVersion: "2020-08-27",
   });
   const data = {
@@ -153,7 +154,7 @@ const getUserTransactions = catchAsync(async (req, res) => {
 
 const cancelSubscription = async (req, res) => {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    const stripe = new Stripe(env.stripe.secretKey, {
       apiVersion: "2020-08-27",
     });
     const { subscriptionId } = req.body;
