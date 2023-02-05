@@ -13,7 +13,7 @@ const createLocation = catchAsync(async (req, res) => {
       return media._id;
     })
   );
-  console.log(req.body)
+  console.log(req.body);
 
   const location = await locationService.createLocation({
     partner: req.user._id,
@@ -32,24 +32,22 @@ const createLocation = catchAsync(async (req, res) => {
 });
 
 const deleteLocation = catchAsync(async (req, res) => {
-
   const { locationId } = req.params;
 
-  console.log(locationId)
+  console.log(locationId);
   const location = await locationService.getLocationById(locationId);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
 
   const data = {
-    deleted: true
+    deleted: true,
   };
 
   await locationService.deleteLocationByID(locationId, data);
 
   res.send(location);
 });
-
 
 const getLocations = catchAsync(async (req, res) => {
   let filter = pick(req.query, ["isActive", "partner"]);
@@ -105,7 +103,6 @@ const updateLocation = catchAsync(async (req, res) => {
     },
   };
 
-
   await locationService.updateLocationById(locationId, data);
   res.send(location);
 });
@@ -124,8 +121,16 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
+  const arrivalImages = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
   const updatedLocation = await locationService.updateLocationById(locationId, {
     ...req.body,
+    arrivalImages,
     isActive: true,
   });
 
@@ -193,5 +198,5 @@ module.exports = {
   quickArrival,
   quickDeparture,
   reviewLocation,
-  deleteLocation
+  deleteLocation,
 };
