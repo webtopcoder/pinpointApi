@@ -22,6 +22,10 @@ router
   );
 
 router
+  .route("/review/:reviewId/like")
+  .post(auth(), locationController.likeReview);
+
+router
   .route("/:locationId/review")
   .post(
     auth(),
@@ -46,6 +50,8 @@ router
     validate(locationValidation.quickDeparture),
     locationController.quickDeparture
   );
+
+router.route("/:locationId/like").post(auth(), locationController.likeLocation);
 
 router
   .route("/:locationId")

@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { locationService } = require("@services");
+const { locationService, likeService, reviewService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
@@ -190,6 +190,72 @@ const reviewLocation = catchAsync(async (req, res) => {
   res.send(review);
 });
 
+const likeLocation = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  if (!location.like) {
+    location.like = await likeService.createLike({
+      users: [],
+      count: 0,
+    });
+
+    await location.save();
+  }
+
+  const liked = location.like.users.includes(req.user.id);
+
+  if (liked) {
+    location.like.users = location.like.users.filter(
+      (user) => user != req.user._id
+    );
+    location.like.count -= 1;
+  } else {
+    location.like.users.push(req.user._id);
+    location.like.count += 1;
+  }
+
+  await likeService.updateLikeById(location.like._id, location.like);
+
+  res.send({ liked: !liked });
+});
+
+const likeReview = catchAsync(async (req, res) => {
+  const { reviewId } = req.params;
+  const review = await reviewService.getReviewById(reviewId);
+  if (!review) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Review not found");
+  }
+
+  if (!review.like) {
+    review.like = await likeService.createLike({
+      users: [],
+      count: 0,
+    });
+
+    await review.save();
+  }
+
+  const liked = review.like.users.includes(req.user.id);
+
+  if (liked) {
+    review.like.users = review.like.users.filter(
+      (user) => user != req.user._id
+    );
+    review.like.count -= 1;
+  } else {
+    review.like.users.push(req.user._id);
+    review.like.count += 1;
+  }
+
+  await likeService.updateLikeById(review.like._id, review.like);
+
+  res.send({ liked: !liked });
+});
+
 module.exports = {
   createLocation,
   getLocations,
@@ -199,4 +265,6 @@ module.exports = {
   quickDeparture,
   reviewLocation,
   deleteLocation,
+  likeReview,
+  likeLocation,
 };
