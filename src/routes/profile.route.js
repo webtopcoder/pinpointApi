@@ -18,6 +18,10 @@ router
   );
 
 router
+  .route("/partner/dashboard")
+  .get(auth(), profileController.getPartnerDashboard);
+
+router
   .route("/avatar")
   .post(auth(), upload.single("avatar"), profileController.addProfilePicture);
 
