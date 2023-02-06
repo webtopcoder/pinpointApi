@@ -63,4 +63,8 @@ router
     profileController.createPost
   );
 
+router
+  .route("/:userId/image/all")
+  .get(auth(true), profileController.getAllImages);
+
 module.exports = router;

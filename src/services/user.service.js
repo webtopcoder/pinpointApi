@@ -413,6 +413,64 @@ const getUserActivity = async (userId, { page, search }) => {
   };
 };
 
+const getProfileImages = async (userId, options) => {
+  const imagesInPost = await Post.aggregate([
+    {
+      $match: {
+        $or: [
+          {
+            to: new ObjectId(userId),
+          },
+          {
+            from: new ObjectId(userId),
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "images",
+        foreignField: "_id",
+        as: "images",
+      },
+    },
+    {
+      $project: {
+        image: "$images",
+      },
+    },
+    {
+      $group: {
+        _id: "",
+        image: {
+          $push: "$image",
+        },
+      },
+    },
+    {
+      $unwind: "$image",
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+    {
+      $skip: (parseInt(options.page) - 1) * options.limit,
+    },
+    {
+      $limit: parseInt(options.limit),
+    },
+  ]);
+
+  const images = imagesInPost.reduce((acc, image) => {
+    image.image.forEach((img) => {
+      acc.push(img);
+    });
+    return acc;
+  }, []);
+  return images;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -423,4 +481,5 @@ module.exports = {
   checkUser,
   getUserActivity,
   getUserByUsername,
+  getProfileImages,
 };
