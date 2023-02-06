@@ -14,7 +14,6 @@ const logger = require("@configs/logger");
 const loginUserWithEmailAndPassword = async (email, password) => {
   const user = await userService.getUserByEmail(email);
 
-  console.log(user);
   if (user && !user.isEmailVerified) {
     throw new ApiError(httpStatus.FORBIDDEN, "Email is not verified.");
   }
