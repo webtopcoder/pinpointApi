@@ -5,7 +5,7 @@ const { userService, shoutoutService, likeService } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
 const { Post } = require("../models");
-const { uploadMedia, createMedia } = require("../services/media.service");
+const { uploadMedia } = require("../services/media.service");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -220,6 +220,22 @@ const editProfileData = catchAsync(async (req, res) => {
   return res.json({ success: true, data: user });
 });
 
+const getAllImages = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { page, limit } = req.query;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const images = await userService.getProfileImages(user._id, {
+    page: page ?? 1,
+    limit: limit ?? 10,
+  });
+
+  return res.json({ success: true, image: images });
+});
+
 module.exports = {
   createPost,
   editProfile,
@@ -231,4 +247,5 @@ module.exports = {
   editProfileData,
   votePoll,
   getPollForProfile,
+  getAllImages,
 };
