@@ -105,130 +105,6 @@ const deleteUserById = async (userId) => {
 };
 
 const getUserActivity = async (userId, { page, search }) => {
-  // let post = await Post.aggregate([
-  //   {
-  //     $match: {
-  //       $or: [
-  //         {
-  //           from: new ObjectId(userId),
-  //         },
-  //         {
-  //           to: new ObjectId(userId),
-  //         },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: "users",
-  //       localField: "from",
-  //       foreignField: "_id",
-  //       as: "from_user",
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: "users",
-  //       localField: "to",
-  //       foreignField: "_id",
-  //       as: "to_user",
-  //     },
-  //   },
-  //   {
-  //     $unwind: "$from_user",
-  //   },
-  //   {
-  //     $unwind: "$to_user",
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: Media.collection.name,
-  //       localField: "images",
-  //       foreignField: "_id",
-  //       as: "images",
-  //     },
-  //   },
-  //   {
-  //     $unwind: "$from_user",
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: Like.collection.name,
-  //       localField: "like",
-  //       foreignField: "_id",
-  //       as: "like",
-  //     },
-  //   },
-  //   {
-  //     $unwind: "$like",
-  //   },
-  //   {
-  //     $project: {
-  //       from_user: {
-  //         username: "$from_user.username",
-  //         avatar: "$from_user.profile.avatar",
-  //         _id: "$from_user._id",
-  //       },
-  //       to_user: {
-  //         username: "$to_user.username",
-  //         avatar: "$to_user.profile.avatar",
-  //         _id: "$to_user._id",
-  //       },
-  //       content: "$content",
-  //       image: "$images",
-  //       createdAt: "$createdAt",
-  //       type: "$type",
-  //       like: "$like",
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: Media.collection.name,
-  //       localField: "from_user.avatar",
-  //       foreignField: "_id",
-  //       as: "from_user.avatar",
-  //     },
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: Media.collection.name,
-  //       localField: "to_user.avatar",
-  //       foreignField: "_id",
-  //       as: "to_user.avatar",
-  //     },
-  //   },
-  //   {
-  //     $unwind: {
-  //       path: "$from_user.avatar",
-  //       preserveNullAndEmptyArrays: true,
-  //     },
-  //   },
-  //   {
-  //     $unwind: {
-  //       path: "$to_user.avatar",
-  //       preserveNullAndEmptyArrays: true,
-  //     },
-  //   },
-  //   {
-  //     $match: {
-  //       $or: [
-  //         { "from.username": new RegExp(search, "i") },
-  //         { "to.username": new RegExp(search, "i") },
-  //         { content: new RegExp(search, "i") },
-  //       ],
-  //     },
-  //   },
-  //   {
-  //     $sort: { createdAt: -1 },
-  //   },
-  //   {
-  //     $skip: (parseInt(page) - 1) * 5,
-  //   },
-  //   {
-  //     $limit: 5,
-  //   },
-  // ]);
-
   let postAndFollows = await User.aggregate([
     {
       $match: {
@@ -258,6 +134,17 @@ const getUserActivity = async (userId, { page, search }) => {
           },
         ],
         pipeline: [
+          {
+            $lookup: {
+              from: Like.collection.name,
+              localField: "like",
+              foreignField: "_id",
+              as: "like",
+            },
+          },
+          {
+            $unwind: "$like",
+          },
           {
             $lookup: {
               from: Media.collection.name,
@@ -316,23 +203,21 @@ const getUserActivity = async (userId, { page, search }) => {
           },
           {
             $project: {
-              from: {
+              from_user: {
                 username: "$from.username",
-                profile: {
-                  avatar: "$from.profile.avatar",
-                },
+                avatar: "$from.profile.avatar",
                 _id: "$from._id",
               },
-              to: {
+              to_user: {
                 username: "$to.username",
-                profile: {
-                  avatar: "$to.profile.avatar",
-                },
+                avatar: "$to.profile.avatar",
                 _id: "$to._id",
               },
               content: "$content",
               images: "$images",
+              like: "$like",
               createdAt: "$createdAt",
+              updatedAt: "$updatedAt",
               type: "post",
             },
           },
@@ -416,19 +301,16 @@ const getUserActivity = async (userId, { page, search }) => {
             $project: {
               follower: {
                 username: "$follower.username",
-                profile: {
-                  avatar: "$follower.profile.avatar",
-                },
+                avatar: "$follower.profile.avatar",
                 _id: "$follower._id",
               },
               following: {
                 username: "$following.username",
-                profile: {
-                  avatar: "$following.profile.avatar",
-                },
+                avatar: "$following.profile.avatar",
                 _id: "$following._id",
               },
               createdAt: "$createdAt",
+              updatedAt: "$updatedAt",
               type: "follow",
             },
           },
