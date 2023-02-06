@@ -113,7 +113,7 @@ const getProfileActivity = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   const { post, images } = await userService.getUserActivity(userId, {
-    page,
+    page: page ?? 1,
     search,
   });
 

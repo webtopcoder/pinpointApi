@@ -23,8 +23,10 @@ const createUser = async (userBody) => {
  * Query for users
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options
- * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
- * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {string} [options.sortBy] - Sort option in the format:
+ *     sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default
+ *     = 10)
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
@@ -104,127 +106,227 @@ const deleteUserById = async (userId) => {
 };
 
 const getUserActivity = async (userId, { page, search }) => {
-  let post = await Post.aggregate([
+  let postAndFollows = await User.aggregate([
     {
       $match: {
-        $or: [
-          {
-            from: new ObjectId(userId),
-          },
-          {
-            to: new ObjectId(userId),
-          },
-        ],
+        _id: new ObjectId(userId),
       },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "from",
-        foreignField: "_id",
-        as: "from_user",
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "to",
-        foreignField: "_id",
-        as: "to_user",
-      },
-    },
-    {
-      $unwind: "$from_user",
-    },
-    {
-      $unwind: "$to_user",
     },
     {
       $lookup: {
         from: Media.collection.name,
-        localField: "images",
+        localField: "profile.avatar",
         foreignField: "_id",
-        as: "images",
+        as: "profile.avatar",
       },
     },
     {
-      $unwind: "$from_user",
+      $unwind: "$profile.avatar",
     },
     {
       $lookup: {
-        from: Like.collection.name,
-        localField: "like",
-        foreignField: "_id",
-        as: "like",
+        from: "posts",
+        let: { userId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $or: { from: "$$userId", to: "$$userId" } },
+            },
+          },
+        ],
+        pipeline: [
+          {
+            $lookup: {
+              from: Like.collection.name,
+              localField: "like",
+              foreignField: "_id",
+              as: "like",
+            },
+          },
+          {
+            $unwind: "$like",
+          },
+          {
+            $lookup: {
+              from: Media.collection.name,
+              localField: "images",
+              foreignField: "_id",
+              as: "images",
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "from",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: Media.collection.name,
+                    localField: "profile.avatar",
+                    foreignField: "_id",
+                    as: "profile.avatar",
+                  },
+                },
+                {
+                  $unwind: "$profile.avatar",
+                },
+              ],
+              as: "from",
+            },
+          },
+          {
+            $unwind: "$from",
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "to",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: Media.collection.name,
+                    localField: "profile.avatar",
+                    foreignField: "_id",
+                    as: "profile.avatar",
+                  },
+                },
+                {
+                  $unwind: "$profile.avatar",
+                },
+              ],
+              as: "to",
+            },
+          },
+          {
+            $unwind: "$to",
+          },
+          {
+            $project: {
+              from_user: {
+                username: "$from.username",
+                avatar: "$from.profile.avatar",
+                _id: "$from._id",
+              },
+              to_user: {
+                username: "$to.username",
+                avatar: "$to.profile.avatar",
+                _id: "$to._id",
+              },
+              content: "$content",
+              images: "$images",
+              like: "$like",
+              createdAt: "$createdAt",
+              updatedAt: "$updatedAt",
+              type: "post",
+            },
+          },
+          {
+            $match: {
+              $or: [
+                { "from.username": new RegExp(search, "i") },
+                { "to.username": new RegExp(search, "i") },
+                { content: new RegExp(search, "i") },
+              ],
+            },
+          },
+          {
+            $sort: { updatedAt: -1 },
+          },
+        ],
+        as: "posts",
       },
     },
     {
-      $unwind: "$like",
+      $lookup: {
+        from: "follows",
+        let: { userId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $or: { follower: "$$userId", following: "$$userId" } },
+            },
+          },
+        ],
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "follower",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: Media.collection.name,
+                    localField: "profile.avatar",
+                    foreignField: "_id",
+                    as: "profile.avatar",
+                  },
+                },
+                {
+                  $unwind: "$profile.avatar",
+                },
+              ],
+              as: "follower",
+            },
+          },
+          {
+            $unwind: "$follower",
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "following",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: Media.collection.name,
+                    localField: "profile.avatar",
+                    foreignField: "_id",
+                    as: "profile.avatar",
+                  },
+                },
+                {
+                  $unwind: "$profile.avatar",
+                },
+              ],
+              as: "following",
+            },
+          },
+          {
+            $unwind: "$following",
+          },
+          {
+            $project: {
+              follower: {
+                username: "$follower.username",
+                avatar: "$follower.profile.avatar",
+                _id: "$follower._id",
+              },
+              following: {
+                username: "$following.username",
+                avatar: "$following.profile.avatar",
+                _id: "$following._id",
+              },
+              createdAt: "$createdAt",
+              updatedAt: "$updatedAt",
+              type: "follow",
+            },
+          },
+          {
+            $sort: { updatedAt: -1 },
+          },
+        ],
+        as: "follows",
+      },
     },
     {
       $project: {
-        from_user: {
-          username: "$from_user.username",
-          avatar: "$from_user.profile.avatar",
-          _id: "$from_user._id",
-        },
-        to_user: {
-          username: "$to_user.username",
-          avatar: "$to_user.profile.avatar",
-          _id: "$to_user._id",
-        },
-        content: "$content",
-        image: "$images",
-        createdAt: "$createdAt",
-        type: "$type",
-        like: "$like",
+        posts: 1,
+        follows: 1,
       },
-    },
-    {
-      $lookup: {
-        from: Media.collection.name,
-        localField: "from_user.avatar",
-        foreignField: "_id",
-        as: "from_user.avatar",
-      },
-    },
-    {
-      $lookup: {
-        from: Media.collection.name,
-        localField: "to_user.avatar",
-        foreignField: "_id",
-        as: "to_user.avatar",
-      },
-    },
-    {
-      $unwind: {
-        path: "$from_user.avatar",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $unwind: {
-        path: "$to_user.avatar",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $match: {
-        $or: [
-          { "from.username": new RegExp(search, "i") },
-          { "to.username": new RegExp(search, "i") },
-          { content: new RegExp(search, "i") },
-        ],
-      },
-    },
-    {
-      $sort: { createdAt: -1 },
-    },
-    {
-      $skip: (parseInt(page) - 1) * 5,
-    },
-    {
-      $limit: 5,
     },
   ]);
 
@@ -280,10 +382,27 @@ const getUserActivity = async (userId, { page, search }) => {
       },
     },
   ]);
+
   const images = image.length > 0 ? image[0].image : [];
+  const postAndFollowsOfCurrentUser =
+    postAndFollows.length > 0 ? postAndFollows[0] : null;
+
+  if (!postAndFollowsOfCurrentUser)
+    return {
+      post: [],
+      images,
+    };
+
+  const post = postAndFollowsOfCurrentUser.posts.concat(
+    postAndFollowsOfCurrentUser.follows
+  );
+
+  post.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+
+  const limitedPost = post.splice((parseInt(page) - 1) * 5, 5);
 
   return {
-    post,
+    post: limitedPost,
     images,
   };
 };
