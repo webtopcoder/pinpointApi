@@ -50,7 +50,7 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
   const tokenDoc = await Token.create({
     token,
     user: userId,
-    expires: expires.toDate(),
+    expires: expires ? expires.toDate() : moment.now(),
     type,
     blacklisted,
   });
@@ -147,15 +147,9 @@ const generateAuthTokens = async (user) => {
  * @returns {Promise<string>}
  */
 const generateResetPasswordToken = async (user) => {
-  const expires = moment().add(
-    config.otp.resetPasswordExpirationMinutes,
-    "minutes"
-  );
+  const expires = moment().add(config.otp.expirationTime, "minutes");
   const tokenType = tokenTypes.RESET_PASSWORD;
-  const token = generateOTP();
-
-  await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
-  await saveToken(token, user.id, expires, tokenType);
+  const token = generateToken(user.id, expires, tokenType);
   return token;
 };
 

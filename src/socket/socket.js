@@ -31,6 +31,32 @@ const Action = {
       to,
     });
   },
+  addLocation: async (from, to) => {
+    const from_user = await User.findById(from);
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      message: from_user.username + " has added new location!",
+      to,
+    });
+  },
+  shoutout: async (from, to) => {
+    const from_user = await User.findById(from);
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      message: from_user.username + " has given you a shoutout!",
+      to,
+    });
+  },
 };
 
 module.exports = {

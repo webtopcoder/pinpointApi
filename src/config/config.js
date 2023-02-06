@@ -37,6 +37,9 @@ const envVariableSchema = Joi.object()
     SWAGGER_URL: Joi.string()
       .description("Swagger URL")
       .default("http://localhost:8080"),
+    FRONTEND_URL: Joi.string()
+      .description("Frontend URL")
+      .default("http://localhost:3000"),
   })
   .unknown();
 
@@ -83,4 +86,5 @@ module.exports = {
   stripe: {
     secretKey: envVars.STRIPE_SECRET_KEY,
   },
+  frontend_url: envVars.FRONTEND_URL,
 };

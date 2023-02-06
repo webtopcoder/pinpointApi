@@ -273,10 +273,11 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
     partner: userId,
   }).populate("reviews");
 
-  const businessRating =
+  const businessRating = (
     locations.reduce((acc, location) => {
       return acc + (location.rating ?? 0);
-    }, 0) / locations.length;
+    }, 0) / locations.length
+  ).toFixed(2);
 
   const profileViews =
     (await userService.getUserById(userId)).profileViews ?? 0;

@@ -27,7 +27,15 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       type: {
         type: String,
-        enum: ["follow", "like", "comment", "mention", "mail"],
+        enum: [
+          "follow",
+          "like",
+          "comment",
+          "mention",
+          "mail",
+          "addLocation",
+          "shoutout",
+        ],
         required: true,
       },
       url: {
@@ -53,6 +61,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       case "mail":
         await Action.mail(actor, recipient);
         break;
+      case "addLocation":
+        await Action.addLocation(actor, recipient);
+        break;
+      case "shoutout":
+        await Action.shoutout(actor, recipient);
       default:
         break;
     }
