@@ -64,6 +64,7 @@ const checkUser = (fieldName, fieldValue) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = (email) => {
+
   return User.findOne({ email }).populate("profile.avatar");
 };
 const getUserByUsername = (username) => {
