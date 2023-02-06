@@ -44,9 +44,10 @@ const sendResetPasswordEmail = async (userId) => {
 
   const subject = "Reset password";
   const to = user.email;
-  const link = `${config.frontend_url}/reset-password`;
-  const html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p><br><p>Please click on the following <a href="${link}">link</a> to reset your password.</p>
-                  <br><p>If you did not request this, please ignore this email.</p>`;
+  const link = `${config.frontend_url}/authentication/create-password/?token=${token}`;
+  const html = `<p>Hi, br><p>Please click on the following <a href="${link}">link</a> to reset your password.</p>
+    <br>Or enter the following OTP to reset your password: <br><p>${link}</p>
+    <br><p>If you did not request this, please ignore this email.</p>`;
 
   await sendEmail(to, subject, html);
 };

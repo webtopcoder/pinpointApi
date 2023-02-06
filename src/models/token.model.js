@@ -59,6 +59,11 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
     return token.type === otpType && (await bcrypt.compare(otp, token.token));
   };
 
+  tokenSchema.methods.isBlacklisted = async function () {
+    const token = this;
+    return token.blacklisted;
+  };
+
   /**
    * @typedef Token
    */

@@ -4,6 +4,8 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   { tokenTypes } = require("@configs/tokens");
 const logger = require("@configs/logger");
+const jwt = require("jsonwebtoken");
+const config = require("../config/config");
 
 /**
  * Login with username and password
@@ -77,24 +79,37 @@ const refreshAuth = async (refreshToken) => {
  * @param {string} newPassword
  * @returns {Promise}
  */
-const resetPassword = async (email, otp, newPassword) => {
+const resetPassword = async (token, newPassword) => {
   try {
-    const user = await userService.getUserByEmail(email);
-    if (!user) {
-      throw Error();
-    }
+    const payload = jwt.verify(token, config.jwt.secret);
 
-    const verifyOTP = await tokenService.verifyOTP(
-      user.id,
-      otp,
-      tokenTypes.RESET_PASSWORD
-    );
-    if (!verifyOTP) {
+    const blacklisted = await Token.findOne({
+      token: token,
+      type: tokenTypes.RESET_PASSWORD,
+      blacklisted: true,
+    });
+
+    if (
+      !payload.sub ||
+      blacklisted ||
+      payload.type !== tokenTypes.RESET_PASSWORD
+    ) {
       throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token");
     }
 
+    const user = await userService.getUserById(payload.sub);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+
     await userService.updateUserById(user.id, { password: newPassword });
-    await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
+    await tokenService.saveToken(
+      token,
+      user.id,
+      payload.expires,
+      tokenTypes.RESET_PASSWORD,
+      true
+    );
   } catch (error) {
     logger.error(error.stack);
     throw new ApiError(httpStatus.UNAUTHORIZED, "Password reset failed");
