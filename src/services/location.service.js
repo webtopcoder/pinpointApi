@@ -29,6 +29,7 @@ const getLocationById = async (id) => {
         },
       ],
     })
+    .populate("subCategories")
     .populate({
       path: "arrivalImages",
     });
@@ -46,7 +47,9 @@ const deleteLocationByID = async (id, updateBody) => {
 };
 
 const getLocationsByPartnerId = async (partnerId, filter) => {
-  return Location.find({ ...filter, partner: partnerId }).populate("images");
+  return Location.find({ ...filter, partner: partnerId })
+    .populate("images")
+    .populate("subCategories");
 };
 
 const createLocation = async (locationBody) => {
@@ -65,7 +68,6 @@ const updateLocationById = async (locationId, updateBody) => {
 };
 
 const queryLocations = async (filter, options) => {
-  let defaultFilter = filter;
   /* if (filter.isActive) {
     defaultFilter = {
       ...defaultFilter,

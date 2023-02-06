@@ -80,6 +80,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           },
         ],
       },
+      subCategories: [
+        {
+          type: Types.ObjectId,
+          ref: "SubCategory",
+        },
+      ],
     },
     {
       timestamps: true,
