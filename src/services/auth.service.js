@@ -106,7 +106,7 @@ const resetPassword = async (token, newPassword) => {
     await tokenService.saveToken(
       token,
       user.id,
-      payload.expires,
+      undefined,
       tokenTypes.RESET_PASSWORD,
       true
     );

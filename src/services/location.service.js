@@ -3,6 +3,9 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
+const { EventEmitter, events } = require("../events");
+const followService = require("./follow.service");
+const userService = require("./user.service");
 
 const getLocationById = async (id) => {
   return Location.findById(id)
@@ -54,7 +57,22 @@ const getLocationsByPartnerId = async (partnerId, filter) => {
 
 const createLocation = async (locationBody) => {
   const like = await Like.create({ count: 0 });
-  return Location.create({ ...locationBody, like: like._id });
+  const location = await Location.create({ ...locationBody, like: like._id });
+  const partner = await userService.getUserById(locationBody.partner);
+  const userFollowers = await followService.getFollowers(partner._id);
+
+  userFollowers.forEach((follower) => {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: follower._id,
+      actor: partner._id,
+      title: "New Location",
+      description: `${partner.username} has added a new location @${locationBody.title}`,
+      url: `/profile/${partner._id}/locations/${location._id}`,
+      type: "addLocation",
+    });
+  });
+
+  return location;
 };
 
 const updateLocationById = async (locationId, updateBody) => {

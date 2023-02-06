@@ -3,9 +3,23 @@ const httpStatus = require("http-status"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
+const userService = require("./user.service");
+const { EventEmitter, events } = require("../events");
 
 const createShoutout = async (shoutoutBody) => {
   const shoutout = await Shoutout.create(shoutoutBody);
+
+  const shoutoutUser = await userService.getUserById(shoutoutBody.from);
+
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: shoutout.to.toString(),
+    actor: shoutout.from.toString(),
+    title: "Shoutout",
+    description: `${shoutoutUser.username} has sent you a shoutout`,
+    url: `/profile/${shoutout.to.toString()}/shout-outs/`,
+    type: "shoutout",
+  });
+
   return shoutout;
 };
 
