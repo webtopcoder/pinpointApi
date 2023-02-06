@@ -109,7 +109,7 @@ const getUserActivity = async (userId, { page, search }) => {
   let postAndFollows = await User.aggregate([
     {
       $match: {
-        _id: new ObjectId(userId),
+        _id: new ObjectId(userId.toString()),
       },
     },
     {
@@ -130,11 +130,14 @@ const getUserActivity = async (userId, { page, search }) => {
         pipeline: [
           {
             $match: {
-              $expr: { $or: { from: "$$userId", to: "$$userId" } },
+              $expr: {
+                $or: [
+                  { $eq: ["$from", "$$userId"] },
+                  { $eq: ["$to", "$$userId"] },
+                ],
+              },
             },
           },
-        ],
-        pipeline: [
           {
             $lookup: {
               from: Like.collection.name,
@@ -215,7 +218,7 @@ const getUserActivity = async (userId, { page, search }) => {
                 _id: "$to._id",
               },
               content: "$content",
-              images: "$images",
+              image: "$images",
               like: "$like",
               createdAt: "$createdAt",
               updatedAt: "$updatedAt",
@@ -245,11 +248,14 @@ const getUserActivity = async (userId, { page, search }) => {
         pipeline: [
           {
             $match: {
-              $expr: { $or: { follower: "$$userId", following: "$$userId" } },
+              $expr: {
+                $or: [
+                  { $eq: ["$follower", "$$userId"] },
+                  { $eq: ["$following", "$$userId"] },
+                ],
+              },
             },
           },
-        ],
-        pipeline: [
           {
             $lookup: {
               from: "users",
