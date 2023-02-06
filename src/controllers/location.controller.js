@@ -27,6 +27,7 @@ const createLocation = catchAsync(async (req, res) => {
       latitude: req.body.lat,
       longitude: req.body.lng,
     },
+    subCategories: req.body.subCategories,
   });
   res.status(httpStatus.CREATED).send(location);
 });
@@ -56,7 +57,14 @@ const getLocations = catchAsync(async (req, res) => {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
   }
-  options.populate = ["partner", "like", "reviews", "images", "arrivalImages"];
+  options.populate = [
+    "partner",
+    "like",
+    "reviews",
+    "images",
+    "arrivalImages",
+    "subCategories",
+  ];
   const result = await locationService.queryLocations(filter, options);
   res.send(result);
 });
@@ -101,6 +109,7 @@ const updateLocation = catchAsync(async (req, res) => {
       latitude: req.body.lat,
       longitude: req.body.lng,
     },
+    subCategories: req.body.subCategories,
   };
 
   await locationService.updateLocationById(locationId, data);

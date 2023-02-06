@@ -1,5 +1,8 @@
 const Joi = require("joi");
-const { objectId } = require("./custom.validation");
+const {
+  objectId,
+  validateObjectIdArrayInFormData,
+} = require("./custom.validation");
 
 const createLocation = {
   body: Joi.object().keys({
@@ -10,6 +13,7 @@ const createLocation = {
     state: Joi.string().allow(""),
     lat: Joi.string().allow(""),
     lng: Joi.string().allow(""),
+    subCategories: Joi.string().custom(validateObjectIdArrayInFormData),
   }),
 };
 
@@ -44,6 +48,7 @@ const updateLocation = {
       state: Joi.string().allow(""),
       lat: Joi.string().allow(""),
       lng: Joi.string().allow(""),
+      subCategories: Joi.string().custom(validateObjectIdArrayInFormData), // transform to array of objectIds
     })
     .min(1),
 };
