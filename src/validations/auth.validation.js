@@ -17,6 +17,11 @@ const register = {
       })
       .required(),
     category: Joi.string().custom(objectId),
+    dob: Joi.when("role", {
+      is: "user",
+      then: Joi.date().required(),
+      otherwise: Joi.date().optional(),
+    }),
   }),
 };
 

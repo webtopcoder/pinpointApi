@@ -88,6 +88,10 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
       partnershipPriceRenewalDate: {
         type: String,
       },
+      profileViews: {
+        type: Number,
+        default: 0,
+      },
     },
     {
       timestamps: true,

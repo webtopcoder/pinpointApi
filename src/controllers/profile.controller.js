@@ -1,10 +1,15 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { userService, shoutoutService, likeService } = require("@services");
+const {
+  userService,
+  shoutoutService,
+  likeService,
+  locationService,
+} = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
-const { Post } = require("../models");
+const { Post, Location, Follow } = require("../models");
 const { uploadMedia } = require("../services/media.service");
 
 const editProfile = catchAsync(async (req, res) => {
@@ -107,7 +112,10 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
 
 const getProfileActivity = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  const { search, page } = pick(req.query, ["search", "page"]);
+  let { search, page } = pick(req.query, ["search", "page"]);
+
+  page = page ? parseInt(page) : 1;
+
   const user = await userService.getUserById(userId);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
@@ -116,6 +124,16 @@ const getProfileActivity = catchAsync(async (req, res) => {
     page: page ?? 1,
     search,
   });
+
+  if (page == 1) {
+    try {
+      await userService.updateUserById(user._id, {
+        profileViews: (user.profileViews ?? 0) + 1,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return res.json({
     success: true,
@@ -236,6 +254,43 @@ const getAllImages = catchAsync(async (req, res) => {
   return res.json({ success: true, image: images });
 });
 
+const getPartnerDashboard = catchAsync(async (req, res) => {
+  const userId = req.user._id;
+  const partnerLocations = await Location.find({
+    partner: userId,
+  }).countDocuments();
+
+  const activeLocations = await Location.find({
+    partner: userId,
+    isActive: true,
+  }).countDocuments();
+
+  const followers = await Follow.find({
+    following: userId,
+  }).countDocuments();
+
+  const locations = await Location.find({
+    partner: userId,
+  }).populate("reviews");
+
+  const businessRating =
+    locations.reduce((acc, location) => {
+      return acc + (location.rating ?? 0);
+    }, 0) / locations.length;
+
+  const profileViews =
+    (await userService.getUserById(userId)).profileViews ?? 0;
+
+  return res.send({
+    partnerLocations,
+    activeLocations,
+    followers,
+    profileViews,
+    businessRating,
+    checkIns: 100,
+  });
+});
+
 module.exports = {
   createPost,
   editProfile,
@@ -248,4 +303,5 @@ module.exports = {
   votePoll,
   getPollForProfile,
   getAllImages,
+  getPartnerDashboard,
 };
