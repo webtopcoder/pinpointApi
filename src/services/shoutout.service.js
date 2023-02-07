@@ -7,6 +7,8 @@ const userService = require("./user.service");
 const { EventEmitter, events } = require("../events");
 
 const createShoutout = async (shoutoutBody) => {
+
+  console.log(shoutoutBody)
   const shoutout = await Shoutout.create(shoutoutBody);
 
   const shoutoutUser = await userService.getUserById(shoutoutBody.from);

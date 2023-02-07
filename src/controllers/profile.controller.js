@@ -170,8 +170,9 @@ const createPost = catchAsync(async (req, res) => {
 
   await newPost.save();
 
-  const pattern = /\B@[a-z0-9_-]+/gi;
+  const pattern = /@[\w\s]+\b/g;
   const mentions = content.match(pattern);
+
   if (mentions && mentions.length) {
     await Promise.all(
       mentions.map(async (mention) => {
@@ -179,7 +180,6 @@ const createPost = catchAsync(async (req, res) => {
         const followerOrFollowing = await followService.getFollowAndFollowings(
           req.user._id
         );
-
         const followAndFollowingList = Array.from(
           new Set(
             followerOrFollowing?.map((item) => {
@@ -196,11 +196,16 @@ const createPost = catchAsync(async (req, res) => {
           )
         );
 
+        console.log(followAndFollowingList, mention);
+
+
         if (!followAndFollowingList.includes(mention)) {
+
           return;
         }
+        console.log(111)
         const to_user = await userService.getUserByUsername(mention);
-
+        
         if (to_user) {
           const shoutout_data = {
             from: req.user._id,
