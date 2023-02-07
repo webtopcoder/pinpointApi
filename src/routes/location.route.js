@@ -53,6 +53,8 @@ router
 
 router.route("/:locationId/like").post(auth(), locationController.likeLocation);
 
+router.route("/:locationId/check-in").post(auth(), locationController.checkIn);
+
 router
   .route("/:locationId")
   .get(

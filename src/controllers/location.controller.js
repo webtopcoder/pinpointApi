@@ -265,6 +265,27 @@ const likeReview = catchAsync(async (req, res) => {
   res.send({ liked: !liked });
 });
 
+const checkIn = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  if (!location.checkIn?.includes(req.user._id)) {
+    const updatedLocation = await locationService.updateLocationById(
+      locationId,
+      {
+        checkIn: [...location.checkIn, req.user._id],
+      }
+    );
+
+    res.status(httpStatus.CREATED).send(updatedLocation);
+  }
+
+  res.status(httpStatus.CREATED).send(location);
+});
+
 module.exports = {
   createLocation,
   getLocations,
@@ -276,4 +297,5 @@ module.exports = {
   deleteLocation,
   likeReview,
   likeLocation,
+  checkIn,
 };
