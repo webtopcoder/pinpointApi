@@ -53,6 +53,8 @@ router
 
 router.route("/:locationId/like").post(auth(), locationController.likeLocation);
 
+router.route("/:locationId/check-in").post(auth(), locationController.checkIn);
+
 router
   .route("/:locationId")
   .get(
@@ -60,12 +62,12 @@ router
     validate(locationValidation.getLocation),
     locationController.getLocation
   )
-  .post(
+  .patch(
     auth(),
     upload.array("images", 5),
     validate(locationValidation.updateLocation),
     locationController.updateLocation
   )
-  .put(auth(), locationController.deleteLocation);
+  .delete(auth(), locationController.deleteLocation);
 
 module.exports = router;

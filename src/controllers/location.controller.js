@@ -78,20 +78,20 @@ const getLocation = catchAsync(async (req, res) => {
 });
 
 const updateLocation = catchAsync(async (req, res) => {
-  // console.log(req.params)
   const images = await Promise.all(
     req.files.map(async (file) => {
       const media = await uploadMedia(file, req.user._id);
       return media._id;
     })
   );
+
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
 
-  if (!location.partner == req.user._id) {
+  if (location.partner._id != req.user._id) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "You don't have permission to update this location"
@@ -101,7 +101,7 @@ const updateLocation = catchAsync(async (req, res) => {
   const data = {
     title: req.body.title,
     description: req.body.description,
-    images,
+    images: images.length > 0 ? images : location.images,
     mapLocation: {
       address: req.body.address,
       city: req.body.city,
@@ -265,6 +265,27 @@ const likeReview = catchAsync(async (req, res) => {
   res.send({ liked: !liked });
 });
 
+const checkIn = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  if (!location.checkIn?.includes(req.user._id)) {
+    const updatedLocation = await locationService.updateLocationById(
+      locationId,
+      {
+        checkIn: [...location.checkIn, req.user._id],
+      }
+    );
+
+    res.status(httpStatus.CREATED).send(updatedLocation);
+  }
+
+  res.status(httpStatus.CREATED).send(location);
+});
+
 module.exports = {
   createLocation,
   getLocations,
@@ -276,4 +297,5 @@ module.exports = {
   deleteLocation,
   likeReview,
   likeLocation,
+  checkIn,
 };

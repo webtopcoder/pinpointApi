@@ -2,6 +2,8 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { followService } = require("@services");
 const pick = require("@utils/pick");
+const ApiError = require("../utils/ApiError");
+const { Follow } = require("../models");
 
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
@@ -56,9 +58,25 @@ const getOwnFollowerAndFollowing = catchAsync(async (req, res) => {
   });
 });
 
+const unfriend = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const follow = await Follow.findOne({
+    follower: userId,
+    following: req.user._id,
+  });
+
+  if (!follow) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Follow not found");
+  }
+
+  await followService.followOrUnfollow(userId, req.user._id);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 module.exports = {
   getFollowers,
   getFollowings,
   followOrUnfollow,
   getOwnFollowerAndFollowing,
+  unfriend,
 };

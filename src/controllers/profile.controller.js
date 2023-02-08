@@ -287,13 +287,17 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
   const profileViews =
     (await userService.getUserById(userId)).profileViews ?? 0;
 
+  const checkIns = locations.reduce((acc, location) => {
+    return acc + (location.checkIn?.length ?? 0);
+  }, 0);
+
   return res.send({
     partnerLocations,
     activeLocations,
     followers,
     profileViews,
     businessRating,
-    checkIns: 100,
+    checkIns,
   });
 });
 

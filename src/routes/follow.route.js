@@ -21,6 +21,8 @@ router
     followController.followOrUnfollow
   );
 
+router.route("/:userId/unfriend").delete(auth(), followController.unfriend);
+
 router
   .route("/:userId/following")
   .get(auth(true), followController.getFollowings);
