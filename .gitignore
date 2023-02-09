@@ -2,3 +2,5 @@
 .env*
 
 public/avatar
+
+dist/
