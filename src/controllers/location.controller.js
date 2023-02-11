@@ -337,6 +337,29 @@ const getFavoriteLocations = catchAsync(async (req, res) => {
   res.send(locations);
 });
 
+const getInteractiveMap = catchAsync(async (_, res) => {
+  const filter = {
+    isActive: true,
+    "mapLocation.interactiveMapContent": { $exists: true },
+  };
+
+  const options = {
+    sort: { createdAt: -1 },
+    pagination: false,
+  };
+
+  options.select = "mapLocation";
+  options.projection = [
+    "mapLocation._id",
+    "mapLocation.longitude",
+    "mapLocation.latitude",
+    "mapLocation.interactiveMapContent",
+  ];
+
+  const map = await locationService.queryLocations(filter, options);
+  res.send(map);
+});
+
 module.exports = {
   createLocation,
   getLocations,
@@ -352,4 +375,5 @@ module.exports = {
   favoriteLocation,
   unfavoriteLocation,
   getFavoriteLocations,
+  getInteractiveMap,
 };

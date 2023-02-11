@@ -21,6 +21,8 @@ router
     locationController.getLocations
   );
 
+router.route("/interactive-map").get(locationController.getInteractiveMap);
+
 router
   .route("/review/:reviewId/like")
   .post(auth(), locationController.likeReview);

@@ -19,6 +19,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       state: {
         type: String,
       },
+      interactiveMapContent: {
+        type: String,
+      },
     },
     {
       _id: false,
