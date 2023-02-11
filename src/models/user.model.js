@@ -76,21 +76,32 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         state: { type: String },
       },
       category: { type: Types.ObjectId, ref: "Category", required: false },
+
+      profileViews: {
+        type: Number,
+        default: 0,
+      },
+
       activePartnership: {
         type: Types.ObjectId,
         ref: "Partnership",
         default: null,
       },
+
+      favoriteLocations: [
+        {
+          type: Types.ObjectId,
+          ref: "Location",
+        },
+      ],
+
+      // FIX: this should be a virtual field
       activeSubscription: {
         type: Schema.Types.Mixed,
         default: null,
       },
       partnershipPriceRenewalDate: {
         type: String,
-      },
-      profileViews: {
-        type: Number,
-        default: 0,
       },
     },
     {

@@ -470,6 +470,11 @@ const getProfileImages = async (userId, options) => {
   return images;
 };
 
+const getFavoriteLocations = async (userId) => {
+  const locations = await User.findById(userId).populate("favoriteLocations");
+  return locations.favoriteLocations;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -481,4 +486,5 @@ module.exports = {
   getUserActivity,
   getUserByUsername,
   getProfileImages,
+  getFavoriteLocations,
 };
