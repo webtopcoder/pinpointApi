@@ -14,7 +14,6 @@
       "@controllers": ["./src/controllers/"],
       "@validations": ["./src/validations/"],
       "@utils": ["./src/utils/"],
-
       "@baseDir/*": ["./*"],
       "@src/*": ["src/*"],
       "@configs/*": ["src/config/*"],

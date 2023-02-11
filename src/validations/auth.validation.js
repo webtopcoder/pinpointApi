@@ -33,6 +33,13 @@ const login = {
   }),
 };
 
+const adminlogin = {
+  body: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  }),
+};
+
 const logout = {
   body: Joi.object().keys({
     refreshToken: Joi.string().required(),
@@ -81,6 +88,7 @@ const verifyEmail = {
 module.exports = {
   register,
   login,
+  adminlogin,
   logout,
   refreshTokens,
   forgotPassword,

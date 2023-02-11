@@ -30,6 +30,30 @@ const login = catchAsync(async (req, res, next) => {
   });
 });
 
+const adminLogin = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+  let admin = await authService.loginAdminWithEmailAndPassword(email, password);
+  if (!admin || !(Object.keys(admin).length > 0)) {
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ code: 400, message: "Unable to login." });
+  }
+  admin = admin.toJSON();
+  const tokens = await tokenService.generateAuthTokens(admin);
+  res.send({
+    data: { admin, tokens }
+  });
+});
+
+const verifyMe = catchAsync(async (req, res, next) => {
+  const jwtToken = req.headers.authorization;
+  const user = await authService.getSourceFromJWT(jwtToken);
+  res.send({
+    data: { user }
+  });
+});
+
+
 const logout = catchAsync(async (req, res) => {
   await authService.logout(req.body.refreshToken);
   res.status(httpStatus.NO_CONTENT).send();
@@ -93,6 +117,8 @@ const getUser = catchAsync(async (req, res) => {
 module.exports = {
   register,
   login,
+  adminLogin,
+  verifyMe,
   logout,
   refreshTokens,
   forgotPassword,

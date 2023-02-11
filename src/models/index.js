@@ -2,7 +2,6 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const mongoose = require("mongoose-fill");
 
 module.exports.User = require("./user.model")(mongoose, mongoosePaginate);
-module.exports.Admin = require("./admin.model")(mongoose, mongoosePaginate);
 module.exports.Token = require("./token.model")(mongoose, mongoosePaginate);
 module.exports.Mail = require("./mail.model")(mongoose, mongoosePaginate);
 module.exports.Like = require("./like.model")(mongoose, mongoosePaginate);

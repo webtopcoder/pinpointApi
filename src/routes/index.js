@@ -55,6 +55,14 @@ const defaultRoutes = [
     path: "/post",
     route: require("./post.route"),
   },
+  {
+    path: "/statistics",
+    route: require("./statistics.route"),
+  },
+  {
+    path: "/admin",
+    route: require("./admin.route"),
+  },
 ];
 
 defaultRoutes.forEach((route) => {

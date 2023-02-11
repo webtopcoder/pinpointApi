@@ -12,7 +12,8 @@ router.post(
   authController.register
 );
 router.post("/login", validate(authValidation.login), authController.login);
-router.post("/admin-login", validate(authValidation.login), authController.login);
+router.get("/admin/me", authController.verifyMe);
+router.post("/admin-login", validate(authValidation.adminlogin), authController.adminLogin);
 router.post("/logout", validate(authValidation.logout), authController.logout);
 router.post(
   "/refresh-tokens",

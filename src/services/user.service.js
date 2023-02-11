@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Post, Media, Like } = require("../models"),
+  { User, Admin, Post, Media, Like } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -69,6 +69,10 @@ const getUserByEmail = (email) => {
 
   return User.findOne({ email }).populate("profile.avatar");
 };
+
+const getAdminByEmail = (email) => {
+  return Admin.findOne({ email });
+};
 const getUserByUsername = (username) => {
   return User.findOne({ username }).populate("profile.avatar");
 };
@@ -86,6 +90,8 @@ const updateUserById = async (userId, updateBody) => {
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
+
+  console.log(updateBody)
   Object.assign(user, updateBody);
   await user.save();
   return user;
@@ -476,6 +482,7 @@ module.exports = {
   queryUsers,
   getUserById,
   getUserByEmail,
+  getAdminByEmail,
   updateUserById,
   deleteUserById,
   checkUser,

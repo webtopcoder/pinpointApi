@@ -36,6 +36,31 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 };
 
 /**
+ * AdminLogin with username and password
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<User>}
+ */
+const loginAdminWithEmailAndPassword = async (email, password) => {
+  const admin = await userService.getAdminByEmail(email);
+  if (!admin || !(await admin.isPasswordMatch(password))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
+  }
+  return admin;
+};
+
+/**
+* @param {string} token
+* @returns {Promise<User>}
+*/
+const getSourceFromJWT = async (token) => {
+
+  const decodded = jwt.verify(token, process.env.JWT_SECRET);
+  console.log(decodded['source'])
+  return decodded;
+};
+
+/**
  * Logout
  * @param {string} refreshToken
  * @returns {Promise}
@@ -160,7 +185,7 @@ const verifyEmail = async (email, otp) => {
   await Token.deleteMany({ user: user._id, type: tokenTypes.VERIFY_EMAIL });
 
   let updateUser = {};
-  if (["pending", "active"].includes(user.status)) {
+  if (["pending", "inactive"].includes(user.status)) {
     updateUser = { status: "active" };
   }
 
@@ -170,8 +195,11 @@ const verifyEmail = async (email, otp) => {
   });
 };
 
+
 module.exports = {
   loginUserWithEmailAndPassword,
+  loginAdminWithEmailAndPassword,
+  getSourceFromJWT,
   logout,
   refreshAuth,
   resetPassword,

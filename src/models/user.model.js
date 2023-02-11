@@ -59,8 +59,8 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
       },
       status: {
         type: String,
-        enum: ["pending", "suspended", "banned", "active"],
-        default: "active",
+        enum: ["pending", "suspended", "banned", "active", "inactive"],
+        default: "inactive",
       },
       role: {
         type: String,

@@ -16,4 +16,6 @@ module.exports.partnershipService = require("./partnership.service");
 module.exports.orderService = require("./order.service");
 module.exports.transactionService = require("./transaction.service");
 module.exports.postService = require("./post.service");
+module.exports.statisticService = require("./statistic.service");
 module.exports.likeService = require("./like.service");
+module.exports.adminService = require("./admin.service");

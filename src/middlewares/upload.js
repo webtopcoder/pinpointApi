@@ -59,4 +59,24 @@ const upload = multer({
   fileFilter,
 });
 
+const uploadAdmin = multer({
+  
+  storage: multer.diskStorage({
+    destination: "./public/avatar",
+    filename: (req, file, callBack) => {
+      const { id } = req.params;
+      const parsedPath = path.parse(file.originalname);
+      const ext = parsedPath.ext;
+
+      const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${
+        id
+      }${ext}`;
+      callBack(null, fileName);
+    },
+  }),
+  limits: {},
+  fileFilter,
+});
+
 module.exports = upload;
+module.exports = uploadAdmin;

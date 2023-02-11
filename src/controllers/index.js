@@ -11,3 +11,5 @@ module.exports.settingController = require("./setting.controller");
 module.exports.shoutoutController = require("./shoutout.controller");
 module.exports.partnershipController = require("./partnership.controller");
 module.exports.postController = require("./post.controller");
+module.exports.statisticController = require("./statistic.controller");
+module.exports.adminController = require("./admin.controller");
