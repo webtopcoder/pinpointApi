@@ -10,6 +10,7 @@ export const USER_ROLES = {
 export const STATUS_PENDING = 'pending';
 export const STATUS_ACTIVE = 'active';
 export const STATUS_INACTIVE = 'inactive';
+export const STATUS_DELETED = 'deleted';
 
 export const ISTRUE = 'true';
 export const ISFALSE = 'false';

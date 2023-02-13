@@ -25,7 +25,13 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "Like",
       },
+      status: {
+        type: String,
+        enum: ["active", "pending", "deleted"],
+        default: "active",
+      },
     },
+
     {
       timestamps: true,
       toJSON: { virtuals: true },

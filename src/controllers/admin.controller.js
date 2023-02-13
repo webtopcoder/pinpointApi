@@ -4,18 +4,9 @@ const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
 const { userService, adminService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
+import { Parser } from 'json2csv';
 
 const getSearchUsers = catchAsync(async (req, res) => {
-
-  const partners = await adminService.searchPartner(req.query);
-  if (!partners) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
-  }
-  res.send({ data: partners });
-
-});
-
-const getSearchPartners = catchAsync(async (req, res) => {
 
   const users = await adminService.searchUser(req.query);
   if (!users) {
@@ -23,6 +14,87 @@ const getSearchPartners = catchAsync(async (req, res) => {
   }
   res.send({ data: users });
 
+});
+
+const getSearchActivities = catchAsync(async (req, res) => {
+
+  const activities = await adminService.searchActivities(req.query);
+  if (!activities) {
+    throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
+  }
+
+  res.send({ data: activities });
+
+});
+
+const deleteActivitesByID = catchAsync(async (req, res) => {
+
+  console.log(req.query);
+  const data = {
+    status: 'deleted',
+  };
+
+  const activities = await adminService.deleteActivitiesById(req.query, data);
+
+  res.send(activities);
+
+});
+
+
+
+const getSearchPartners = catchAsync(async (req, res) => {
+
+  const partners = await adminService.searchPartner(req.query);
+  if (!partners) {
+    throw new ApiError(httpStatus.NOT_FOUND, "partners not found");
+  }
+  res.send({ data: partners });
+
+});
+
+const getUsersForCSV = catchAsync(async (req, res) => {
+
+  const fileName = 'partners_export.csv';
+  const fields = [
+    {
+      label: 'firstName',
+      value: 'firstName'
+    },
+    {
+      label: 'lastName',
+      value: 'lastName'
+    },
+    {
+      label: 'username',
+      value: 'username'
+    },
+    {
+      label: 'Email',
+      value: 'email'
+    },
+    {
+      label: 'Role',
+      value: 'role'
+    },
+    {
+      label: 'Status',
+      value: 'status'
+    },
+  ];
+
+
+  const { data } = await adminService.searchPartner({ ...req, limit: 9999 });
+  if (!data) {
+    throw new ApiError(httpStatus.NOT_FOUND, "partners not found");
+  }
+
+  console.log(data);
+  const json2csv = new Parser({ fields });
+  const csv = json2csv.parse(data);
+
+  res.header('Content-Type', 'text/csv');
+  res.attachment(fileName);
+  res.send(csv);
 });
 
 const getUserByID = catchAsync(async (req, res) => {
@@ -53,6 +125,9 @@ const ChangeAvatar = catchAsync(async (req, res) => {
 
 module.exports = {
   getSearchUsers,
+  getSearchActivities,
+  deleteActivitesByID,
+  getUsersForCSV,
   getSearchPartners,
   getUserByID,
   ChangeAvatar

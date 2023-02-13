@@ -14,9 +14,12 @@ const { ObjectId } = require("bson");
  * @returns {Promise<User>}
  */
 const stats = async () => {
+
+  const totalUsers = await User.countDocuments({ role: ROLE_USER });
   const totalActiveUsers = await User.countDocuments({ role: ROLE_USER, status: STATUS_ACTIVE });
   const totalInactiveUsers = await User.countDocuments({ role: ROLE_USER, status: STATUS_INACTIVE });
   const totalPendingUsers = await User.countDocuments({ role: ROLE_USER, status: STATUS_PENDING });
+  const totalPartners = await User.countDocuments({ role: ROLE_PARTNER });
   const totalActivePartners = await User.countDocuments({ role: ROLE_PARTNER, status: STATUS_ACTIVE });
   const totalInactivePartners = await User.countDocuments({ role: ROLE_PARTNER, status: STATUS_INACTIVE });
   const totalPendingPartners = await User.countDocuments({ role: ROLE_PARTNER, status: STATUS_PENDING });
@@ -28,9 +31,11 @@ const stats = async () => {
   const totalLike = await Like.countDocuments({});
   
   return {
+    totalUsers,
     totalActiveUsers,
     totalInactiveUsers,
     totalPendingUsers,
+    totalPartners,
     totalActivePartners,
     totalInactivePartners,
     totalPendingPartners,
