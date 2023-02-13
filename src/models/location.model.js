@@ -100,7 +100,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   );
 
   Location.virtual("rating").get(function () {
-    if (this.reviews.length > 0) {
+    if (this.reviews?.length > 0) {
       const totalRating = this.reviews.reduce((acc, review) => {
         return acc + review.rating;
       }, 0);
@@ -110,7 +110,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   });
 
   Location.virtual("reviewCount").get(function () {
-    return this.reviews.length;
+    return this.reviews?.length;
   });
 
   /* Location.pre("save", function (next) {

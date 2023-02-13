@@ -348,7 +348,6 @@ const getInteractiveMap = catchAsync(async (_, res) => {
     pagination: false,
   };
 
-  options.select = "mapLocation";
   options.projection = [
     "mapLocation._id",
     "mapLocation.longitude",
