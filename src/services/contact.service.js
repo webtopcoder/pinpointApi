@@ -10,12 +10,8 @@ const httpStatus = require("http-status"),
  * @returns {Promise<Contact>}
  * @throws {ApiError}
  */
-const createContact = async ({ user, subject, content }) => {
-  const contact = await Contact.create({
-    user,
-    subject,
-    content,
-  });
+const createContact = async (body) => {
+  const contact = await Contact.create(body);
   return contact;
 };
 
