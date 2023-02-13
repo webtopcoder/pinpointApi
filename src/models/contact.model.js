@@ -11,6 +11,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       subject: { type: String },
       message: { type: String, required: true },
+      usertype: { type: String, required: true, enum: ["user", "partner"] },
     },
     {
       timestamps: true,
