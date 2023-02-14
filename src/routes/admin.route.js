@@ -14,6 +14,10 @@ router
   .get(auth(true), adminController.getSearchActivities);
 
 router
+  .route("/locations/search")
+  .get(auth(true), adminController.getSearchLocations);
+
+router
   .route("/partners/export/csv")
   .get(auth(true), adminController.getUsersForCSV);
 router
@@ -23,6 +27,11 @@ router
 router
   .route("/users/:id/view")
   .get(auth(true), adminController.getUserByID);
+
+router
+  .route("/users/:id")
+  .put(auth(true), adminController.updateUserByID);
+
 
 router
   .route("/partners/:id/view")

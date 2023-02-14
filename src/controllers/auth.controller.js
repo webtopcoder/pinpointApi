@@ -48,8 +48,10 @@ const adminLogin = catchAsync(async (req, res, next) => {
 const verifyMe = catchAsync(async (req, res, next) => {
   const jwtToken = req.headers.authorization;
   const user = await authService.getSourceFromJWT(jwtToken);
+
+  console.log(111111111, user);
   res.send({
-    data: { user }
+    data: user 
   });
 });
 
@@ -90,6 +92,11 @@ const changePassword = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const changePasswordUser = catchAsync(async (req, res) => {
+  await authService.changePasswordUser(req.body.userId, req.body.password);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const user = req.user || (await userService.getUserByEmail(req.body.email));
 
@@ -123,6 +130,7 @@ module.exports = {
   refreshTokens,
   forgotPassword,
   resetPassword,
+  changePasswordUser,
   changePassword,
   sendVerificationEmail,
   verifyEmail,

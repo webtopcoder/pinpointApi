@@ -16,6 +16,30 @@ const getSearchUsers = catchAsync(async (req, res) => {
 
 });
 
+const getSearchLocations = catchAsync(async (req, res) => {
+
+  const locations = await adminService.searchLocation(req.query);
+  if (!locations) {
+    throw new ApiError(httpStatus.NOT_FOUND, "locations not found");
+  }
+  res.send({ data: locations });
+
+});
+
+const updateUserByID = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  await adminService.userUpdate(id, req.body);
+
+  const user = await adminService.getUserByID(id);
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
+  }
+  res.send({ data: user });
+
+});
+
 const getSearchActivities = catchAsync(async (req, res) => {
 
   const activities = await adminService.searchActivities(req.query);
@@ -88,7 +112,6 @@ const getUsersForCSV = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "partners not found");
   }
 
-  console.log(data);
   const json2csv = new Parser({ fields });
   const csv = json2csv.parse(data);
 
@@ -113,12 +136,13 @@ const ChangeAvatar = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
   }
 
-  const user = await adminService.getUserByID(id);
+  const user = await adminService.getUserByIDForAvatar(id);
 
   const media = await uploadMedia(req.file, id, true);
-  // await userService.updateUserById(id, {
-  //   profile: { ...user?.profile.profile, avatar: media._id },
-  // });
+
+  await userService.updateUserById(id, {
+    profile: { ...user?.profile?.profile, avatar: media._id },
+  });
 
   return res.json({ success: true, avatar: media });
 });
@@ -126,6 +150,8 @@ const ChangeAvatar = catchAsync(async (req, res) => {
 module.exports = {
   getSearchUsers,
   getSearchActivities,
+  getSearchLocations,
+  updateUserByID,
   deleteActivitesByID,
   getUsersForCSV,
   getSearchPartners,

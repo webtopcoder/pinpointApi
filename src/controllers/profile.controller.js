@@ -227,6 +227,7 @@ const addProfilePicture = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
   }
   const media = await uploadMedia(req.file, req.user._id, true);
+  
   await userService.updateUserById(req.user._id, {
     profile: { ...req.user.profile, avatar: media._id },
   });

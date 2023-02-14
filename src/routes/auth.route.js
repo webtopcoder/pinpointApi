@@ -30,11 +30,10 @@ router.post(
   validate(authValidation.resetPassword),
   authController.resetPassword
 );
-router.post(
+router.put(
   "/change-password",
-  auth(),
-  validate(authValidation.changePassword),
-  authController.changePassword
+  auth(true),
+  authController.changePasswordUser
 );
 router.post(
   "/send-verification-email",

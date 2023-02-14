@@ -73,6 +73,11 @@ const getUserByEmail = (email) => {
 const getAdminByEmail = (email) => {
   return Admin.findOne({ email });
 };
+
+const getAdminByID = (id) => {
+  return Admin.findOne({ _id: id });
+};
+
 const getUserByUsername = (username) => {
   return User.findOne({ username }).populate("profile.avatar");
 };
@@ -91,7 +96,6 @@ const updateUserById = async (userId, updateBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
 
-  console.log(updateBody)
   Object.assign(user, updateBody);
   await user.save();
   return user;
@@ -487,6 +491,7 @@ module.exports = {
   queryUsers,
   getUserById,
   getUserByEmail,
+  getAdminByID,
   getAdminByEmail,
   updateUserById,
   deleteUserById,

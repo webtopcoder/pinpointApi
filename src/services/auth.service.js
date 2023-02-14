@@ -56,8 +56,11 @@ const loginAdminWithEmailAndPassword = async (email, password) => {
 const getSourceFromJWT = async (token) => {
 
   const decodded = jwt.verify(token, process.env.JWT_SECRET);
-  console.log(decodded['source'])
-  return decodded;
+
+  const admin = await userService.getAdminByID(decodded['sub']);
+
+  return admin;
+
 };
 
 /**
@@ -162,6 +165,19 @@ const changePassword = async (userId, currentPassword, newPassword) => {
 };
 
 /**
+ * Change User password
+ * @param {string} currentPassword
+ * @param {string} newPassword
+ * @returns {Promise}
+ */
+const changePasswordUser = async (userId, newPassword) => {
+  const user = await userService.getUserById(userId);
+  Object.assign(user, { password: newPassword });
+  await user.save();
+  return user;
+};
+
+/**
  * Verify email
  * @param {string} email
  * @param {string} otp
@@ -204,5 +220,6 @@ module.exports = {
   refreshAuth,
   resetPassword,
   changePassword,
+  changePasswordUser,
   verifyEmail,
 };

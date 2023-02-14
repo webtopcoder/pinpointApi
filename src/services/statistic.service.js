@@ -24,27 +24,18 @@ const stats = async () => {
   const totalInactivePartners = await User.countDocuments({ role: ROLE_PARTNER, status: STATUS_INACTIVE });
   const totalPendingPartners = await User.countDocuments({ role: ROLE_PARTNER, status: STATUS_PENDING });
   const totalCategories = await Category.countDocuments();
-  const totalActiveLocations = await Location.countDocuments({ isActive: ISTRUE });
-  const totalINActiveLocations = await Location.countDocuments({ isActive: ISFALSE });
-  const totalOrders = await Order.countDocuments();
+  const totalLocations = await Location.countDocuments();
+  const totalGrossRevenue = await Order.countDocuments();
   const totalGalleries = await Media.countDocuments({});
-  const totalLike = await Like.countDocuments({});
-  
+  const totalactivities = await Like.countDocuments({});
+
   return {
     totalUsers,
-    totalActiveUsers,
-    totalInactiveUsers,
-    totalPendingUsers,
     totalPartners,
-    totalActivePartners,
-    totalInactivePartners,
-    totalPendingPartners,
-    totalCategories,
-    totalActiveLocations,
-    totalINActiveLocations,
-    totalOrders,
-    totalGalleries,
-    totalLike,
+    totalLocations,
+    totalGrossRevenue,
+    totalactivities,
+    
   };
 };
 
