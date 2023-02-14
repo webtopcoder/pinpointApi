@@ -49,7 +49,6 @@ const verifyMe = catchAsync(async (req, res, next) => {
   const jwtToken = req.headers.authorization;
   const user = await authService.getSourceFromJWT(jwtToken);
 
-  console.log(111111111, user);
   res.send({
     data: user 
   });

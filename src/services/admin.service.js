@@ -1,6 +1,6 @@
 const httpStatus = require("http-status"),
   { User, Review, Post, Shoutout, Location } = require("../models"),
-  { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING, STATUS_DELETED, ROLE_USER, ROLE_PARTNER } = require("../config/constants"),
+  { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING, STATUS_DELETED, ROLE_USER, ROLE_PARTNER ,ISFALSE, ISTRUE} = require("../config/constants"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort");
@@ -63,16 +63,16 @@ const searchUser = async (req) => {
     address.push(item.address.city);
   })
 
-  topCities.forEach(function (x) {
-    counts[x] = (counts[x] || 0) + 1;
-  });
+  // topCities.forEach(function (x) {
+  //   counts[x] = (counts[x] || 0) + 1;
+  // });
 
-  console.log(counts);
+  // console.log(counts);
 
   return {
     data,
     total,
-    topCities
+    // topCities
   };
 };
 
@@ -100,7 +100,7 @@ const searchLocation = async (req) => {
       }
     ];
   }
-  query.status = req.status === 'all' || undefined || null || '' ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] } : req.status;
+  query.isActive = req.status === 'all' || undefined || null || '' ? { $in: [ISTRUE, ISFALSE] } : req.status;
 
   let sort = {};
   if (req.sort && req.sortBy) {
@@ -112,10 +112,10 @@ const searchLocation = async (req) => {
   const [data, total] = await Promise.all([
     Location
       .find(query)
-      .sort(sort)
+      .sort(sort).populate('partner subCategories images like')
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
-    User.countDocuments(query)
+    Location.countDocuments(query)
   ]);
 
   return {

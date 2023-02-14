@@ -26,7 +26,7 @@ const stats = async () => {
   const totalCategories = await Category.countDocuments();
   const totalLocations = await Location.countDocuments();
   const totalGrossRevenue = await Order.countDocuments();
-  const totalGalleries = await Media.countDocuments({});
+  const totaltransactions = await Media.countDocuments({});
   const totalactivities = await Like.countDocuments({});
 
   return {
@@ -35,7 +35,7 @@ const stats = async () => {
     totalLocations,
     totalGrossRevenue,
     totalactivities,
-    
+    totaltransactions,
   };
 };
 

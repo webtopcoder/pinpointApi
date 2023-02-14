@@ -22,6 +22,8 @@ const getSearchLocations = catchAsync(async (req, res) => {
   if (!locations) {
     throw new ApiError(httpStatus.NOT_FOUND, "locations not found");
   }
+
+  console.log(locations)
   res.send({ data: locations });
 
 });
