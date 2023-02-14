@@ -1,79 +1,167 @@
 const httpStatus = require("http-status"),
   { User, Review, Post, Shoutout, Location } = require("../models"),
-  { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING, STATUS_DELETED, ROLE_USER, ROLE_PARTNER ,ISFALSE, ISTRUE} = require("../config/constants"),
-  ApiError = require("../utils/ApiError"),
-  customLabels = require("../utils/customLabels"),
-  defaultSort = require("../utils/defaultSort");
-const { ObjectId } = require("bson");
-const { query } = require("express");
-const { add } = require("lodash");
+  {
+    STATUS_ACTIVE,
+    STATUS_INACTIVE,
+    STATUS_PENDING,
+    STATUS_DELETED,
+    ROLE_USER,
+    ROLE_PARTNER,
+    ISFALSE,
+    ISTRUE,
+  } = require("../config/constants"),
+  moment = require("moment"),
+  ApiError = require("../utils/ApiError");
 
+const getTopCities = async ({ role = ROLE_USER }) => {
+  const usersWithCities = await User.find({
+    role,
+  });
+
+  const address = new Map();
+  usersWithCities.forEach((item) => {
+    address.set(
+      item.address.city,
+      address.has(item.address.city) ? address.get(item.address.city) + 1 : 1
+    );
+  });
+
+  return Object.fromEntries(address);
+};
+
+const getUserStats = async (
+  role = ROLE_USER,
+  { yearBack = 1, monthBack = 1, weekBack = 1 }
+) => {
+  const yearBackFromNow = moment().subtract(yearBack, "year").toDate();
+  const monthBackFromNow = moment().subtract(monthBack, "month").toDate();
+  const weekBackFromNow = moment().subtract(weekBack, "week").toDate();
+
+  const [usersByYear, usersByMonth, usersByWeek] = (
+    await Promise.all([
+      User.aggregate([
+        {
+          $match: {
+            role,
+            createdAt: { $gte: yearBackFromNow },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      User.aggregate([
+        {
+          $match: {
+            role,
+            createdAt: { $gte: monthBackFromNow },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      User.aggregate([
+        {
+          $match: {
+            role,
+            createdAt: { $gte: weekBackFromNow },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ])
+  ).map((item) => {
+    return item.reduce((acc, cur) => {
+      acc += cur.count;
+      return acc;
+    }, 0);
+  });
+
+  return {
+    usersByYear,
+    usersByMonth,
+    usersByWeek,
+  };
+};
 
 /**
  * Create a user
  * @param {Object} userBody
  * @returns {Promise<User>}
  */
-const searchUser = async (req) => {
-  req?.status ? req.status : req.status = 'all';
+const searchUser = async (reqQuery) => {
+  reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
 
   let query = {};
 
-  if (req.q) {
-    const regexp = new RegExp(
-      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-      'i'
-    );
+  if (reqQuery.q) {
     query.$or = [
       {
-        username: { $regex: regexp }
+        username: { $regex: reqQuery.q, $options: "ig" },
       },
       {
-        email: { $regex: regexp }
-      }
+        email: { $regex: reqQuery.q, $options: "ig" },
+      },
     ];
   }
   query.role = ROLE_USER;
-  query.status = req.status === 'all' || undefined || null || '' ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] } : req.status;
+  query.status =
+    reqQuery.status === "all" || undefined || null || ""
+      ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] }
+      : reqQuery.status;
 
   let sort = {};
-  if (req.sort && req.sortBy) {
+  if (reqQuery.sort && reqQuery.sortBy) {
     sort = {
-      [req.sortBy]: req.sort
+      [reqQuery.sortBy]: reqQuery.sort,
     };
   }
 
   const [data, total] = await Promise.all([
-    User
-      .find(query)
+    User.find(query)
       .sort(sort)
-      .limit(parseInt(req.limit, 10))
-      .skip(parseInt(req.offset, 10)),
-    User.countDocuments(query)
+      .limit(parseInt(reqQuery.limit, 10))
+      .skip(parseInt(reqQuery.offset, 10)),
+    User.countDocuments(query),
   ]);
 
-  const [cities] = await Promise.all([
-    User
-      .find({}, { address: 1, _id: 0 })
-  ]);
+  const topCities = await getTopCities({
+    role: ROLE_USER,
+  });
+  const userStats = await getUserStats(ROLE_USER, {
+    yearBack: reqQuery.yearBack ?? 1,
+    monthBack: reqQuery.monthBack ?? 1,
+    weekBack: reqQuery.weekBack ?? 1,
+  });
 
-  const topCities = {};
-  let address = [];
-  cities.map(async (item) => {
-    address.push(item.address.city);
-  })
-
-  // topCities.forEach(function (x) {
-  //   counts[x] = (counts[x] || 0) + 1;
-  // });
-
-  // console.log(counts);
-
-  return {
-    data,
-    total,
-    // topCities
-  };
+  return { data, total, topCities, userStats };
 };
 
 /**
@@ -82,40 +170,43 @@ const searchUser = async (req) => {
  * @returns {Promise<location>}
  */
 const searchLocation = async (req) => {
-  req?.status ? req.status : req.status = 'all';
+  req?.status ? req.status : (req.status = "all");
 
   let query = {};
 
   if (req.q) {
     const regexp = new RegExp(
-      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-      'i'
+      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+      "i"
     );
     query.$or = [
       {
-        title: { $regex: regexp }
+        title: { $regex: regexp },
       },
       {
-        description: { $regex: regexp }
-      }
+        description: { $regex: regexp },
+      },
     ];
   }
-  query.isActive = req.status === 'all' || undefined || null || '' ? { $in: [ISTRUE, ISFALSE] } : req.status;
+  query.isActive =
+    req.status === "all" || undefined || null || ""
+      ? { $in: [ISTRUE, ISFALSE] }
+      : req.status;
 
   let sort = {};
   if (req.sort && req.sortBy) {
     sort = {
-      [req.sortBy]: req.sort
+      [req.sortBy]: req.sort,
     };
   }
 
   const [data, total] = await Promise.all([
-    Location
-      .find(query)
-      .sort(sort).populate('partner subCategories images like')
+    Location.find(query)
+      .sort(sort)
+      .populate("partner subCategories images like")
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
-    Location.countDocuments(query)
+    Location.countDocuments(query),
   ]);
 
   return {
@@ -125,67 +216,78 @@ const searchLocation = async (req) => {
 };
 
 const searchActivities = async (req) => {
-
   let query = {};
 
   if (req.q) {
     const regexp = new RegExp(
-      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-      'i'
+      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+      "i"
     );
     query.$or = [
       {
-        content: { $regex: regexp }
+        content: { $regex: regexp },
       },
       {
-        status: { $regex: regexp }
+        status: { $regex: regexp },
       },
     ];
   }
 
-  query.status = req.status === 'all' || undefined || null || '' ? { $in: [STATUS_ACTIVE, STATUS_PENDING, STATUS_DELETED] } : req.status;
+  query.status =
+    req.status === "all" || undefined || null || ""
+      ? { $in: [STATUS_ACTIVE, STATUS_PENDING, STATUS_DELETED] }
+      : req.status;
   let sort = {};
   if (req.sort && req.sortBy) {
     sort = {
-      [req.sortBy]: req.sort
+      [req.sortBy]: req.sort,
     };
   }
 
-  const [Postdata, Posttotal, Reivewdata, ReviewTotal, shoutoutdata, shoutouttotal] = await Promise.all([
-    Post
-      .find(query)
-      .sort(sort).populate('from to images like')
+  const [
+    Postdata,
+    Posttotal,
+    Reivewdata,
+    ReviewTotal,
+    shoutoutdata,
+    shoutouttotal,
+  ] = await Promise.all([
+    Post.find(query)
+      .sort(sort)
+      .populate("from to images like")
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
     Post.countDocuments(query),
-    Review
-      .find(query)
+    Review.find(query)
       .sort(sort)
-      .populate('like images')
+      .populate("like images")
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
     Review.countDocuments(query),
-    Shoutout
-      .find(query)
+    Shoutout.find(query)
       .sort(sort)
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
-    Shoutout.countDocuments(query)
+    Shoutout.countDocuments(query),
   ]);
 
   return {
-    Postdata, Posttotal, Reivewdata, ReviewTotal, shoutoutdata, shoutouttotal
+    Postdata,
+    Posttotal,
+    Reivewdata,
+    ReviewTotal,
+    shoutoutdata,
+    shoutouttotal,
   };
 };
 
 const getActivitiesById = (query) => {
-
   switch (query.type) {
-    case 'Post':
+    case "Post":
       return Post.findById(query.id);
-    case 'Review':
+    case "Review":
       return Review.findById(query.id);
-    case 'Shoutout':
+    case "Shoutout":
       return Shoutout.findById(query.id);
   }
 };
@@ -212,15 +314,15 @@ const userUpdate = async (id, payload) => {
   const data = { ...payload };
 
   if (!user.name) {
-    user.name = [user.firstName || '', user.lastName || ''].join(' ').trim();
+    user.name = [user.firstName || "", user.lastName || ""].join(" ").trim();
   }
 
   if (data.email && data.email.toLowerCase() !== user.email.toLowerCase()) {
     const emailCheck = await User.countDocuments({
       email: data.email.toLowerCase(),
       _id: {
-        $ne: user._id
-      }
+        $ne: user._id,
+      },
     });
     if (emailCheck) {
       throw new ApiError(httpStatus.NOT_FOUND, "Email is already taken");
@@ -233,7 +335,7 @@ const userUpdate = async (id, payload) => {
   ) {
     const usernameCheck = await User.countDocuments({
       username: user.username.toLowerCase(),
-      _id: { $ne: user._id }
+      _id: { $ne: user._id },
     });
     if (usernameCheck) {
       throw new ApiError(httpStatus.NOT_FOUND, "UserName is already taken");
@@ -241,53 +343,51 @@ const userUpdate = async (id, payload) => {
   }
 
   await User.updateOne({ _id: id }, data, { new: true });
-
 };
 
-
-
 const searchPartner = async (req) => {
-
-  req?.status ? req.status : req.status = 'all';
+  req?.status ? req.status : (req.status = "all");
 
   let query = {};
 
   if (req.q) {
     const regexp = new RegExp(
-      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-      'i'
+      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+      "i"
     );
     query.$or = [
       {
-        username: { $regex: regexp }
+        username: { $regex: regexp },
       },
       {
-        email: { $regex: regexp }
-      }
+        email: { $regex: regexp },
+      },
     ];
   }
   query.role = ROLE_PARTNER;
-  query.status = req.status === 'all' || undefined || null || '' ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] } : req.status;
+  query.status =
+    req.status === "all" || undefined || null || ""
+      ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] }
+      : req.status;
 
   let sort = {};
   if (req.sort && req.sortBy) {
     sort = {
-      [req.sortBy]: req.sort
+      [req.sortBy]: req.sort,
     };
   }
 
   const [data, total] = await Promise.all([
-    User
-      .find(query)
+    User.find(query)
       .sort(sort)
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
-    User.countDocuments(query)
+    User.countDocuments(query),
   ]);
 
   return {
     data,
-    total
+    total,
   };
 };
 
@@ -308,5 +408,5 @@ module.exports = {
   getActivitiesById,
   deleteActivitiesById,
   searchPartner,
-  getUserByID
+  getUserByID,
 };
