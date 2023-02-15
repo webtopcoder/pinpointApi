@@ -13,9 +13,10 @@ const httpStatus = require("http-status"),
   moment = require("moment"),
   ApiError = require("../utils/ApiError");
 
-const getTopCities = async ({ role = ROLE_USER }) => {
+const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
   const usersWithCities = await User.find({
     role,
+    "address.city": { $exists: true },
   });
 
   const address = new Map();
@@ -27,7 +28,11 @@ const getTopCities = async ({ role = ROLE_USER }) => {
     );
   });
 
-  return Object.fromEntries(address);
+  const sortedAddress = [...address.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit);
+
+  return Object.fromEntries(sortedAddress);
 };
 
 const getUserStats = async (
