@@ -66,8 +66,6 @@ const deleteActivitesByID = catchAsync(async (req, res) => {
 
 });
 
-
-
 const getSearchPartners = catchAsync(async (req, res) => {
 
   const partners = await adminService.searchPartner(req.query);
@@ -132,6 +130,18 @@ const getUserByID = catchAsync(async (req, res) => {
   res.send({ data: user });
 });
 
+
+const getLocationByID = catchAsync(async (req, res) => {
+
+  const { id } = req.params;
+  const location = await adminService.getLocationByID(id);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "location not found");
+  }
+  res.send({ data: location });
+});
+
+
 const ChangeAvatar = catchAsync(async (req, res) => {
   const { id } = req.params;
   if (!req.file) {
@@ -153,6 +163,7 @@ module.exports = {
   getSearchUsers,
   getSearchActivities,
   getSearchLocations,
+  getLocationByID,
   updateUserByID,
   deleteActivitesByID,
   getUsersForCSV,

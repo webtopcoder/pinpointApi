@@ -396,6 +396,10 @@ const getUserByID = (id) => {
   return User.findById(id).populate("profile.avatar");
 };
 
+const getLocationByID = (id) => {
+  return Location.findById(id).populate();
+};
+
 const getUserByIDForAvatar = (id) => {
   return User.findById(id);
 };
@@ -404,6 +408,7 @@ module.exports = {
   searchUser,
   userUpdate,
   searchLocation,
+  getLocationByID,
   getUserByIDForAvatar,
   searchActivities,
   getActivitiesById,

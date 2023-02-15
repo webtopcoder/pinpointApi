@@ -18,6 +18,10 @@ router
   .get(auth(true), adminController.getSearchLocations);
 
 router
+  .route("/locations/:id/view")
+  .get(auth(true), adminController.getLocationByID);
+
+router
   .route("/partners/export/csv")
   .get(auth(true), adminController.getUsersForCSV);
 router
