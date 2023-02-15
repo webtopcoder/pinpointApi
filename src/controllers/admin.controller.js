@@ -4,28 +4,24 @@ const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
 const { userService, adminService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
-import { Parser } from 'json2csv';
+import { Parser } from "json2csv";
 
 const getSearchUsers = catchAsync(async (req, res) => {
-
   const users = await adminService.searchUser(req.query);
   if (!users) {
     throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
   }
   res.send({ data: users });
-
 });
 
 const getSearchLocations = catchAsync(async (req, res) => {
-
   const locations = await adminService.searchLocation(req.query);
   if (!locations) {
     throw new ApiError(httpStatus.NOT_FOUND, "locations not found");
   }
 
-  console.log(locations)
+  console.log(locations);
   res.send({ data: locations });
-
 });
 
 const updateUserByID = catchAsync(async (req, res) => {
@@ -39,75 +35,64 @@ const updateUserByID = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
   }
   res.send({ data: user });
-
 });
 
 const getSearchActivities = catchAsync(async (req, res) => {
-
   const activities = await adminService.searchActivities(req.query);
   if (!activities) {
     throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
   }
 
   res.send({ data: activities });
-
 });
 
 const deleteActivitesByID = catchAsync(async (req, res) => {
-
   console.log(req.query);
   const data = {
-    status: 'deleted',
+    status: "deleted",
   };
 
   const activities = await adminService.deleteActivitiesById(req.query, data);
 
   res.send(activities);
-
 });
 
-
-
 const getSearchPartners = catchAsync(async (req, res) => {
-
   const partners = await adminService.searchPartner(req.query);
   if (!partners) {
     throw new ApiError(httpStatus.NOT_FOUND, "partners not found");
   }
   res.send({ data: partners });
-
 });
 
 const getUsersForCSV = catchAsync(async (req, res) => {
-
-  const fileName = 'partners_export.csv';
+  const fileName = "partners_export.csv";
   const fields = [
     {
-      label: 'firstName',
-      value: 'firstName'
+      label: "firstName",
+      value: "firstName",
     },
     {
-      label: 'lastName',
-      value: 'lastName'
+      label: "lastName",
+      value: "lastName",
     },
     {
-      label: 'username',
-      value: 'username'
+      label: "username",
+      value: "username",
     },
     {
-      label: 'Email',
-      value: 'email'
+      label: "Email",
+      value: "email",
     },
     {
-      label: 'Role',
-      value: 'role'
+      label: "Role",
+      value: "role",
     },
     {
-      label: 'Status',
-      value: 'status'
+      label: "Status",
+      value: "status",
     },
   ];
-
 
   const { data } = await adminService.searchPartner({ ...req, limit: 9999 });
   if (!data) {
@@ -117,13 +102,12 @@ const getUsersForCSV = catchAsync(async (req, res) => {
   const json2csv = new Parser({ fields });
   const csv = json2csv.parse(data);
 
-  res.header('Content-Type', 'text/csv');
+  res.header("Content-Type", "text/csv");
   res.attachment(fileName);
   res.send(csv);
 });
 
 const getUserByID = catchAsync(async (req, res) => {
-
   const { id } = req.params;
   const user = await adminService.getUserByID(id);
   if (!user) {
@@ -158,5 +142,5 @@ module.exports = {
   getUsersForCSV,
   getSearchPartners,
   getUserByID,
-  ChangeAvatar
+  ChangeAvatar,
 };

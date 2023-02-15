@@ -354,16 +354,18 @@ const userUpdate = async (id, payload) => {
   await User.updateOne({ _id: id }, data, { new: true });
 };
 
-const searchPartner = async (req) => {
-  req?.status ? req.status : (req.status = "all");
+const searchPartner = async (reqQuery) => {
+  reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
 
+  const pipeline = [];
   let query = {};
 
-  if (req.q) {
+  if (reqQuery.q) {
     const regexp = new RegExp(
-      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+      reqQuery.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
       "i"
     );
+
     query.$or = [
       {
         username: { $regex: regexp },
@@ -373,24 +375,88 @@ const searchPartner = async (req) => {
       },
     ];
   }
+
   query.role = ROLE_PARTNER;
   query.status =
-    req.status === "all" || undefined || null || ""
+    reqQuery.status === "all" || undefined || null || ""
       ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] }
-      : req.status;
+      : reqQuery.status;
 
-  let sort = {};
-  if (req.sort && req.sortBy) {
-    sort = {
-      [req.sortBy]: req.sort,
-    };
+  pipeline.push({
+    $match: query,
+  });
+
+  if (reqQuery.sort && reqQuery.sortBy) {
+    pipeline.push({
+      $sort: {
+        [reqQuery.sortBy]: reqQuery.sort === "desc" ? -1 : 1,
+      },
+    });
   }
 
   const [data, total] = await Promise.all([
-    User.find(query)
-      .sort(sort)
-      .limit(parseInt(req.limit, 10))
-      .skip(parseInt(req.offset, 10)),
+    User.aggregate([
+      ...pipeline,
+      {
+        $lookup: {
+          from: "locations",
+          localField: "_id",
+          foreignField: "partner",
+          as: "locations",
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: "$category",
+      },
+      {
+        $lookup: {
+          from: "settings",
+          localField: "_id",
+          foreignField: "user",
+          as: "externalUsers",
+          pipeline: [
+            {
+              $match: {
+                key: "user:additionalUser",
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$externalUsers",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          locationCount: {
+            $size: "$locations",
+          },
+        },
+      },
+      {
+        $project: {
+          locations: 0,
+          userSettings: 0,
+        },
+      },
+      {
+        $skip: parseInt(reqQuery.offset, 10),
+      },
+      {
+        $limit: parseInt(reqQuery.limit, 10),
+      },
+    ]),
     User.countDocuments(query),
   ]);
 
