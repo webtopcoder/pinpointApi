@@ -21,13 +21,13 @@ router
     locationController.getLocations
   );
 
-router.route("/interactive-map").get(locationController.getInteractiveMap);
+// router.route("/interactive-map").get(locationController.getInteractiveMap);
 
 router
   .route("/review/:reviewId/like")
   .post(auth(), locationController.likeReview);
 
-router.route("/favorite/:userId").get(locationController.getFavoriteLocations);
+// router.route("/favorite/:userId").get(locationController.getFavoriteLocations);
 
 router
   .route("/:locationId/review")
@@ -57,12 +57,12 @@ router
 
 router.route("/:locationId/like").post(auth(), locationController.likeLocation);
 
-router.route("/:locationId/check-in").post(auth(), locationController.checkIn);
+// router.route("/:locationId/check-in").post(auth(), locationController.checkIn);
 
-router
-  .route("/:locationId/favorite")
-  .post(auth(), locationController.favoriteLocation)
-  .delete(auth(), locationController.unfavoriteLocation);
+// router
+//   .route("/:locationId/favorite")
+//   .post(auth(), locationController.favoriteLocation)
+//   .delete(auth(), locationController.unfavoriteLocation);
 
 router
   .route("/:locationId")

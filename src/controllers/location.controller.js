@@ -1,12 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const {
-  locationService,
-  likeService,
-  reviewService,
-  userService,
-} = require("@services");
+const { locationService, likeService, reviewService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
@@ -18,7 +13,6 @@ const createLocation = catchAsync(async (req, res) => {
       return media._id;
     })
   );
-  console.log(req.body);
 
   const location = await locationService.createLocation({
     partner: req.user._id,
@@ -40,7 +34,6 @@ const createLocation = catchAsync(async (req, res) => {
 const deleteLocation = catchAsync(async (req, res) => {
   const { locationId } = req.params;
 
-  console.log(locationId);
   const location = await locationService.getLocationById(locationId);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
@@ -75,34 +68,28 @@ const getLocations = catchAsync(async (req, res) => {
 });
 
 const getLocation = catchAsync(async (req, res) => {
-  let location = await locationService.getLocationById(req.params.locationId);
+  const location = await locationService.getLocationById(req.params.locationId);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
-
-  location = location.toJSON();
-
-  res.send({
-    ...location,
-    isFavorite: req.user?.favoriteLocations?.includes(location.id) ?? false,
-  });
+  res.send(location);
 });
 
 const updateLocation = catchAsync(async (req, res) => {
+  // console.log(req.params)
   const images = await Promise.all(
     req.files.map(async (file) => {
       const media = await uploadMedia(file, req.user._id);
       return media._id;
     })
   );
-
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
 
-  if (location.partner._id != req.user._id) {
+  if (!location.partner == req.user._id) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "You don't have permission to update this location"
@@ -112,7 +99,7 @@ const updateLocation = catchAsync(async (req, res) => {
   const data = {
     title: req.body.title,
     description: req.body.description,
-    images: images.length > 0 ? images : location.images,
+    images,
     mapLocation: {
       address: req.body.address,
       city: req.body.city,
@@ -276,89 +263,6 @@ const likeReview = catchAsync(async (req, res) => {
   res.send({ liked: !liked });
 });
 
-const checkIn = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-  }
-
-  if (!location.checkIn?.includes(req.user._id)) {
-    const updatedLocation = await locationService.updateLocationById(
-      locationId,
-      {
-        checkIn: [...location.checkIn, req.user._id],
-      }
-    );
-
-    res.status(httpStatus.CREATED).send(updatedLocation);
-  }
-
-  res.status(httpStatus.CREATED).send(location);
-});
-
-const favoriteLocation = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-  }
-
-  await userService.updateUserById(req.user._id, {
-    favoriteLocations: req.user.favoriteLocations?.includes(location._id)
-      ? req.user.favoriteLocations
-      : [...req.user.favoriteLocations, locationId],
-  });
-
-  res.status(httpStatus.NO_CONTENT).send();
-});
-
-const unfavoriteLocation = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-  }
-
-  await userService.updateUserById(req.user._id, {
-    favoriteLocations: req.user.favoriteLocations.filter(
-      (location) => location != locationId
-    ),
-  });
-
-  res.status(httpStatus.NO_CONTENT).send();
-});
-
-const getFavoriteLocations = catchAsync(async (req, res) => {
-  const { userId } = req.params;
-  const locations = await userService.getFavoriteLocations(userId);
-  res.send(locations);
-});
-
-const getInteractiveMap = catchAsync(async (_, res) => {
-  const filter = {
-    isActive: true,
-    "mapLocation.interactiveMapContent": { $exists: true },
-  };
-
-  const options = {
-    sort: { createdAt: -1 },
-    pagination: false,
-  };
-
-  options.projection = [
-    "mapLocation._id",
-    "mapLocation.longitude",
-    "mapLocation.latitude",
-    "mapLocation.interactiveMapContent",
-  ];
-
-  const map = await locationService.queryLocations(filter, options);
-  res.send(map);
-});
-
 module.exports = {
   createLocation,
   getLocations,
@@ -370,9 +274,4 @@ module.exports = {
   deleteLocation,
   likeReview,
   likeLocation,
-  checkIn,
-  favoriteLocation,
-  unfavoriteLocation,
-  getFavoriteLocations,
-  getInteractiveMap,
 };

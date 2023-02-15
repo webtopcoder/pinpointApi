@@ -19,6 +19,7 @@ const getTopCities = async ({ role = ROLE_USER }) => {
   });
 
   const address = new Map();
+
   usersWithCities.forEach((item) => {
     address.set(
       item.address.city,
@@ -203,7 +204,7 @@ const searchLocation = async (req) => {
   const [data, total] = await Promise.all([
     Location.find(query)
       .sort(sort)
-      .populate("partner subCategories images like")
+      .populate("partner subCategories images like reviews")
       .limit(parseInt(req.limit, 10))
       .skip(parseInt(req.offset, 10)),
     Location.countDocuments(query),
