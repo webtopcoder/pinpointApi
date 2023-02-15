@@ -88,7 +88,7 @@ const getUserStats = async (
         $group: {
           _id: {
             $dateToString: {
-              format: "%U",
+              format: "%Y-%U",
               date: "$createdAt",
             },
           },
@@ -100,8 +100,18 @@ const getUserStats = async (
 
   return {
     usersByYear,
-    usersByMonth,
-    usersByWeek,
+    usersByMonth: usersByMonth.map((item) => {
+      return {
+        ...item,
+        _id: moment(item._id, "MM").format("MMM"),
+      };
+    }),
+    usersByWeek: usersByWeek.map((item) => {
+      return {
+        ...item,
+        _id: moment(item._id, "YYYY-WW").format("YYYY-MM-DD"),
+      };
+    }),
   };
 };
 
