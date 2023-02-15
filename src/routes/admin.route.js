@@ -5,9 +5,7 @@ const uploadAdmin = require("../middlewares/upload");
 
 const router = express.Router();
 
-router
-  .route("/users/search")
-  .get(auth(true), adminController.getSearchUsers);
+router.route("/users/search").get(auth(true), adminController.getSearchUsers);
 
 router
   .route("/activities/search")
@@ -24,22 +22,16 @@ router
 router
   .route("/partners/export/csv")
   .get(auth(true), adminController.getUsersForCSV);
+
 router
   .route("/partners/search")
   .get(auth(true), adminController.getSearchPartners);
 
-router
-  .route("/users/:id/view")
-  .get(auth(true), adminController.getUserByID);
+router.route("/users/:id/view").get(auth(true), adminController.getUserByID);
 
-router
-  .route("/users/:id")
-  .put(auth(true), adminController.updateUserByID);
+router.route("/users/:id").put(auth(true), adminController.updateUserByID);
 
-
-router
-  .route("/partners/:id/view")
-  .get(auth(true), adminController.getUserByID);
+router.route("/partners/:id/view").get(auth(true), adminController.getUserByID);
 
 router
   .route("/users/:id/avatar/upload")

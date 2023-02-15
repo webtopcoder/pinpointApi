@@ -41,19 +41,18 @@ const adminLogin = catchAsync(async (req, res, next) => {
   admin = admin.toJSON();
   const tokens = await tokenService.generateAuthTokens(admin);
   res.send({
-    data: { admin, tokens }
+    data: { admin, tokens },
   });
 });
 
-const verifyMe = catchAsync(async (req, res, next) => {
+const getAdmin = catchAsync(async (req, res) => {
   const jwtToken = req.headers.authorization;
   const user = await authService.getSourceFromJWT(jwtToken);
 
   res.send({
-    data: user 
+    data: user,
   });
 });
-
 
 const logout = catchAsync(async (req, res) => {
   await authService.logout(req.body.refreshToken);
@@ -124,7 +123,7 @@ module.exports = {
   register,
   login,
   adminLogin,
-  verifyMe,
+  getAdmin,
   logout,
   refreshTokens,
   forgotPassword,

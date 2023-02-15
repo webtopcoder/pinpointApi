@@ -12,8 +12,11 @@ router.post(
   authController.register
 );
 router.post("/login", validate(authValidation.login), authController.login);
-router.get("/admin/me", authController.verifyMe);
-router.post("/admin-login", validate(authValidation.adminlogin), authController.adminLogin);
+router.post(
+  "/admin-login",
+  validate(authValidation.adminlogin),
+  authController.adminLogin
+);
 router.post("/logout", validate(authValidation.logout), authController.logout);
 router.post(
   "/refresh-tokens",
@@ -30,11 +33,7 @@ router.post(
   validate(authValidation.resetPassword),
   authController.resetPassword
 );
-router.put(
-  "/change-password",
-  auth(true),
-  authController.changePasswordUser
-);
+router.put("/change-password", auth(true), authController.changePasswordUser);
 router.post(
   "/send-verification-email",
   auth(true),
@@ -46,6 +45,8 @@ router.post(
   validate(authValidation.verifyEmail),
   authController.verifyEmail
 );
+
 router.get("/me", auth(), authController.getUser);
+router.get("/admin/me", authController.getAdmin);
 
 module.exports = router;

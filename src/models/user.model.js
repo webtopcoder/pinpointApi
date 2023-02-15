@@ -93,6 +93,7 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
           ref: "Location",
         },
       ],
+
       favoriteLocations: [
         {
           type: Types.ObjectId,
