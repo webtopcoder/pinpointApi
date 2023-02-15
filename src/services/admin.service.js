@@ -13,9 +13,10 @@ const httpStatus = require("http-status"),
   moment = require("moment"),
   ApiError = require("../utils/ApiError");
 
-const getTopCities = async ({ role = ROLE_USER }) => {
+const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
   const usersWithCities = await User.find({
     role,
+    "address.city": { $exists: true },
   });
 
   const address = new Map();
@@ -27,7 +28,11 @@ const getTopCities = async ({ role = ROLE_USER }) => {
     );
   });
 
-  return Object.fromEntries(address);
+  const sortedAddress = [...address.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit);
+
+  return Object.fromEntries(sortedAddress);
 };
 
 const getUserStats = async (
@@ -38,77 +43,80 @@ const getUserStats = async (
   const monthBackFromNow = moment().subtract(monthBack, "month").toDate();
   const weekBackFromNow = moment().subtract(weekBack, "week").toDate();
 
-  const [usersByYear, usersByMonth, usersByWeek] = (
-    await Promise.all([
-      User.aggregate([
-        {
-          $match: {
-            role,
-            createdAt: { $gte: yearBackFromNow },
-          },
+  const [usersByYear, usersByMonth, usersByWeek] = await Promise.all([
+    User.aggregate([
+      {
+        $match: {
+          role,
+          createdAt: { $gte: yearBackFromNow },
         },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt",
-              },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y",
+              date: "$createdAt",
             },
-            count: { $sum: 1 },
           },
+          count: { $sum: 1 },
         },
-      ]),
-      User.aggregate([
-        {
-          $match: {
-            role,
-            createdAt: { $gte: monthBackFromNow },
-          },
+      },
+    ]),
+    User.aggregate([
+      {
+        $match: {
+          role,
+          createdAt: { $gte: monthBackFromNow },
         },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt",
-              },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%m",
+              date: "$createdAt",
             },
-            count: { $sum: 1 },
           },
+          count: { $sum: 1 },
         },
-      ]),
-      User.aggregate([
-        {
-          $match: {
-            role,
-            createdAt: { $gte: weekBackFromNow },
-          },
+      },
+    ]),
+    User.aggregate([
+      {
+        $match: {
+          role,
+          createdAt: { $gte: weekBackFromNow },
         },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt",
-              },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%U",
+              date: "$createdAt",
             },
-            count: { $sum: 1 },
           },
+          count: { $sum: 1 },
         },
-      ]),
-    ])
-  ).map((item) => {
-    return item.reduce((acc, cur) => {
-      acc += cur.count;
-      return acc;
-    }, 0);
-  });
+      },
+    ]),
+  ]);
 
   return {
     usersByYear,
-    usersByMonth,
-    usersByWeek,
+    usersByMonth: usersByMonth.map((item) => {
+      return {
+        ...item,
+        _id: moment(item._id, "MM").format("MMM"),
+      };
+    }),
+    usersByWeek: usersByWeek.map((item) => {
+      return {
+        ...item,
+        _id: moment(item._id, "YYYY-WW").format("YYYY-MM-DD"),
+      };
+    }),
   };
 };
 
@@ -157,9 +165,9 @@ const searchUser = async (reqQuery) => {
     role: ROLE_USER,
   });
   const userStats = await getUserStats(ROLE_USER, {
-    yearBack: reqQuery.yearBack ?? 1,
-    monthBack: reqQuery.monthBack ?? 1,
-    weekBack: reqQuery.weekBack ?? 1,
+    yearBack: reqQuery.yearBack ?? 5,
+    monthBack: reqQuery.monthBack ?? 5,
+    weekBack: reqQuery.weekBack ?? 5,
   });
 
   return { data, total, topCities, userStats };
