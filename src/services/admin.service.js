@@ -415,11 +415,10 @@ const getUserByIDForAvatar = (id) => {
   return User.findById(id);
 };
 
-const getMonthlyRevenue = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
+const getMonthlyRevenue = ({
+  start = new Date(new Date().getFullYear(), 0, 1),
+  end = new Date(new Date().getFullYear(), 11, 31),
+}) => {
   return Transaction.aggregate([
     {
       $match: {
@@ -433,17 +432,16 @@ const getMonthlyRevenue = () => {
     {
       $group: {
         _id: "$status",
-        total: { $sum: "$total" },
+        total: { $sum: "$amount" },
       },
     },
   ]);
 };
 
-const getYearlyRevenue = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const end = new Date(now.getFullYear(), 11, 31);
-
+const getYearlyRevenue = ({
+  start = new Date(new Date().getFullYear(), 0, 1),
+  end = new Date(new Date().getFullYear(), 11, 31),
+}) => {
   return Transaction.aggregate([
     {
       $match: {
@@ -457,7 +455,7 @@ const getYearlyRevenue = () => {
     {
       $group: {
         _id: "$status",
-        total: { $sum: "$total" },
+        total: { $sum: "$amount" },
       },
     },
   ]);
