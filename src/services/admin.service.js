@@ -18,6 +18,8 @@ const httpStatus = require("http-status"),
     ISTRUE,
   } = require("../config/constants"),
   moment = require("moment"),
+  customLabels = require("../utils/customLabels"),
+  defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 
 const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
@@ -461,6 +463,14 @@ const getYearlyRevenue = ({
   ]);
 };
 
+const getLatestTransactions = (filter, options) => {
+  return Transaction.paginate(filter, {
+    customLabels,
+    sort: defaultSort,
+    ...options,
+  });
+};
+
 module.exports = {
   searchUser,
   userUpdate,
@@ -473,4 +483,5 @@ module.exports = {
   getUserByID,
   getMonthlyRevenue,
   getYearlyRevenue,
+  getLatestTransactions,
 };

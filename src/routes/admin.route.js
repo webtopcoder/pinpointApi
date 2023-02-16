@@ -44,4 +44,8 @@ router
   .route("/revenue/yearly")
   .get(auth(true), adminController.getYearlyRevenue);
 
+router
+  .route("/revenue/recent-transactions")
+  .get(auth(true), adminController.getLatestTransactions);
+
 module.exports = router;
