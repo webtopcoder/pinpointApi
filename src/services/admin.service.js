@@ -6,6 +6,7 @@ const httpStatus = require("http-status"),
     Shoutout,
     Location,
     Transaction,
+    Media,
   } = require("../models"),
   {
     STATUS_ACTIVE,
@@ -471,6 +472,50 @@ const getLatestTransactions = (filter, options) => {
   });
 };
 
+const getLatestActivities = async ({ limit = 5, page = 1 }) => {
+  const [posts, reviews, shoutouts, medias, users, partners] =
+    await Promise.all([
+      Post.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("from to like images"),
+      Review.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("like images user location"),
+      Shoutout.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("from to post post.like post.images"),
+      Media.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit),
+      User.find({ role: ROLE_USER })
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("profile.avatar"),
+      User.find({ role: ROLE_PARTNER })
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("profile.avatar"),
+    ]);
+
+  return {
+    posts,
+    reviews,
+    shoutouts,
+    medias,
+    users,
+    partners,
+  };
+};
+
 module.exports = {
   searchUser,
   userUpdate,
@@ -484,4 +529,5 @@ module.exports = {
   getMonthlyRevenue,
   getYearlyRevenue,
   getLatestTransactions,
+  getLatestActivities,
 };

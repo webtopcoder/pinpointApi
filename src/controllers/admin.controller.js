@@ -166,6 +166,17 @@ const getLatestTransactions = catchAsync(async (req, res) => {
   res.send(transactions);
 });
 
+const getLatestActivities = catchAsync(async (req, res) => {
+  const { limit, page } = pick(req.query, ["limit", "page"]);
+  const activities = await adminService.getLatestActivities({ limit, page });
+
+  if (!activities) {
+    throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
+  }
+
+  res.send(activities);
+});
+
 module.exports = {
   getSearchUsers,
   getSearchActivities,
@@ -179,4 +190,5 @@ module.exports = {
   getMonthlyRevenue,
   getYearlyRevenue,
   getLatestTransactions,
+  getLatestActivities,
 };
