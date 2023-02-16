@@ -27,14 +27,6 @@ router
   .route("/partners/search")
   .get(auth(true), adminController.getSearchPartners);
 
-router
-  .route("/revenue/search")
-  .get(auth(true), adminController.getSearchRevenue);
-
-router
-  .route("/revenue/categories")
-  .get(auth(true), categoryController.getCategories);
-
 router.route("/users/:id/view").get(auth(true), adminController.getUserByID);
 
 router.route("/users/:id").put(auth(true), adminController.updateUserByID);
@@ -48,5 +40,13 @@ router
 router
   .route("/activities/delete")
   .put(auth(true), adminController.deleteActivitesByID);
+
+router
+  .route("/revenue/monthly")
+  .get(auth(true), adminController.getMonthlyRevenue);
+
+router
+  .route("/revenue/yearly")
+  .get(auth(true), adminController.getYearlyRevenue);
 
 module.exports = router;

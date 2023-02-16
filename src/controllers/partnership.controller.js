@@ -77,6 +77,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
     const stripe = new Stripe(env.stripe.secretKey, {
       apiVersion: "2020-08-27",
     });
+
     const { customerId, priceId } = req.body;
 
     const subscription = await stripe.subscriptions.create({
@@ -119,6 +120,7 @@ const createTransaction = catchAsync(async (req, res) => {
     amount: req.body.amount,
     currency: req.body.currency,
     user: req.user,
+    status: "completed",
   };
 
   const plans = await stripe.prices.list({
@@ -129,14 +131,17 @@ const createTransaction = catchAsync(async (req, res) => {
   const userUpdatedPlan = plans.data.find(
     (plan) => plan.id == req.body.priceId
   );
+
   const partnerships = await partnershipService.getPartnerships();
   const updatedPartnership = partnerships.find(
     (partnership) => partnership.plan.id == userUpdatedPlan.id
   );
+
   const updateUser = {
     ...req.user,
     activePartnership: updatedPartnership,
   };
+
   await userService.updateUserById(req.user._id, updateUser);
   res.send(await transactionService.createTransaction(data));
 });

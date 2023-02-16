@@ -14,14 +14,6 @@ const getSearchUsers = catchAsync(async (req, res) => {
   res.send({ data: users });
 });
 
-const getSearchRevenue = catchAsync(async (req, res) => {
-  const Revenue = await adminService.searchRevenue(req.query);
-  if (!Revenue) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
-  }
-  res.send({ data: Revenue });
-});
-
 const getSearchLocations = catchAsync(async (req, res) => {
   const locations = await adminService.searchLocation(req.query);
   if (!locations) {
@@ -156,6 +148,22 @@ const ChangeAvatar = catchAsync(async (req, res) => {
   return res.json({ success: true, avatar: media });
 });
 
+const getMonthlyRevenue = catchAsync(async (req, res) => {
+  const revenue = await adminService.getMonthlyRevenue(req.query);
+  if (!revenue) {
+    throw new ApiError(httpStatus.NOT_FOUND, "revenue not found");
+  }
+  res.send({ data: revenue });
+});
+
+const getYearlyRevenue = catchAsync(async (req, res) => {
+  const revenue = await adminService.getYearlyRevenue(req.query);
+  if (!revenue) {
+    throw new ApiError(httpStatus.NOT_FOUND, "revenue not found");
+  }
+  res.send({ data: revenue });
+});
+
 module.exports = {
   getSearchUsers,
   getSearchActivities,
@@ -165,7 +173,8 @@ module.exports = {
   deleteActivitesByID,
   getUsersForCSV,
   getSearchPartners,
-  getSearchRevenue,
   getUserByID,
   ChangeAvatar,
+  getMonthlyRevenue,
+  getYearlyRevenue,
 };
