@@ -1,5 +1,12 @@
 const httpStatus = require("http-status"),
-  { User, Review, Post, Shoutout, Location } = require("../models"),
+  {
+    User,
+    Review,
+    Post,
+    Shoutout,
+    Location,
+    Transaction,
+  } = require("../models"),
   {
     STATUS_ACTIVE,
     STATUS_INACTIVE,
@@ -408,6 +415,54 @@ const getUserByIDForAvatar = (id) => {
   return User.findById(id);
 };
 
+const getMonthlyRevenue = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  return Transaction.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: start,
+          $lte: end,
+        },
+        status: "completed",
+      },
+    },
+    {
+      $group: {
+        _id: "$status",
+        total: { $sum: "$total" },
+      },
+    },
+  ]);
+};
+
+const getYearlyRevenue = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const end = new Date(now.getFullYear(), 11, 31);
+
+  return Transaction.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: start,
+          $lte: end,
+        },
+        status: "completed",
+      },
+    },
+    {
+      $group: {
+        _id: "$status",
+        total: { $sum: "$total" },
+      },
+    },
+  ]);
+};
+
 module.exports = {
   searchUser,
   userUpdate,
@@ -418,4 +473,6 @@ module.exports = {
   deleteActivitiesById,
   searchPartner,
   getUserByID,
+  getMonthlyRevenue,
+  getYearlyRevenue,
 };

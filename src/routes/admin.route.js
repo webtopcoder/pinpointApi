@@ -5,9 +5,7 @@ const uploadAdmin = require("../middlewares/upload");
 
 const router = express.Router();
 
-router
-  .route("/users/search")
-  .get(auth(true), adminController.getSearchUsers);
+router.route("/users/search").get(auth(true), adminController.getSearchUsers);
 
 router
   .route("/activities/search")
@@ -24,18 +22,11 @@ router
   .route("/partners/search")
   .get(auth(true), adminController.getSearchPartners);
 
-router
-  .route("/users/:id/view")
-  .get(auth(true), adminController.getUserByID);
+router.route("/users/:id/view").get(auth(true), adminController.getUserByID);
 
-router
-  .route("/users/:id")
-  .put(auth(true), adminController.updateUserByID);
+router.route("/users/:id").put(auth(true), adminController.updateUserByID);
 
-
-router
-  .route("/partners/:id/view")
-  .get(auth(true), adminController.getUserByID);
+router.route("/partners/:id/view").get(auth(true), adminController.getUserByID);
 
 router
   .route("/users/:id/avatar/upload")
@@ -44,5 +35,13 @@ router
 router
   .route("/activities/delete")
   .put(auth(true), adminController.deleteActivitesByID);
+
+router
+  .route("/revenue/monthly")
+  .get(auth(true), adminController.getMonthlyRevenue);
+
+router
+  .route("/revenue/yearly")
+  .get(auth(true), adminController.getYearlyRevenue);
 
 module.exports = router;
