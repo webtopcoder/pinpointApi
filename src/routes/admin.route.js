@@ -1,6 +1,6 @@
 const express = require("express");
 const auth = require("@middlewares/auth");
-const { adminController } = require("@controllers");
+const { adminController, categoryController } = require("@controllers");
 const uploadAdmin = require("../middlewares/upload");
 
 const router = express.Router();
@@ -26,6 +26,14 @@ router
 router
   .route("/partners/search")
   .get(auth(true), adminController.getSearchPartners);
+
+router
+  .route("/revenue/search")
+  .get(auth(true), adminController.getSearchRevenue);
+
+router
+  .route("/revenue/categories")
+  .get(auth(true), categoryController.getCategories);
 
 router.route("/users/:id/view").get(auth(true), adminController.getUserByID);
 

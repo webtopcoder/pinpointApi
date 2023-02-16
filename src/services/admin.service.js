@@ -173,6 +173,54 @@ const searchUser = async (reqQuery) => {
   return { data, total, topCities, userStats };
 };
 
+const searchRevenue = async (reqQuery) => {
+  reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
+
+  let query = {};
+
+  if (reqQuery.q) {
+    query.$or = [
+      {
+        username: { $regex: reqQuery.q, $options: "ig" },
+      },
+      {
+        email: { $regex: reqQuery.q, $options: "ig" },
+      },
+    ];
+  }
+  query.role = ROLE_USER;
+  query.status =
+    reqQuery.status === "all" || undefined || null || ""
+      ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] }
+      : reqQuery.status;
+
+  let sort = {};
+  if (reqQuery.sort && reqQuery.sortBy) {
+    sort = {
+      [reqQuery.sortBy]: reqQuery.sort,
+    };
+  }
+
+  const [data, total] = await Promise.all([
+    User.find(query)
+      .sort(sort)
+      .limit(parseInt(reqQuery.limit, 10))
+      .skip(parseInt(reqQuery.offset, 10)),
+    User.countDocuments(query),
+  ]);
+
+  const topCities = await getTopCities({
+    role: ROLE_USER,
+  });
+  const userStats = await getUserStats(ROLE_USER, {
+    yearBack: reqQuery.yearBack ?? 5,
+    monthBack: reqQuery.monthBack ?? 5,
+    weekBack: reqQuery.weekBack ?? 5,
+  });
+
+  return { data, total, topCities, userStats };
+};
+
 /**
  * get Locations
  * @param {Object} userBody
@@ -460,9 +508,20 @@ const searchPartner = async (reqQuery) => {
     User.countDocuments(query),
   ]);
 
+  const topCities = await getTopCities({
+    role: ROLE_PARTNER,
+  });
+  const userStats = await getUserStats(ROLE_PARTNER, {
+    yearBack: reqQuery.yearBack ?? 5,
+    monthBack: reqQuery.monthBack ?? 5,
+    weekBack: reqQuery.weekBack ?? 5,
+  });
+
   return {
     data,
     total,
+    topCities,
+    userStats
   };
 };
 
@@ -488,5 +547,6 @@ module.exports = {
   getActivitiesById,
   deleteActivitiesById,
   searchPartner,
+  searchRevenue,
   getUserByID,
 };

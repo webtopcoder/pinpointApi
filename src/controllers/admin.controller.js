@@ -14,6 +14,14 @@ const getSearchUsers = catchAsync(async (req, res) => {
   res.send({ data: users });
 });
 
+const getSearchRevenue = catchAsync(async (req, res) => {
+  const Revenue = await adminService.searchRevenue(req.query);
+  if (!Revenue) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
+  }
+  res.send({ data: Revenue });
+});
+
 const getSearchLocations = catchAsync(async (req, res) => {
   const locations = await adminService.searchLocation(req.query);
   if (!locations) {
@@ -110,6 +118,8 @@ const getUsersForCSV = catchAsync(async (req, res) => {
 const getUserByID = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = await adminService.getUserByID(id);
+
+  console.log(user);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
@@ -129,6 +139,7 @@ const getLocationByID = catchAsync(async (req, res) => {
 
 
 const ChangeAvatar = catchAsync(async (req, res) => {
+  console.log(req.params);
   const { id } = req.params;
   if (!req.file) {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
@@ -154,6 +165,7 @@ module.exports = {
   deleteActivitesByID,
   getUsersForCSV,
   getSearchPartners,
+  getSearchRevenue,
   getUserByID,
   ChangeAvatar,
 };
