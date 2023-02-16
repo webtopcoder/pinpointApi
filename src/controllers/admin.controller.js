@@ -5,6 +5,7 @@ const ApiError = require("@utils/ApiError");
 const { userService, adminService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 import { Parser } from "json2csv";
+import pick from "../utils/pick";
 
 const getSearchUsers = catchAsync(async (req, res) => {
   const users = await adminService.searchUser(req.query);
@@ -164,6 +165,33 @@ const getYearlyRevenue = catchAsync(async (req, res) => {
   res.send({ data: revenue });
 });
 
+const getLatestTransactions = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ["status"]);
+  const options = pick(req.query, ["limit", "page"]);
+
+  const transactions = await adminService.getLatestTransactions(
+    filter,
+    options
+  );
+
+  if (!transactions) {
+    throw new ApiError(httpStatus.NOT_FOUND, "transactions not found");
+  }
+
+  res.send(transactions);
+});
+
+const getLatestActivities = catchAsync(async (req, res) => {
+  const { limit, page } = pick(req.query, ["limit", "page"]);
+  const activities = await adminService.getLatestActivities({ limit, page });
+
+  if (!activities) {
+    throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
+  }
+
+  res.send(activities);
+});
+
 module.exports = {
   getSearchUsers,
   getSearchActivities,
@@ -177,4 +205,6 @@ module.exports = {
   ChangeAvatar,
   getMonthlyRevenue,
   getYearlyRevenue,
+  getLatestTransactions,
+  getLatestActivities,
 };

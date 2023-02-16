@@ -6,6 +6,7 @@ const httpStatus = require("http-status"),
     Shoutout,
     Location,
     Transaction,
+    Media,
   } = require("../models"),
   {
     STATUS_ACTIVE,
@@ -18,6 +19,8 @@ const httpStatus = require("http-status"),
     ISTRUE,
   } = require("../config/constants"),
   moment = require("moment"),
+  customLabels = require("../utils/customLabels"),
+  defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 
 const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
@@ -544,11 +547,10 @@ const getUserByIDForAvatar = (id) => {
   return User.findById(id);
 };
 
-const getMonthlyRevenue = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
+const getMonthlyRevenue = ({
+  start = new Date(new Date().getFullYear(), 0, 1),
+  end = new Date(new Date().getFullYear(), 11, 31),
+}) => {
   return Transaction.aggregate([
     {
       $match: {
@@ -562,17 +564,16 @@ const getMonthlyRevenue = () => {
     {
       $group: {
         _id: "$status",
-        total: { $sum: "$total" },
+        total: { $sum: "$amount" },
       },
     },
   ]);
 };
 
-const getYearlyRevenue = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const end = new Date(now.getFullYear(), 11, 31);
-
+const getYearlyRevenue = ({
+  start = new Date(new Date().getFullYear(), 0, 1),
+  end = new Date(new Date().getFullYear(), 11, 31),
+}) => {
   return Transaction.aggregate([
     {
       $match: {
@@ -586,10 +587,62 @@ const getYearlyRevenue = () => {
     {
       $group: {
         _id: "$status",
-        total: { $sum: "$total" },
+        total: { $sum: "$amount" },
       },
     },
   ]);
+};
+
+const getLatestTransactions = (filter, options) => {
+  return Transaction.paginate(filter, {
+    customLabels,
+    sort: defaultSort,
+    ...options,
+  });
+};
+
+const getLatestActivities = async ({ limit = 5, page = 1 }) => {
+  const [posts, reviews, shoutouts, medias, users, partners] =
+    await Promise.all([
+      Post.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("from to like images"),
+      Review.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("like images user location"),
+      Shoutout.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("from to post post.like post.images"),
+      Media.find({})
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit),
+      User.find({ role: ROLE_USER })
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("profile.avatar"),
+      User.find({ role: ROLE_PARTNER })
+        .sort({ createdAt: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .populate("profile.avatar"),
+    ]);
+
+  return {
+    posts,
+    reviews,
+    shoutouts,
+    medias,
+    users,
+    partners,
+  };
 };
 
 module.exports = {
@@ -606,4 +659,6 @@ module.exports = {
   getUserByID,
   getMonthlyRevenue,
   getYearlyRevenue,
+  getLatestTransactions,
+  getLatestActivities,
 };

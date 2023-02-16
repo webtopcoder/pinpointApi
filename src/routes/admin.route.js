@@ -2,6 +2,8 @@ const express = require("express");
 const auth = require("@middlewares/auth");
 const { adminController, categoryController } = require("@controllers");
 const uploadAdmin = require("../middlewares/upload");
+const validate = require("../middlewares/validate");
+const { adminValidation } = require("../validations");
 
 const router = express.Router();
 
@@ -48,5 +50,21 @@ router
 router
   .route("/revenue/yearly")
   .get(auth(true), adminController.getYearlyRevenue);
+
+router
+  .route("/revenue/recent-transactions")
+  .get(
+    auth(true),
+    validate(adminValidation.getLatestTransactions),
+    adminController.getLatestTransactions
+  );
+
+router
+  .route("/recent-activities")
+  .get(
+    auth(true),
+    validate(adminValidation.getLatestActivities),
+    adminController.getLatestActivities
+  );
 
 module.exports = router;
