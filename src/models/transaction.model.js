@@ -9,7 +9,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         required: true,
       },
       amount: {
-        type: String,
+        type: Number,
         required: true,
       },
       currency: {
