@@ -65,15 +65,15 @@ const getLocations = catchAsync(async (req, res) => {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
   }
-
+  let locationCategory;
   if (filter.category) {
-    const category = await categoryService.getCategoryByName(filter.category);
-    if (!category) {
+    locationCategory = await categoryService.getCategoryByName(filter.category);
+    if (!locationCategory) {
       throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
     }
 
     const categoryPartners = await categoryService.getPartnersByCategory(
-      category._id
+      locationCategory._id
     );
     filter.partner = { $in: categoryPartners };
 
@@ -81,10 +81,24 @@ const getLocations = catchAsync(async (req, res) => {
   }
 
   if (filter.subCategory) {
-    const subCategory = await categoryService.getSubCategoryByName(
-      filter.subCategory
+    const subCategories = await Promise.all(
+      filter.subCategory.split(",").map(async (subCategoryName) => {
+        if (locationCategory) {
+          const subCategory = await categoryService.getSubCategoryByName(
+            subCategoryName.trim(),
+            locationCategory._id
+          );
+          return subCategory._id;
+        } else {
+          const subCategory = await categoryService.getSubCategoryByName(
+            subCategoryName.trim()
+          );
+          return subCategory._id;
+        }
+      })
     );
-    filter.subCategories = { $in: [subCategory._id] };
+
+    filter.subCategories = { $in: subCategories };
     delete filter.subCategory;
   }
 
