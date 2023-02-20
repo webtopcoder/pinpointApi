@@ -60,9 +60,10 @@ const getCategoryByName = async (name) => {
   return category;
 };
 
-const getSubCategoryByName = async (name) => {
+const getSubCategoryByName = async (name, categoryId) => {
   const subCategory = await SubCategory.findOne({
     name,
+    category: categoryId ? categoryId : { $exists: true },
   });
   if (!subCategory) {
     throw new ApiError(
