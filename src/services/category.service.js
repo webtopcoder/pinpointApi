@@ -1,19 +1,33 @@
 const httpStatus = require("http-status"),
   { Category, SubCategory, User } = require("@models"),
   ApiError = require("@utils/ApiError"),
-  customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
 
 /**
  * Get Categories
  * @returns {Promise<Category[]>}
  */
-const getCategories = async () => {
-  const categories = await Category.find();
+const getCategories = async (query) => {
+  const categories = await Category.find()
+    .sort(query.sort ?? defaultSort)
+    .skip(((query.page ?? 1) - 1) * (query.limit ?? 10))
+    .limit(query.limit ?? 10);
   if (!categories) {
     throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
   }
   return categories;
+};
+
+const getSubCategories = async (query) => {
+  const subCategories = await SubCategory.find()
+    .sort(query.sort ?? defaultSort)
+    .skip(((query.page ?? 1) - 1) * (query.limit ?? 10))
+    .limit(query.limit ?? 10)
+    .populate("category");
+  if (!subCategories) {
+    throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
+  }
+  return subCategories;
 };
 
 /**
@@ -82,11 +96,76 @@ const getPartnersByCategory = async (id) => {
   return partners;
 };
 
+const getSubCategoryById = async (id) => {
+  const subCategory = await SubCategory.findById(id);
+  if (!subCategory) {
+    throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
+  }
+  return subCategory;
+};
+
+const createCategory = async (categoryBody) => {
+  const category = await Category.create(categoryBody);
+  return category;
+};
+
+const createSubCategory = async (subCategoryBody) => {
+  const subCategory = await SubCategory.create(subCategoryBody);
+  return subCategory;
+};
+
+const updateCategory = async (id, updateBody) => {
+  const category = await getCategoryById(id);
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+  Object.assign(category, updateBody);
+  await category.save();
+  return category;
+};
+
+const updateSubCategory = async (id, updateBody) => {
+  const subCategory = await getSubCategoryById(id);
+  if (!subCategory) {
+    throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
+  }
+  Object.assign(subCategory, updateBody);
+  await subCategory.save();
+  return subCategory;
+};
+
+const deleteCategory = async (id) => {
+  const category = await getCategoryById(id);
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+  await category.delete();
+  return category;
+};
+
+const deleteSubCategory = async (id) => {
+  const subCategory = await getSubCategoryById(id);
+  if (!subCategory) {
+    throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
+  }
+  await subCategory.delete();
+  return subCategory;
+};
+
+
 module.exports = {
   getCategories,
+  getSubCategories,
   getCategoryById,
+  getSubCategoryById,
   getSubCategoryByCategoryId,
   getCategoryByName,
   getSubCategoryByName,
   getPartnersByCategory,
+  createCategory,
+  createSubCategory,
+  updateCategory,
+  updateSubCategory,
+  deleteCategory,
+  deleteSubCategory,
 };
