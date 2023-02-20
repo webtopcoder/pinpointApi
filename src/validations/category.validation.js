@@ -6,3 +6,17 @@ const getSubCategories = {
     categoryId: Joi.string().required().custom(objectId),
   }),
 };
+
+const getAdminSubCategories = {
+  query: Joi.object().keys({
+    categoryId: Joi.string().custom(objectId),
+    page: Joi.number().default(1),
+    limit: Joi.number().default(10),
+    sort: Joi.string(),
+  }),
+};
+
+module.exports = {
+  getSubCategories,
+  getAdminSubCategories,
+};
