@@ -152,6 +152,7 @@ const deleteSubCategory = async (id) => {
   return subCategory;
 };
 
+
 module.exports = {
   getCategories,
   getSubCategories,
