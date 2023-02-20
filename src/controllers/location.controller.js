@@ -1,7 +1,12 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { locationService, likeService, reviewService } = require("@services");
+const {
+  locationService,
+  likeService,
+  reviewService,
+  categoryService,
+} = require("@services");
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
@@ -49,12 +54,40 @@ const deleteLocation = catchAsync(async (req, res) => {
 });
 
 const getLocations = catchAsync(async (req, res) => {
-  let filter = pick(req.query, ["isActive", "partner"]);
+  let filter = pick(req.query, [
+    "isActive",
+    "partner",
+    "category",
+    "subCategory",
+  ]);
   let options = pick(req.query, ["limit", "page", "sort", "pagination"]);
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
   }
+
+  if (filter.category) {
+    const category = await categoryService.getCategoryByName(filter.category);
+    if (!category) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+    }
+
+    const categoryPartners = await categoryService.getPartnersByCategory(
+      category._id
+    );
+    filter.partner = { $in: categoryPartners };
+
+    delete filter.category;
+  }
+
+  if (filter.subCategory) {
+    const subCategory = await categoryService.getSubCategoryByName(
+      filter.subCategory
+    );
+    filter.subCategories = { $in: [subCategory._id] };
+    delete filter.subCategory;
+  }
+
   options.populate = [
     "partner",
     "like",

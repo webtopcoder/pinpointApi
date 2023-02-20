@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { Category, SubCategory } = require("@models"),
+  { Category, SubCategory, User } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
@@ -50,8 +50,42 @@ const getSubCategoryByCategoryId = async (id) => {
   return subCategory;
 };
 
+const getCategoryByName = async (name) => {
+  const category = await Category.findOne({
+    name,
+  });
+  if (!category) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+  return category;
+};
+
+const getSubCategoryByName = async (name) => {
+  const subCategory = await SubCategory.findOne({
+    name,
+  });
+  if (!subCategory) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "SubCategory of requested category not found"
+    );
+  }
+  return subCategory;
+};
+
+const getPartnersByCategory = async (id) => {
+  const partners = await User.find({
+    category: id,
+  }).select("_id");
+
+  return partners;
+};
+
 module.exports = {
   getCategories,
   getCategoryById,
   getSubCategoryByCategoryId,
+  getCategoryByName,
+  getSubCategoryByName,
+  getPartnersByCategory,
 };
