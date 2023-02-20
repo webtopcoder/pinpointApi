@@ -7,6 +7,7 @@ const httpStatus = require("http-status"),
     Location,
     Transaction,
     Media,
+    Admin,
   } = require("../models"),
   {
     STATUS_ACTIVE,
@@ -531,20 +532,8 @@ const searchPartner = async (reqQuery) => {
     data,
     total,
     topCities,
-    userStats
+    userStats,
   };
-};
-
-const getUserByID = (id) => {
-  return User.findById(id).populate("profile.avatar");
-};
-
-const getLocationByID = (id) => {
-  return Location.findById(id).populate();
-};
-
-const getUserByIDForAvatar = (id) => {
-  return User.findById(id);
 };
 
 const getMonthlyRevenue = ({
@@ -601,62 +590,84 @@ const getLatestTransactions = (filter, options) => {
   });
 };
 
-const getLatestActivities = async ({ limit = 5, page = 1 }) => {
-  const [posts, reviews, shoutouts, medias, users, partners] =
-    await Promise.all([
-      Post.find({})
-        .sort({ createdAt: -1 })
-        .skip(limit * (page - 1))
-        .limit(limit)
-        .populate("from to like images"),
-      Review.find({})
-        .sort({ createdAt: -1 })
-        .skip(limit * (page - 1))
-        .limit(limit)
-        .populate("like images user location"),
-      Shoutout.find({})
-        .sort({ createdAt: -1 })
-        .skip(limit * (page - 1))
-        .limit(limit)
-        .populate("from to post post.like post.images"),
-      Media.find({})
-        .sort({ createdAt: -1 })
-        .skip(limit * (page - 1))
-        .limit(limit),
-      User.find({ role: ROLE_USER })
-        .sort({ createdAt: -1 })
-        .skip(limit * (page - 1))
-        .limit(limit)
-        .populate("profile.avatar"),
-      User.find({ role: ROLE_PARTNER })
-        .sort({ createdAt: -1 })
-        .skip(limit * (page - 1))
-        .limit(limit)
-        .populate("profile.avatar"),
-    ]);
+const getLatestActivities = async ({ limit = 5, page = 1, type }) => {
+  switch (type) {
+    case "user":
+      return {
+        data: await User.find({ role: ROLE_USER })
+          .sort({ createdAt: -1 })
+          .skip(limit * (page - 1))
+          .limit(limit)
+          .populate("profile.avatar"),
 
-  return {
-    posts,
-    reviews,
-    shoutouts,
-    medias,
-    users,
-    partners,
-  };
+        total: await User.countDocuments({ role: ROLE_USER }),
+      };
+    case "partner":
+      return {
+        data: await User.find({ role: ROLE_PARTNER })
+          .sort({ createdAt: -1 })
+          .skip(limit * (page - 1))
+          .limit(limit)
+          .populate("profile.avatar"),
+        total: await User.countDocuments({ role: ROLE_PARTNER }),
+      };
+    case "post":
+      return {
+        data: await Post.find({})
+          .sort({ createdAt: -1 })
+          .skip(limit * (page - 1))
+          .limit(limit)
+          .populate("from to like images"),
+        total: await Post.countDocuments({}),
+      };
+    case "review":
+      return {
+        data: await Review.find({})
+          .sort({ createdAt: -1 })
+          .skip(limit * (page - 1))
+          .limit(limit)
+          .populate("like images user location"),
+        total: await Review.countDocuments({}),
+      };
+    case "shoutout":
+      return {
+        data: await Shoutout.find({})
+          .sort({ createdAt: -1 })
+          .skip(limit * (page - 1))
+          .limit(limit)
+          .populate("from to post post.like post.images"),
+        total: await Shoutout.countDocuments({}),
+      };
+    case "media":
+      return {
+        data: await Media.find({})
+          .sort({ createdAt: -1 })
+          .skip(limit * (page - 1))
+          .limit(limit),
+        total: await Media.countDocuments({}),
+      };
+    default:
+      return {
+        data: [],
+        total: 0,
+      };
+  }
+};
+
+const getAdminById = async (id) => {
+  return Admin.findById(id);
 };
 
 module.exports = {
+  getAdminById,
   searchUser,
   userUpdate,
   searchLocation,
-  getLocationByID,
-  getUserByIDForAvatar,
   searchActivities,
   getActivitiesById,
   deleteActivitiesById,
   searchPartner,
   searchRevenue,
-  getUserByID,
   getMonthlyRevenue,
   getYearlyRevenue,
   getLatestTransactions,

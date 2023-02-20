@@ -2,8 +2,11 @@ const Joi = require("joi");
 
 const getLatestActivities = {
   query: Joi.object().keys({
-    limit: Joi.number().integer().min(1).max(50).default(5),
+    limit: Joi.number().integer().min(1).max(100).default(10),
     page: Joi.number().integer().min(1).default(1),
+    type: Joi.string()
+      .valid("post", "shoutout", "partner", "user", "media", "review")
+      .default("post"),
   }),
 };
 

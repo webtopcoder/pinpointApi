@@ -1,70 +1,68 @@
 const express = require("express");
 const auth = require("@middlewares/auth");
-const { adminController, categoryController } = require("@controllers");
+const { adminController } = require("@controllers");
 const uploadAdmin = require("../middlewares/upload");
 const validate = require("../middlewares/validate");
 const { adminValidation } = require("../validations");
 
 const router = express.Router();
 
-router.route("/users/search").get(auth(true), adminController.getSearchUsers);
-
 router
-  .route("/activities/search")
-  .get(auth(true), adminController.getSearchActivities);
+  .route("/users/search")
+  .get(auth(false, true), adminController.getSearchUsers);
 
 router
   .route("/locations/search")
-  .get(auth(true), adminController.getSearchLocations);
+  .get(auth(false, true), adminController.getSearchLocations);
 
 router
   .route("/locations/:id/view")
-  .get(auth(true), adminController.getLocationByID);
+  .get(auth(false, true), adminController.getLocationByID);
 
 router
   .route("/partners/export/csv")
-  .get(auth(true), adminController.getUsersForCSV);
+  .get(auth(false, true), adminController.getUsersForCSV);
 
 router
   .route("/partners/search")
-  .get(auth(true), adminController.getSearchPartners);
+  .get(auth(false, true), adminController.getSearchPartners);
 
-router.route("/users/:id/view").get(auth(true), adminController.getUserByID);
+router
+  .route("/users/:id/view")
+  .get(auth(false, true), adminController.getUserByID);
 
-router.route("/users/:id").put(auth(true), adminController.updateUserByID);
+router
+  .route("/users/:id")
+  .put(auth(false, true), adminController.updateUserByID);
 
-router.route("/partners/:id/view").get(auth(true), adminController.getUserByID);
+router
+  .route("/partners/:id/view")
+  .get(auth(false, true), adminController.getUserByID);
 
 router
   .route("/users/:id/avatar/upload")
-  .post(auth(true), uploadAdmin.single("avatar"), adminController.ChangeAvatar);
-
-router
-  .route("/activities/delete")
-  .put(auth(true), adminController.deleteActivitesByID);
+  .post(
+    auth(false, true),
+    uploadAdmin.single("avatar"),
+    adminController.ChangeAvatar
+  );
 
 router
   .route("/revenue/monthly")
-  .get(auth(true), adminController.getMonthlyRevenue);
+  .get(auth(false, true), adminController.getMonthlyRevenue);
 
 router
   .route("/revenue/yearly")
-  .get(auth(true), adminController.getYearlyRevenue);
+  .get(auth(false, true), adminController.getYearlyRevenue);
 
 router
   .route("/revenue/recent-transactions")
   .get(
-    auth(true),
+    auth(false, true),
     validate(adminValidation.getLatestTransactions),
     adminController.getLatestTransactions
   );
 
-router
-  .route("/recent-activities")
-  .get(
-    auth(true),
-    validate(adminValidation.getLatestActivities),
-    adminController.getLatestActivities
-  );
+router.use("/activities", require("./admin/activity.route"));
 
 module.exports = router;

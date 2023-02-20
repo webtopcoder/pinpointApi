@@ -119,9 +119,7 @@ const getUserByID = catchAsync(async (req, res) => {
   res.send({ data: user });
 });
 
-
 const getLocationByID = catchAsync(async (req, res) => {
-
   const { id } = req.params;
   const location = await adminService.getLocationByID(id);
   if (!location) {
@@ -129,7 +127,6 @@ const getLocationByID = catchAsync(async (req, res) => {
   }
   res.send({ data: location });
 });
-
 
 const ChangeAvatar = catchAsync(async (req, res) => {
   console.log(req.params);
@@ -182,8 +179,12 @@ const getLatestTransactions = catchAsync(async (req, res) => {
 });
 
 const getLatestActivities = catchAsync(async (req, res) => {
-  const { limit, page } = pick(req.query, ["limit", "page"]);
-  const activities = await adminService.getLatestActivities({ limit, page });
+  const { limit, page, type } = pick(req.query, ["limit", "page", "type"]);
+  const activities = await adminService.getLatestActivities({
+    limit,
+    page,
+    type,
+  });
 
   if (!activities) {
     throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
