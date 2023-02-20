@@ -47,6 +47,6 @@ router.post(
 );
 
 router.get("/me", auth(), authController.getUser);
-router.get("/admin/me", authController.getAdmin);
+router.get("/admin/me", auth(false, true), authController.getAdmin);
 
 module.exports = router;

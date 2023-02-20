@@ -4,8 +4,6 @@ const { statisticController } = require("@controllers");
 
 const router = express.Router();
 
-router
-  .route("/admin")
-  .get(auth(true), statisticController.getStats);
+router.route("/admin").get(auth(false, true), statisticController.getStats);
 
 module.exports = router;

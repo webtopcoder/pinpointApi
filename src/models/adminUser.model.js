@@ -35,6 +35,10 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         },
         private: true, // used by the toJSON plugin
       },
+      role: {
+        type: String,
+        default: "admin",
+      },
     },
     {
       timestamps: true,

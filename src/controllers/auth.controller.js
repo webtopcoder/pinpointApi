@@ -30,7 +30,7 @@ const login = catchAsync(async (req, res, next) => {
   });
 });
 
-const adminLogin = catchAsync(async (req, res, next) => {
+const adminLogin = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   let admin = await authService.loginAdminWithEmailAndPassword(email, password);
   if (!admin || !(Object.keys(admin).length > 0)) {
@@ -46,12 +46,7 @@ const adminLogin = catchAsync(async (req, res, next) => {
 });
 
 const getAdmin = catchAsync(async (req, res) => {
-  const jwtToken = req.headers.authorization;
-  const user = await authService.getSourceFromJWT(jwtToken);
-
-  res.send({
-    data: user,
-  });
+  res.send({ data: req.user });
 });
 
 const logout = catchAsync(async (req, res) => {
