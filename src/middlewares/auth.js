@@ -25,7 +25,7 @@ const verifyCallback = (req, resolve, reject) => async (err, user, info) => {
 };
 
 const auth =
-  (allowAnonymous = false) =>
+  (allowAnonymous = false, isAdmin = false) =>
   async (req, res, next) => {
     const passportMiddleware = allowAnonymous ? ["jwt", "anonymous"] : ["jwt"];
     return new Promise((resolve, reject) => {
@@ -36,6 +36,10 @@ const auth =
       )(req, res, next);
     })
       .then((user) => {
+        if (isAdmin && user.role !== "admin") {
+          throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");
+        }
+
         ns.run(() => {
           ns.set("user", user);
           next();

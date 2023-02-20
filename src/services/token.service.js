@@ -14,12 +14,19 @@ const { tokenTypes } = require("@configs/tokens");
  * @param {string} [secret]
  * @returns {string}
  */
-const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
+const generateToken = ({
+  userId,
+  expires,
+  type,
+  secret = config.jwt.secret,
+  extra = {},
+}) => {
   const payload = {
     sub: userId,
     iat: moment().unix(),
     exp: expires.unix(),
     type,
+    ...extra,
   };
   return jwt.sign(payload, secret);
 };
@@ -107,21 +114,29 @@ const generateAuthTokens = async (user) => {
     config.jwt.accessExpirationMinutes,
     "minutes"
   );
-  const accessToken = generateToken(
-    user.id,
-    accessTokenExpires,
-    tokenTypes.ACCESS
-  );
+  const accessToken = generateToken({
+    userId: user.id,
+    expires: accessTokenExpires,
+    type: tokenTypes.ACCESS,
+    extra: {
+      role: user.role,
+    },
+  });
 
   const refreshTokenExpires = moment().add(
     config.jwt.refreshExpirationDays,
     "days"
   );
-  const refreshToken = generateToken(
-    user.id,
-    refreshTokenExpires,
-    tokenTypes.REFRESH
-  );
+
+  const refreshToken = generateToken({
+    userId: user.id,
+    expires: refreshTokenExpires,
+    type: tokenTypes.REFRESH,
+    extra: {
+      role: user.role,
+    },
+  });
+
   await saveToken(
     refreshToken,
     user.id,
@@ -149,7 +164,7 @@ const generateAuthTokens = async (user) => {
 const generateResetPasswordToken = async (user) => {
   const expires = moment().add(config.otp.expirationTime, "minutes");
   const tokenType = tokenTypes.RESET_PASSWORD;
-  const token = generateToken(user.id, expires, tokenType);
+  const token = generateToken({ userId: user.id, expires, type: tokenType });
   return token;
 };
 
