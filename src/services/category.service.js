@@ -1,8 +1,7 @@
 const httpStatus = require("http-status"),
-      {Category, SubCategory} = require("@models"),
-      ApiError = require("@utils/ApiError"),
-      customLabels = require("@utils/customLabels"),
-      defaultSort = require("@utils/defaultSort");
+  { Category, SubCategory, User } = require("@models"),
+  ApiError = require("@utils/ApiError"),
+  defaultSort = require("@utils/defaultSort");
 
 /**
  * Get Categories
@@ -54,11 +53,13 @@ const getCategoryById = async (id) => {
  */
 const getSubCategoryByCategoryId = async (id) => {
   const subCategory = await SubCategory.find({
-    category : id,
+    category: id,
   });
   if (!subCategory) {
-    throw new ApiError(httpStatus.NOT_FOUND,
-                       "SubCategory of requested category not found");
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "SubCategory of requested category not found"
+    );
   }
   return subCategory;
 };
@@ -76,64 +77,31 @@ const getCategoryByName = async (name) => {
 const getSubCategoryByName = async (name, categoryId) => {
   const subCategory = await SubCategory.findOne({
     name,
-    category : categoryId ? categoryId : {$exists : true},
+    category: categoryId ? categoryId : { $exists: true },
   });
   if (!subCategory) {
-    throw new ApiError(httpStatus.NOT_FOUND,
-                       "SubCategory of requested category not found");
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "SubCategory of requested category not found"
+    );
   }
   return subCategory;
 };
 
 const getPartnersByCategory = async (id) => {
-  const partners = await User
-                       .find({
-                         category : id,
-                       })
-                       .select("_id");
+  const partners = await User.find({
+    category: id,
+  }).select("_id");
 
   return partners;
 };
 
-=======
 const getSubCategoryById = async (id) => {
   const subCategory = await SubCategory.findById(id);
   if (!subCategory) {
     throw new ApiError(httpStatus.NOT_FOUND, "SubCategory not found");
   }
   return subCategory;
-};
-
-const getCategoryByName = async (name) => {
-  const category = await Category.findOne({
-    name,
-  });
-  if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-  }
-  return category;
-};
-
-const getSubCategoryByName = async (name, categoryId) => {
-  const subCategory = await SubCategory.findOne({
-    name,
-    category : categoryId ? categoryId : {$exists : true},
-  });
-  if (!subCategory) {
-    throw new ApiError(httpStatus.NOT_FOUND,
-                       "SubCategory of requested category not found");
-  }
-  return subCategory;
-};
-
-const getPartnersByCategory = async (id) => {
-  const partners = await User
-                       .find({
-                         category : id,
-                       })
-                       .select("_id");
-
-  return partners;
 };
 
 const createCategory = async (categoryBody) => {
