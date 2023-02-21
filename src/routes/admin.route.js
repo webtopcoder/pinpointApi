@@ -48,20 +48,20 @@ router
   );
 
 router
-  .route("/revenue/monthly")
-  .get(auth(false, true), adminController.getMonthlyRevenue);
-
-router
-  .route("/revenue/yearly")
-  .get(auth(false, true), adminController.getYearlyRevenue);
-
-router
-  .route("/revenue/recent-transactions")
+  .route("/transactions")
   .get(
     auth(false, true),
     validate(adminValidation.getLatestTransactions),
     adminController.getLatestTransactions
   );
+
+router
+  .route("/transactions/monthly-revenue")
+  .get(auth(false, true), adminController.getMonthlyRevenue);
+
+router
+  .route("/transactions/yearly-revenue")
+  .get(auth(false, true), adminController.getYearlyRevenue);
 
 router.use("/activities", require("./admin/activity.route"));
 router.use("/categories", require("./admin/category.route"));

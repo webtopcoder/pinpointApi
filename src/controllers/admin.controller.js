@@ -164,7 +164,15 @@ const getYearlyRevenue = catchAsync(async (req, res) => {
 
 const getLatestTransactions = catchAsync(async (req, res) => {
   const filter = pick(req.query, ["status"]);
-  const options = pick(req.query, ["limit", "page"]);
+  const options = pick(req.query, ["limit", "page", "sort"]);
+
+  if (options.sort) {
+    options.sort = Object.fromEntries(
+      options.sort.split(",").map((field) => field.split(":"))
+    );
+  }
+
+  options.populate = ["user"];
 
   const transactions = await adminService.getLatestTransactions(
     filter,
