@@ -1,6 +1,5 @@
 const socketIo = require("socket.io");
 const _ = require("lodash");
-const uuid = require("node-uuid");
 const { User } = require("../models");
 const UserList = [];
 let socketHandle = null;
@@ -63,7 +62,7 @@ module.exports = {
   Socket: (app) => {
     const io = socketIo(app, {
       cors: {
-        origin: "http://localhost:3000",
+        origin: "*",
       },
     });
     // Add this before the app.get() block
