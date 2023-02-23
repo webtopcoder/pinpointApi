@@ -20,7 +20,7 @@ const login = catchAsync(async (req, res, next) => {
   if (!user || !(Object.keys(user).length > 0) || user.role !== role) {
     return res
       .status(httpStatus.BAD_REQUEST)
-      .json({ code: 400, message: "Unable to login." });
+      .json({ code: 400, message: "No User existing." });
   }
   user = user.toJSON();
   const tokens = await tokenService.generateAuthTokens(user);

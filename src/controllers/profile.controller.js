@@ -74,7 +74,7 @@ const getPollForProfile = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User has no poll");
   }
 
-  res.send(user.profile.poll);
+  res.send(user?.profile?.poll);
 });
 
 const getProfile = catchAsync(async (req, res) => {
@@ -99,12 +99,12 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
 
   return res.json({
     profile: {
-      avatar: user.profile.avatar,
+      avatar: user?.profile?.avatar,
       favorites: 0,
       followers: followerCount,
-      username: user.username,
-      fullname: user.name,
-      usertype: user.role,
+      username: user?.username,
+      fullname: user?.name,
+      usertype: user?.role,
       is_follow: is_followed,
     },
   });
@@ -205,7 +205,7 @@ const createPost = catchAsync(async (req, res) => {
         }
         console.log(111)
         const to_user = await userService.getUserByUsername(mention);
-        
+
         if (to_user) {
           const shoutout_data = {
             from: req.user._id,
@@ -227,7 +227,7 @@ const addProfilePicture = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
   }
   const media = await uploadMedia(req.file, req.user._id, true);
-  
+
   await userService.updateUserById(req.user._id, {
     profile: { ...req.user.profile, avatar: media._id },
   });
@@ -280,7 +280,7 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
   }).populate("reviews");
 
   const businessRating = (
-    locations.reduce((acc, location) => {
+    locations?.reduce((acc, location) => {
       return acc + (location.rating ?? 0);
     }, 0) / locations.length
   ).toFixed(2);
