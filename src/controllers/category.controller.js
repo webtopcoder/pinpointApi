@@ -4,6 +4,11 @@ const { Category, SubCategory } = require("@models");
 const { categoryService } = require("@services");
 
 const getCategories = catchAsync(async (req, res) => {
+  if (req.query.sort) {
+    req.query.sort = Object.fromEntries(
+      req.query.sort.split(",").map((field) => field.split(":"))
+    );
+  }
   const categories = await categoryService.getCategories(req.query);
   res.status(httpStatus.OK).send({
     success: true,
@@ -13,6 +18,11 @@ const getCategories = catchAsync(async (req, res) => {
 });
 
 const getSubCategories = catchAsync(async (req, res) => {
+  if (req.query.sort) {
+    req.query.sort = Object.fromEntries(
+      req.query.sort.split(",").map((field) => field.split(":"))
+    );
+  }
   const subCategories = await categoryService.getSubCategories(req.query);
   res.status(httpStatus.OK).send({
     success: true,
