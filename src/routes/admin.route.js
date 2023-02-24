@@ -1,6 +1,6 @@
 const express = require("express");
 const auth = require("@middlewares/auth");
-const { adminController } = require("@controllers");
+const { adminController, locationController } = require("@controllers");
 const uploadAdmin = require("../middlewares/upload");
 const validate = require("../middlewares/validate");
 const { adminValidation } = require("../validations");
@@ -13,7 +13,7 @@ router
 
 router
   .route("/locations/search")
-  .get(auth(false, true), adminController.getSearchLocations);
+  .get(auth(false, true), locationController.getLocations);
 
 router
   .route("/locations/:id/view")

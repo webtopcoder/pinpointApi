@@ -17,6 +17,34 @@ const getCategories = catchAsync(async (req, res) => {
   });
 });
 
+const getSubCategoriesGroupedByCategories = catchAsync(async (req, res) => {
+  const subCategories = await Category.aggregate([
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "_id",
+        foreignField: "category",
+        as: "subCategories",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        subCategories: {
+          _id: 1,
+          name: 1,
+        },
+      },
+    },
+  ]);
+
+  res.status(httpStatus.OK).send({
+    success: true,
+    subCategories,
+  });
+});
+
 const getSubCategories = catchAsync(async (req, res) => {
   if (req.query.sort) {
     req.query.sort = Object.fromEntries(
@@ -97,4 +125,5 @@ module.exports = {
   updateSubCategory,
   deleteCategory,
   deleteSubCategory,
+  getSubCategoriesGroupedByCategories,
 };

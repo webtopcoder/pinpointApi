@@ -9,6 +9,11 @@ const router = express.Router();
 router.get("/", categoryController.getCategories);
 
 router.get(
+  "/sub-categories",
+  categoryController.getSubCategoriesGroupedByCategories
+);
+
+router.get(
   "/:categoryId/subcategories",
   validate(categoryValidation.getSubCategories),
   categoryController.getSubCategoryByCategoryId

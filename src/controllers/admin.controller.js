@@ -15,16 +15,6 @@ const getSearchUsers = catchAsync(async (req, res) => {
   res.send({ data: users });
 });
 
-const getSearchLocations = catchAsync(async (req, res) => {
-  const locations = await adminService.searchLocation(req.query);
-  if (!locations) {
-    throw new ApiError(httpStatus.NOT_FOUND, "locations not found");
-  }
-
-  console.log(locations);
-  res.send({ data: locations });
-});
-
 const updateUserByID = catchAsync(async (req, res) => {
   const { id } = req.params;
 
@@ -204,7 +194,6 @@ const getLatestActivities = catchAsync(async (req, res) => {
 module.exports = {
   getSearchUsers,
   getSearchActivities,
-  getSearchLocations,
   getLocationByID,
   updateUserByID,
   deleteActivitesByID,
