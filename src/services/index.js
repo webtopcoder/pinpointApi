@@ -19,3 +19,4 @@ module.exports.postService = require("./post.service");
 module.exports.statisticService = require("./statistic.service");
 module.exports.likeService = require("./like.service");
 module.exports.adminService = require("./admin.service");
+module.exports.faqService = require("./faq.service");
