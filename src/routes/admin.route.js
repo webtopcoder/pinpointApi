@@ -65,5 +65,6 @@ router
 
 router.use("/activities", require("./admin/activity.route"));
 router.use("/categories", require("./admin/category.route"));
+router.use("/faqs", require("./admin/faq.route"));
 
 module.exports = router;

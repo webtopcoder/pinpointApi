@@ -8,6 +8,10 @@ const defaultRoutes = [
     route: require("./auth.route"),
   },
   {
+    path: "/base",
+    route: require("./base.route"),
+  },
+  {
     path: "/categories",
     route: require("./category.route"),
   },
