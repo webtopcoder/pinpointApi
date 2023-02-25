@@ -9,6 +9,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         ref: "Category",
       },
       name: { type: String, required: true },
+      image: {
+        type: Types.ObjectId,
+        ref: "Media",
+      },
     },
     {
       timestamps: true,

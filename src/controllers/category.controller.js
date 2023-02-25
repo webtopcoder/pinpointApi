@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { Category, SubCategory } = require("@models");
 const { categoryService } = require("@services");
+const { mediaService } = require("../services");
 
 const getCategories = catchAsync(async (req, res) => {
   if (req.query.sort) {
@@ -80,23 +81,39 @@ const getCategoryById = catchAsync(async (req, res) => {
 });
 
 const createCategory = catchAsync(async (req, res) => {
+  if (req.file) {
+    const media = await mediaService.uploadMedia(req.file, req.user._id, true);
+    req.body.image = media._id;
+  }
   const category = await categoryService.createCategory(req.body);
   res.status(httpStatus.CREATED).send({ success: true, category });
 });
 
 const createSubCategory = catchAsync(async (req, res) => {
+  if (req.file) {
+    const media = await mediaService.uploadMedia(req.file, req.user._id, true);
+    req.body.image = media._id;
+  }
   const subCategory = await categoryService.createSubCategory(req.body);
   res.status(httpStatus.CREATED).send({ success: true, subCategory });
 });
 
 const updateCategory = catchAsync(async (req, res) => {
   const { categoryId } = req.params;
+  if (req.file) {
+    const media = await mediaService.uploadMedia(req.file, req.user._id, true);
+    req.body.image = media._id;
+  }
   const category = await categoryService.updateCategory(categoryId, req.body);
   res.status(httpStatus.OK).send({ success: true, category });
 });
 
 const updateSubCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
+  if (req.file) {
+    const media = await mediaService.uploadMedia(req.file, req.user._id, true);
+    req.body.image = media._id;
+  }
   const subCategory = await categoryService.updateSubCategory(id, req.body);
   res.status(httpStatus.OK).send({ success: true, subCategory });
 });

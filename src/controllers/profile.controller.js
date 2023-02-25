@@ -196,14 +196,10 @@ const createPost = catchAsync(async (req, res) => {
           )
         );
 
-        console.log(followAndFollowingList, mention);
-
-
         if (!followAndFollowingList.includes(mention)) {
-
           return;
         }
-        console.log(111)
+        console.log(111);
         const to_user = await userService.getUserByUsername(mention);
 
         if (to_user) {
