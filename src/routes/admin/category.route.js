@@ -1,6 +1,7 @@
 const express = require("express");
 const validate = require("@middlewares/validate");
 const auth = require("@middlewares/auth");
+const upload = require("@middlewares/upload");
 const { categoryValidation } = require("@validations");
 const { categoryController } = require("@controllers");
 
@@ -11,6 +12,7 @@ router
   .get(auth(false, true), categoryController.getCategories)
   .post(
     auth(false, true),
+    upload.single("image"),
     validate(categoryValidation.createCategory),
     categoryController.createCategory
   );
@@ -24,6 +26,7 @@ router
   )
   .post(
     auth(false, true),
+    upload.single("image"),
     validate(categoryValidation.createSubCategory),
     categoryController.createSubCategory
   );
@@ -33,6 +36,7 @@ router
   .get(auth(false, true), categoryController.getSubCategoryById)
   .patch(
     auth(false, true),
+    upload.single("image"),
     validate(categoryValidation.updateSubCategory),
     categoryController.updateSubCategory
   )
@@ -47,6 +51,7 @@ router
   .get(auth(false, true), categoryController.getCategoryById)
   .patch(
     auth(false, true),
+    upload.single("image"),
     validate(categoryValidation.updateCategory),
     categoryController.updateCategory
   )

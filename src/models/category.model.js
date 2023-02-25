@@ -1,10 +1,14 @@
-const { toJSON, diffHistory } = require("./plugins");
+const { toJSON } = require("./plugins");
 const softDelete = require("mongoose-delete");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Category = new Schema(
     {
       name: { type: String, required: true },
+      image: {
+        type: Types.ObjectId,
+        ref: "Media",
+      },
     },
     {
       timestamps: true,
