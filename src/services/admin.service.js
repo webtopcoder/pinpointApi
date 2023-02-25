@@ -49,7 +49,7 @@ const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
 
 const getUserStats = async (
   role = ROLE_USER,
-  { yearBack = 1, monthBack = 1, weekBack = 1 }
+  { yearBack = 1, monthBack = 1, weekBack = 1, address = "" }
 ) => {
   const yearBackFromNow = moment().subtract(yearBack, "year").toDate();
   const monthBackFromNow = moment().subtract(monthBack, "month").toDate();
@@ -61,6 +61,14 @@ const getUserStats = async (
         $match: {
           role,
           createdAt: { $gte: yearBackFromNow },
+          $or: [
+            {
+              "address.city": { $regex: address, $options: "i" },
+            },
+            {
+              "address.state": { $regex: address, $options: "i" },
+            },
+          ],
         },
       },
       {
@@ -80,6 +88,14 @@ const getUserStats = async (
         $match: {
           role,
           createdAt: { $gte: monthBackFromNow },
+          $or: [
+            {
+              "address.city": { $regex: address, $options: "i" },
+            },
+            {
+              "address.state": { $regex: address, $options: "i" },
+            },
+          ],
         },
       },
       {
@@ -99,6 +115,14 @@ const getUserStats = async (
         $match: {
           role,
           createdAt: { $gte: weekBackFromNow },
+          $or: [
+            {
+              "address.city": { $regex: address, $options: "i" },
+            },
+            {
+              "address.state": { $regex: address, $options: "i" },
+            },
+          ],
         },
       },
       {
@@ -152,6 +176,7 @@ const searchUser = async (reqQuery) => {
       },
     ];
   }
+
   query.role = ROLE_USER;
   query.status =
     reqQuery.status === "all" || undefined || null || ""
@@ -176,10 +201,12 @@ const searchUser = async (reqQuery) => {
   const topCities = await getTopCities({
     role: ROLE_USER,
   });
+
   const userStats = await getUserStats(ROLE_USER, {
     yearBack: reqQuery.yearBack ?? 5,
     monthBack: reqQuery.monthBack ?? 5,
     weekBack: reqQuery.weekBack ?? 5,
+    address: reqQuery.address,
   });
 
   return { data, total, topCities, userStats };
@@ -527,6 +554,7 @@ const searchPartner = async (reqQuery) => {
     yearBack: reqQuery.yearBack ?? 5,
     monthBack: reqQuery.monthBack ?? 5,
     weekBack: reqQuery.weekBack ?? 5,
+    address: reqQuery.address ?? "",
   });
 
   return {
