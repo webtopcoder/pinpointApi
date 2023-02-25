@@ -23,6 +23,7 @@ const httpStatus = require("http-status"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
+const userService = require("./user.service");
 
 const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
   const usersWithCities = await User.find({
@@ -659,6 +660,15 @@ const getAdminById = async (id) => {
   return Admin.findById(id);
 };
 
+const deleteUserByID = async (id) => {
+  const user = await userService.getUserById(id);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  await user.delete();
+  return user;
+};
+
 module.exports = {
   getAdminById,
   searchUser,
@@ -673,4 +683,5 @@ module.exports = {
   getYearlyRevenue,
   getLatestTransactions,
   getLatestActivities,
+  deleteUserByID,
 };

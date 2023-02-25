@@ -33,7 +33,8 @@ router
 
 router
   .route("/users/:id")
-  .put(auth(false, true), adminController.updateUserByID);
+  .put(auth(false, true), adminController.updateUserByID)
+  .delete(auth(false, true), adminController.deleteUserByID);
 
 router
   .route("/partners/:id/view")

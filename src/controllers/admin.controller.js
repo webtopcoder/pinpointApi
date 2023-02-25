@@ -191,6 +191,13 @@ const getLatestActivities = catchAsync(async (req, res) => {
   res.send(activities);
 });
 
+const deleteUserByID = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  await adminService.deleteUserByID(id);
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 module.exports = {
   getSearchUsers,
   getSearchActivities,
@@ -205,4 +212,5 @@ module.exports = {
   getYearlyRevenue,
   getLatestTransactions,
   getLatestActivities,
+  deleteUserByID,
 };
