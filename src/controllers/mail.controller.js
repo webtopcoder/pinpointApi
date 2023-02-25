@@ -5,6 +5,8 @@ const { mailService, userService } = require("@services");
 const pick = require("../utils/pick");
 const { uploadMedia } = require("../services/media.service");
 const followService = require("../services/follow.service");
+const path = require("path");
+const { EventEmitter, events } = require("../events");
 
 const compose = catchAsync(async (req, res) => {
   const { to, subject, message, isNotice } = req.body;
@@ -404,6 +406,31 @@ const bulkActions = catchAsync(async (req, res) => {
   return res.json({ success: true, message: "Action performed successfully!" });
 });
 
+const sendMessageByAdmin = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const { subject, message } = req.body;
+  const attachments = req.files.map((attachment) => ({
+    filename: attachment.originalname,
+    path: path.resolve(__dirname, "../../", attachment.path),
+  }));
+  const to = user.email;
+
+  EventEmitter.emit(events.ADMIN_SEND_MAIL, {
+    to,
+    subject,
+    message,
+    attachments,
+  });
+
+  return res
+    .status(httpStatus.CREATED)
+    .json({ success: true, msg: "Message sent successfully!" });
+});
+
 module.exports = {
   compose,
   getInbox,
@@ -417,4 +444,5 @@ module.exports = {
   getPendingInvites,
   updateMail,
   bulkActions,
+  sendMessageByAdmin,
 };

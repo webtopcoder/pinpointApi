@@ -100,9 +100,8 @@ const getUsersForCSV = catchAsync(async (req, res) => {
 
 const getUserByID = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const user = await adminService.getUserByID(id);
+  const user = await userService.getUserById(id);
 
-  console.log(user);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }

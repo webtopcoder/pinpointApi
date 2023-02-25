@@ -35,9 +35,20 @@ const bulkActions = {
   }),
 };
 
+const sendMessageByAdmin = {
+  params: Joi.object().keys({
+    userId: Joi.string().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    subject: Joi.string().required(),
+    message: Joi.string().required(),
+  }),
+};
+
 module.exports = {
   createMail,
   invite,
   updateMail,
   bulkActions,
+  sendMessageByAdmin,
 };

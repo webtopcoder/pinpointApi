@@ -20,16 +20,24 @@ if (config.env !== "test") {
  * Send an email
  * @param {string} to
  * @param {string} subject
- * @param {string} text
+ * @param {string} html
+ * @param {any} attachments
  * @returns {Promise}
  */
-const sendEmail = async (to, subject, html) => {
-  const msg = { from: config.email.from, to, subject, html };
+const sendEmail = async (to, subject, html, attachments) => {
+  const msg = { from: config.email.from, to, subject, html, attachments };
   try {
     await transport.sendMail(msg);
   } catch (err) {
     logger.error(err);
   }
+};
+
+/**
+ * Send mail from Admin
+ */
+const sendMailFromAdmin = async ({ to, subject, message, attachments }) => {
+  await sendEmail(to, subject, message, attachments);
 };
 
 /**
@@ -83,4 +91,5 @@ module.exports = {
   sendResetPasswordEmail,
   sendVerificationEmail,
   sendInviteEmail,
+  sendMailFromAdmin,
 };

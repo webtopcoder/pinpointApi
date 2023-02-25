@@ -7,6 +7,7 @@ const userEvents = {
   USER_ONLINE: "user.online",
   SEND_INVITE: "user.sendInvite",
   SEND_NOTIFICATION: "user.sendNotification",
+  ADMIN_SEND_MAIL: "admin.sendMail",
 };
 
 const authEvents = {
@@ -38,6 +39,8 @@ Object.keys(events).forEach((event) => {
         case events.SEND_NOTIFICATION:
           await notificationService.sendNotification(data);
           break;
+        case events.ADMIN_SEND_MAIL:
+          await emailService.sendMailFromAdmin(data);
         default:
           logger.error("Event not found");
       }
