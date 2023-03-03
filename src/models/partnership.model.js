@@ -84,9 +84,12 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
 
       const oldPrice = partnership.stripePriceId;
       partnership.stripePriceId = price.id;
-      await stripeService.updatePrice(oldPrice, {
-        active: false,
-      });
+
+      if (oldPrice) {
+        await stripeService.updatePrice(oldPrice, {
+          active: false,
+        });
+      }
     }
   });
 
