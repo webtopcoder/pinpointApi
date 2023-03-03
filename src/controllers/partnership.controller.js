@@ -10,6 +10,26 @@ const pick = require("../utils/pick");
 const env = require("../config/config");
 
 const Stripe = require("stripe");
+const { Partnership } = require("../models");
+
+const createPartnership = catchAsync(async (req, res) => {
+  const partnership = await partnershipService.createPartnership(req.body);
+  res.status(httpStatus.CREATED).send(partnership);
+});
+
+const updatePartnership = catchAsync(async (req, res) => {
+  const partnership = await partnershipService.updatePartnershipById(
+    req.params.partnershipId,
+    req.body
+  );
+  res.send(partnership);
+});
+
+const deletePartnership = catchAsync(async (req, res) => {
+  await partnershipService.deletePartnershipById(req.params.partnershipId);
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
 
 const getPartnerships = catchAsync(async (req, res) => {
   let filter = pick(req.query, ["q"]);
@@ -90,12 +110,12 @@ const subscribePartnership = catchAsync(async (req, res) => {
       },
       expand: ["latest_invoice.payment_intent"],
     });
-    console.log(subscription);
 
     const updateBody = {
       ...req.user,
       activeSubscription: subscription,
     };
+
     await userService.updateUserById(req.user._id, updateBody);
     res.status(200).json({
       code: "subscription_created",
@@ -112,9 +132,6 @@ const subscribePartnership = catchAsync(async (req, res) => {
 });
 
 const createTransaction = catchAsync(async (req, res) => {
-  const stripe = new Stripe(env.stripe.secretKey, {
-    apiVersion: "2020-08-27",
-  });
   const data = {
     order: req.body.order,
     amount: req.body.amount,
@@ -123,19 +140,9 @@ const createTransaction = catchAsync(async (req, res) => {
     status: "completed",
   };
 
-  const plans = await stripe.prices.list({
-    lookup_keys: [req.body.lookup_key],
-    expand: ["data.product"],
+  const updatedPartnership = await Partnership.findOne({
+    stripePriceId: req.body.priceId,
   });
-  console.log(plans);
-  const userUpdatedPlan = plans.data.find(
-    (plan) => plan.id == req.body.priceId
-  );
-
-  const partnerships = await partnershipService.getPartnerships();
-  const updatedPartnership = partnerships.find(
-    (partnership) => partnership.plan.id == userUpdatedPlan.id
-  );
 
   const updateUser = {
     ...req.user,
@@ -186,6 +193,9 @@ const cancelSubscription = async (req, res) => {
 };
 
 module.exports = {
+  createPartnership,
+  updatePartnership,
+  deletePartnership,
   createCustomer,
   getPartnerships,
   getPartnershipById,

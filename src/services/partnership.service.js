@@ -5,7 +5,8 @@ const httpStatus = require("http-status"),
   ApiError = require("../utils/ApiError");
 
 const createPartnership = async (partnershipBody) => {
-  const partnership = await Partnership.create(partnershipBody);
+  const partnership = new Partnership(partnershipBody);
+  await partnership.save();
   return partnership;
 };
 
@@ -17,22 +18,28 @@ const queryPartnerships = async (filter, options) => {
   });
   return partnerships;
 };
+
 const getPartnerships = async () => Partnership.find();
+
 const getPartnershipById = async (id, populate) => {
   const partnership = await Partnership.findById(id).populate(populate);
-  console.log(partnership);
+
   if (!partnership) {
     throw new ApiError(httpStatus.NOT_FOUND, "Partnership not found");
   }
+
   return partnership;
 };
 
 const updatePartnershipById = async (partnershipId, updateBody) => {
   const partnership = await getPartnershipById(partnershipId);
+
   if (!partnership) {
     throw new ApiError(httpStatus.NOT_FOUND, "Partnership not found");
   }
+
   Object.assign(partnership, updateBody);
+
   await partnership.save();
   return partnership;
 };
@@ -42,6 +49,7 @@ const deletePartnershipById = async (partnershipId) => {
   if (!partnership) {
     throw new ApiError(httpStatus.NOT_FOUND, "Partnership not found");
   }
+
   await partnership.delete();
   return partnership;
 };
