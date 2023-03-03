@@ -22,6 +22,8 @@ router
   .route("/create-transaction")
   .post(auth(), partnershipController.createTransaction);
 
-router.route("/:id").get(auth(), partnershipController.getPartnershipById);
+router
+  .route("/:partnershipId")
+  .get(auth(), partnershipController.getPartnershipById);
 
 module.exports = router;

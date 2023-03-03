@@ -55,7 +55,7 @@ const getPartnerships = catchAsync(async (req, res) => {
 
 const getPartnershipById = catchAsync(async (req, res) => {
   const partnership = await partnershipService.getPartnershipById(
-    req.params.id
+    req.params.partnershipId
   );
   if (!partnership) {
     throw new ApiError(httpStatus.NOT_FOUND, "Partnership not found");
