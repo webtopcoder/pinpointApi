@@ -83,18 +83,7 @@ const getLocations = catchAsync(async (req, res) => {
   if (filter.subCategory) {
     const subCategories = await Promise.all(
       filter.subCategory.split(",").map(async (subCategoryName) => {
-        if (locationCategory) {
-          const subCategory = await categoryService.getSubCategoryByName(
-            subCategoryName.trim(),
-            locationCategory._id
-          );
-          return subCategory._id;
-        } else {
-          const subCategory = await categoryService.getSubCategoryByName(
-            subCategoryName.trim()
-          );
-          return subCategory._id;
-        }
+        return subCategoryName
       })
     );
 
