@@ -103,6 +103,16 @@ const getPendingInvites = async (userId) => {
   return mails;
 };
 
+const getIsReadEmails = async (userId) => {
+  const mails = await queryMails({
+    to: userId,
+    is_read: false,
+    from_is_deleted: false,
+  });
+
+  return mails;
+};
+
 const bulkDelete = async (mailIds, userId) => {
   const objectMailIds = mailIds.map((id) => mongoose.Types.ObjectId(id));
   const objectUserId = mongoose.Types.ObjectId(userId);
@@ -171,6 +181,7 @@ module.exports = {
   invite,
   resendInvite,
   getPendingInvites,
+  getIsReadEmails,
   getMailById,
   bulkDelete,
   bulkUpdate,

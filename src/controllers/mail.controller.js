@@ -368,6 +368,11 @@ const getPendingInvites = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getIsReadEmails = catchAsync(async (req, res) => {
+  const result = await mailService.getIsReadEmails(req.user._id);
+  res.send(result);
+});
+
 const updateMail = catchAsync(async (req, res) => {
   const { mailId } = req.params;
   const userId = req.user._id;
@@ -442,6 +447,7 @@ module.exports = {
   getNotices,
   getInvitation,
   getPendingInvites,
+  getIsReadEmails,
   updateMail,
   bulkActions,
   sendMessageByAdmin,
