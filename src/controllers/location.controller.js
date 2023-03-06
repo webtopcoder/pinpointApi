@@ -92,13 +92,25 @@ const getLocations = catchAsync(async (req, res) => {
   }
 
   options.populate = [
-    "partner",
+    {
+      path: "partner",
+      populate: [
+        {
+          path: "category",
+          populate: {
+            path: "image"
+          },
+        },
+      ],
+    },
     "like",
     "reviews",
     "images",
     "arrivalImages",
     "subCategories",
   ];
+
+  
   const result = await locationService.queryLocations(filter, options);
   res.send(result);
 });
