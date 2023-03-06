@@ -9,8 +9,6 @@ const mongoose = require("mongoose-fill");
 
 const createMail = async (mailBody) => {
   const createdMails = await Mail.create(mailBody);
-
-  console.log(createdMails);
   const sendingUser = Array.isArray(mailBody)
     ? mailBody[0].from
     : mailBody.from;
