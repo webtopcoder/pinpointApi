@@ -6,11 +6,11 @@ const {
   likeService,
   reviewService,
   categoryService,
+  userService,
 } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
-const { array } = require("joi");
 
 const createLocation = catchAsync(async (req, res) => {
   const images = await Promise.all(
@@ -87,7 +87,7 @@ const getLocations = catchAsync(async (req, res) => {
   if (filter.subCategory) {
     const subCategories = await Promise.all(
       filter.subCategory.split(",").map(async (subCategoryName) => {
-        return subCategoryName
+        return subCategoryName;
       })
     );
 
@@ -102,7 +102,7 @@ const getLocations = catchAsync(async (req, res) => {
         {
           path: "category",
           populate: {
-            path: "image"
+            path: "image",
           },
         },
       ],
@@ -315,6 +315,46 @@ const likeReview = catchAsync(async (req, res) => {
   res.send({ liked: !liked });
 });
 
+const favoriteLocation = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  await userService.updateUserById(req.user._id, {
+    favoriteLocations: req.user.favoriteLocations?.includes(location._id)
+      ? req.user.favoriteLocations
+      : [...req.user.favoriteLocations, locationId],
+  });
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const unfavoriteLocation = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  await userService.updateUserById(req.user._id, {
+    favoriteLocations: req.user.favoriteLocations.filter(
+      (location) => location != locationId
+    ),
+  });
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const getFavoriteLocations = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const locations = await userService.getFavoriteLocations(userId);
+  res.send(locations);
+});
+
 module.exports = {
   createLocation,
   getLocations,
@@ -326,4 +366,7 @@ module.exports = {
   deleteLocation,
   likeReview,
   likeLocation,
+  favoriteLocation,
+  unfavoriteLocation,
+  getFavoriteLocations,
 };

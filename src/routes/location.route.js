@@ -59,10 +59,10 @@ router.route("/:locationId/like").post(auth(), locationController.likeLocation);
 
 // router.route("/:locationId/check-in").post(auth(), locationController.checkIn);
 
-// router
-//   .route("/:locationId/favorite")
-//   .post(auth(), locationController.favoriteLocation)
-//   .delete(auth(), locationController.unfavoriteLocation);
+router
+  .route("/:locationId/favorite")
+  .post(auth(), locationController.favoriteLocation)
+  .delete(auth(), locationController.unfavoriteLocation);
 
 router
   .route("/:locationId")
