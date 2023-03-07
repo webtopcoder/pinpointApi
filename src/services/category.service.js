@@ -96,6 +96,14 @@ const getPartnersByCategory = async (id) => {
   return partners;
 };
 
+const getSubcategoriesByCategoryID = async (id) => {
+  const subcategories = await SubCategory.find({
+    category: id,
+  }).select("_id");
+
+  return subcategories;
+};
+
 const getSubCategoryById = async (id) => {
   const subCategory = await SubCategory.findById(id);
   if (!subCategory) {
@@ -157,6 +165,7 @@ module.exports = {
   getSubCategories,
   getCategoryById,
   getSubCategoryById,
+  getSubcategoriesByCategoryID,
   getSubCategoryByCategoryId,
   getCategoryByName,
   getSubCategoryByName,

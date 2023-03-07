@@ -26,8 +26,8 @@ const getLocations = {
     sort: Joi.string(),
     pagination: Joi.boolean(),
     partner: Joi.string().custom(objectId),
-    subCategory: Joi.string(),
-    category: Joi.string(),
+    subCategory: Joi.string().allow(""),
+    category: Joi.string().allow(""),
   }),
 };
 

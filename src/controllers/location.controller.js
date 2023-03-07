@@ -10,6 +10,7 @@ const {
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
+const { array } = require("joi");
 
 const createLocation = catchAsync(async (req, res) => {
   const images = await Promise.all(
@@ -67,17 +68,20 @@ const getLocations = catchAsync(async (req, res) => {
   }
   let locationCategory;
   if (filter.category) {
-    locationCategory = await categoryService.getCategoryByName(filter.category);
+    locationCategory = await categoryService.getCategoryById(filter.category);
     if (!locationCategory) {
       throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
     }
 
-    const categoryPartners = await categoryService.getPartnersByCategory(
+    const subcategoriesID = await categoryService.getSubCategoryByCategoryId(
       locationCategory._id
     );
-    filter.partner = { $in: categoryPartners };
+    var subCategoriesString = [];
+    subcategoriesID.map(async (item) => {
+      subCategoriesString.push(item.id);
+    });
 
-    delete filter.category;
+    filter.subCategory = subCategoriesString.toString();
   }
 
   if (filter.subCategory) {
@@ -110,7 +114,7 @@ const getLocations = catchAsync(async (req, res) => {
     "subCategories",
   ];
 
-  
+  delete filter.category;
   const result = await locationService.queryLocations(filter, options);
   res.send(result);
 });
