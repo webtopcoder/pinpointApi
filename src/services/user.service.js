@@ -81,6 +81,25 @@ const getAdminByID = (id) => {
 const getUserByUsername = (username) => {
   return User.findOne({ username }).populate("profile.avatar");
 };
+
+const getActivePartners = async (status) => {
+  const result = await User.find({
+    role: 'partner',
+    status: status
+  })
+    .populate([
+      {
+        path: "category",
+        populate: {
+          path: "image"
+        },
+      },
+    ],)
+    .select("address category");
+
+    return result;
+};
+
 /**
  * Update user by id
  * @param {ObjectId} userId
@@ -500,4 +519,5 @@ module.exports = {
   getUserByUsername,
   getProfileImages,
   getFavoriteLocations,
+  getActivePartners
 };

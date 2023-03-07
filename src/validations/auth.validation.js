@@ -14,8 +14,9 @@ const register = {
         address: Joi.string(),
         state: Joi.string().required(),
         city: Joi.string().required(),
-      })
-      .required(),
+        latitude: Joi.number(),
+        longitude: Joi.number(),
+      }),
     category: Joi.string().custom(objectId),
     dob: Joi.when("role", {
       is: "user",

@@ -5,6 +5,7 @@ const ApiError = require("@utils/ApiError");
 const { authService, userService, tokenService } = require("@services");
 
 const register = catchAsync(async (req, res) => {
+
   const user = await userService.createUser(req.body);
   EventEmitter.emit(events.VERIFY_EMAIL, user.id);
   res.send({
@@ -113,6 +114,12 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getActivePartners = catchAsync(async (req, res) => {
+  const { status } = req.query;
+  let activepartners = await userService.getActivePartners(status);
+  res.send(activepartners);
+});
+
 const getUser = catchAsync(async (req, res) => {
   res.send({ success: true, user: req.user });
 });
@@ -131,4 +138,5 @@ module.exports = {
   sendVerificationEmail,
   verifyEmail,
   getUser,
+  getActivePartners,
 };

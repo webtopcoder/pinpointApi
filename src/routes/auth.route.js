@@ -46,6 +46,7 @@ router.post(
   authController.verifyEmail
 );
 
+router.get("/partners", authController.getActivePartners);
 router.get("/me", auth(), authController.getUser);
 router.get("/admin/me", auth(false, true), authController.getAdmin);
 

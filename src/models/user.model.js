@@ -71,6 +71,12 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         type: Date,
       },
       address: {
+        latitude: {
+          type: Number,
+        },
+        longitude: {
+          type: Number,
+        },
         address: { type: String, default: "" },
         city: { type: String },
         state: { type: String },
