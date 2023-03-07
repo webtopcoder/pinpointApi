@@ -23,7 +23,10 @@ const login = catchAsync(async (req, res, next) => {
       .json({ code: 400, message: "No User existing." });
   }
   user = user.toJSON();
-  const tokens = await tokenService.generateAuthTokens(user);
+  let tokens;
+  if (role === 'partner' && user.status !== 'active') tokens = ''
+  else tokens = await tokenService.generateAuthTokens(user);
+
   res.send({
     user,
     tokens,

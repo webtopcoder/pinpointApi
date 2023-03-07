@@ -200,13 +200,7 @@ const verifyEmail = async (email, otp) => {
 
   await Token.deleteMany({ user: user._id, type: tokenTypes.VERIFY_EMAIL });
 
-  let updateUser = {};
-  if (["pending", "inactive"].includes(user.status)) {
-    updateUser = { status: "active" };
-  }
-
   await userService.updateUserById(user.id, {
-    ...updateUser,
     isEmailVerified: true,
   });
 };
