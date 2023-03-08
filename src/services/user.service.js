@@ -97,7 +97,7 @@ const getActivePartners = async (status) => {
     ],)
     .select("address category");
 
-    return result;
+  return result;
 };
 
 /**
@@ -519,5 +519,5 @@ module.exports = {
   getUserByUsername,
   getProfileImages,
   getFavoriteLocations,
-  getActivePartners
+  getActivePartners,
 };

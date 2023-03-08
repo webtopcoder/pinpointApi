@@ -19,6 +19,7 @@ const compose = catchAsync(async (req, res) => {
       return media._id;
     })
   );
+  console.log(to)
 
   if (!isNotice) {
     to_user = await userService.queryUsers(

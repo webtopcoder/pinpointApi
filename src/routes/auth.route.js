@@ -48,6 +48,7 @@ router.post(
 
 router.get("/partners", authController.getActivePartners);
 router.get("/me", auth(), authController.getUser);
+router.get("/username", auth(), authController.getUsernameById);
 router.get("/admin/me", auth(false, true), authController.getAdmin);
 
 module.exports = router;

@@ -120,6 +120,12 @@ const getActivePartners = catchAsync(async (req, res) => {
   res.send(activepartners);
 });
 
+const getUsernameById = catchAsync(async (req, res) => {
+  const { ID } = req.query;
+  let userinfo = await userService.getUserById(ID);
+  res.send(userinfo);
+});
+
 const getUser = catchAsync(async (req, res) => {
   res.send({ success: true, user: req.user });
 });
@@ -133,6 +139,7 @@ module.exports = {
   refreshTokens,
   forgotPassword,
   resetPassword,
+  getUsernameById,
   changePasswordUser,
   changePassword,
   sendVerificationEmail,
