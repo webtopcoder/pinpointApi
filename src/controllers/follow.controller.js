@@ -7,8 +7,24 @@ const { Follow } = require("../models");
 
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  let filter = {};
+  let filter = {}
+  // let filter = pick(req.query, [
+  //   "q",
+  // ]);
+
+  // console.log(filter.q);
+  // if (filter.q !== "") {
+  //   filter["$or"] = [
+  //     { firstName: { $regex: filter.q, $options: "i" } },
+  //     { lastName: { $regex: filter.q, $options: "i" } },
+  //     { username: { $regex: filter.q, $options: "i" } },
+  //   ];
+  //   delete filter.q;
+  // }
+  // else delete filter.q;
+
   let options = pick(req.query, ["limit", "page", "sort"]);
+
   options.populate = [
     "follower",
     { path: "follower", populate: "profile.avatar" },

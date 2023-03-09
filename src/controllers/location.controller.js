@@ -249,6 +249,25 @@ const reviewLocation = catchAsync(async (req, res) => {
   res.send(review);
 });
 
+const checkIn = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  const ischeckedin = location.checkIn.includes(req.user.id);
+  if (ischeckedin) {
+    res.send({ count: location.checkIn.length, type: 'warning', message: "You are already checked in." });
+  }
+  else {
+    const result = await locationService.updateLocationById(locationId, {
+      checkIn: [...location.checkIn, req.user._id],
+    });
+    res.send({ count: result.checkIn.length, type: 'success', message: "You are checked in successfully." });
+  }
+});
+
 const likeLocation = catchAsync(async (req, res) => {
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
@@ -369,4 +388,5 @@ module.exports = {
   favoriteLocation,
   unfavoriteLocation,
   getFavoriteLocations,
+  checkIn
 };

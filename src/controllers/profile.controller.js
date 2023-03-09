@@ -170,7 +170,7 @@ const createPost = catchAsync(async (req, res) => {
 
   await newPost.save();
 
-  const pattern = /@[\w\s]+\b/g;
+  const pattern = /@\w+/g;
   const mentions = content.match(pattern);
 
   if (mentions && mentions.length) {
@@ -199,9 +199,8 @@ const createPost = catchAsync(async (req, res) => {
         if (!followAndFollowingList.includes(mention)) {
           return;
         }
-        console.log(111);
         const to_user = await userService.getUserByUsername(mention);
-
+        console.log(to_user);
         if (to_user) {
           const shoutout_data = {
             from: req.user._id,

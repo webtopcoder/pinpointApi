@@ -9,21 +9,24 @@ const mongoose = require("mongoose-fill");
 
 const createMail = async (mailBody) => {
   const createdMails = await Mail.create(mailBody);
+
   const sendingUser = Array.isArray(mailBody)
     ? mailBody[0].from
     : mailBody.from;
 
   const from_user = await userService.getUserById(sendingUser);
+
+  createdMails.map((item) => {
     EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: createdMails.to,
-      actor: createdMails.from,
+      recipient: item.to,
+      actor: item.from,
       type: "mail",
       title: "New message",
       description: `You have a new message from @${from_user.username}`,
-      url: `/message/${createdMails._id}`,
+      url: `/message/${item._id}`,
       type: "mail",
     });
-
+  });
   return createdMails;
 };
 

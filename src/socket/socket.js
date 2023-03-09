@@ -23,7 +23,7 @@ const Action = {
     if (!room) {
       throw new Error("Room not found");
     }
-
+      console.log(from_user)
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       message: from_user.username + " has sent you a message!",

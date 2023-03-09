@@ -123,6 +123,14 @@ const acceptFollowing = async (id, type, updateBody) => {
       status: 'active'
     };
 
+    // EventEmitter.emit(events.SEND_NOTIFICATION, {
+    //   recipient: follow.following,
+    //   actor: follow.follower,
+    //   title: "New Follower",
+    //   url: `/profile/${userId}/activity`,
+    //   type: "followAccept",
+    // });
+
     await Follow.create(followData);
   }
 

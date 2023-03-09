@@ -13,13 +13,13 @@ const compose = catchAsync(async (req, res) => {
   const from = req.user._id;
   let to_user;
   let mailsToSend;
+
   const files = await Promise.all(
     req.files.map(async (file) => {
       const media = await uploadMedia(file, req.user._id);
       return media._id;
     })
   );
-  console.log(to)
 
   if (!isNotice) {
     to_user = await userService.queryUsers(
@@ -61,7 +61,9 @@ const compose = catchAsync(async (req, res) => {
           };
         });
       });
+
   }
+
 
   await mailService.createMail(mailsToSend);
 

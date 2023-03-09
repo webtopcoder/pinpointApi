@@ -497,6 +497,7 @@ const getProfileImages = async (userId, options) => {
     });
     return acc;
   }, []);
+  
   return images;
 };
 

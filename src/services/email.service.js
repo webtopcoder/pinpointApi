@@ -63,21 +63,27 @@ const sendResetPasswordEmail = async (userId) => {
 const sendVerificationEmail = async (userId) => {
   const user = await userService.getUserById(userId);
   const token = await tokenService.generateVerifyEmailToken(user);
-
+  let html;
   const subject = "Email Verification";
   const to = user.email;
   const link = `${config.frontend_url}/verify-email`;
-  const html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
-                  <br><p>If you did not request this, please ignore this email.</p>`;
+  if (user.role === "user") {
+    html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p><br><p>Pinpoint is going to vet out your business to make sure you are legit.</p><br><p> You will receive an email in less than an hour with the results. If approved, you will then be able to login. Thank you!</p><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
+    <br><p>If you did not request this, please ignore this email.</p>`;
+  }
+  else {
+    html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
+    <br><p>If you did not request this, please ignore this email.</p>`;
+  }
 
   await sendEmail(to, subject, html);
 };
 
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
-
-  const defaultMessage = "hello is this invitation?";
-
+  const link = `${config.frontend_url}/home`;
+  const defaultMessage = `<p>Hi, <br><p>I am going to invite our platform.</p><br><p><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
+  <br><p>If you did not request this, please ignore this email.</p>`;
   const subject = "Invitation";
   const to = inviteTo;
   const html = message ? message : defaultMessage;
