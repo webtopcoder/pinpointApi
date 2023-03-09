@@ -15,9 +15,17 @@ const { ObjectId } = require("bson");
 const getFollowers = async (userId) => {
   const follows = await Follow.find({
     following: userId,
+    status: 'active'
   })
     .populate("follower")
     .select("-following");
+  return follows;
+};
+
+const getFollowById = async (id) => {
+  const follows = await Follow.findById(
+    id,
+  )
   return follows;
 };
 
@@ -43,6 +51,7 @@ const getFollowings = async (userId) => {
  * @throws {ApiError}
  */
 const followOrUnfollow = async (userId, followingUser) => {
+  let res;
   const followData = {
     follower: userId,
     following: followingUser,
@@ -56,8 +65,19 @@ const followOrUnfollow = async (userId, followingUser) => {
   }
 
   if (follows) {
-    follows.delete();
-    return follows;
+    if (follows.status === "decline")
+      res = {
+        type: 'warning',
+        message: 'you are already declined'
+      }
+    else if (follows.status === "pending")
+      res = {
+        type: 'warning',
+        message: 'you are on pending.'
+      }
+    else
+      follows.delete();
+    return res;
   }
 
   let follow = await Follow.findOneDeleted(followData);
@@ -78,6 +98,34 @@ const followOrUnfollow = async (userId, followingUser) => {
     type: "follow",
   });
 
+  res = {
+    type: 'success',
+    message: 'Requested Successfully.'
+  }
+
+  return res;
+};
+
+const acceptFollowing = async (id, type, updateBody) => {
+  const follow = await getFollowById(id);
+  if (!follow) {
+    throw new ApiError(httpStatus.NOT_FOUND, "follow not found");
+  }
+
+  console.log(follow.follower)
+  Object.assign(follow, updateBody);
+  await follow.save();
+
+  if (type === "active") {
+    const followData = {
+      follower: follow.following,
+      following: follow.follower,
+      status: 'active'
+    };
+
+    await Follow.create(followData);
+  }
+
   return follow;
 };
 
@@ -85,6 +133,7 @@ const getFollowStatus = async (userId, followingUser) => {
   const followData = {
     follower: userId,
     following: followingUser,
+    status: 'active'
   };
 
   const follows = await Follow.findOne(followData);
@@ -159,4 +208,6 @@ module.exports = {
   getFollowStatus,
   queryFollows,
   getFollowAndFollowings,
+  acceptFollowing,
+  getFollowById
 };

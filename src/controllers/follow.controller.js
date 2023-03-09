@@ -18,6 +18,7 @@ const getFollowers = catchAsync(async (req, res) => {
     {
       ...filter,
       following: userId,
+      status: { $in: ['active', 'pending'] }
     },
     options
   );
@@ -45,9 +46,18 @@ const getFollowings = catchAsync(async (req, res) => {
 
 const followOrUnfollow = catchAsync(async (req, res) => {
   const { userId } = req.params;
-  await followService.followOrUnfollow(req.user._id, userId);
+  const result = await followService.followOrUnfollow(req.user._id, userId);
+  res.status(httpStatus.OK).send({ data: result });
+});
+
+const acceptFollowingRequest = catchAsync(async (req, res) => {
+  const { id, type } = req.query;
+  await followService.acceptFollowing(id, type, {
+    status: type,
+  });
   res.status(httpStatus.NO_CONTENT).send();
 });
+
 
 const getOwnFollowerAndFollowing = catchAsync(async (req, res) => {
   const { _id: userId } = req.user;
@@ -79,4 +89,5 @@ module.exports = {
   followOrUnfollow,
   getOwnFollowerAndFollowing,
   unfriend,
+  acceptFollowingRequest,
 };

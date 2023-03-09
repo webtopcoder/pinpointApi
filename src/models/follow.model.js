@@ -12,6 +12,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "User",
       },
+      status: {
+        type: String,
+        enum: ["pending", "decline", "active",],
+        default: "pending",
+      },
     },
     {
       timestamps: true,
