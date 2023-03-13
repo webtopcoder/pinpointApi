@@ -156,8 +156,6 @@ const bulkUpdate = async (mailIds, updateBody, userId) => {
     $or: [{ to: objectUserId }, { from: objectUserId }],
   });
 
-  console.log({ mails });
-
   const bulkOps = mails.map((mail) => {
     return {
       updateOne: {

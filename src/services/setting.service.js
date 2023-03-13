@@ -3,10 +3,19 @@ const httpStatus = require("http-status"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
+const { events, EventEmitter } = require("@events");
 
 const createSetting = async (settingBody) => {
+
+  if (settingBody.key == "user:additionalUser") {
+    EventEmitter.emit(events.SEND_ADDITION_USER, {
+      NewUser: settingBody.value[settingBody.value.length - 1],
+      user_id: settingBody.user
+    });
+  }
   const setting = await Setting.create(settingBody);
   return setting;
+
 };
 
 const getSettingByKey = async ({ key }) => {
@@ -46,6 +55,12 @@ const updateSettingById = async (settingId, updateBody) => {
 };
 
 const updateSetting = async (setting, updateBody) => {
+  if (updateBody.key == "user:additionalUser") {
+    EventEmitter.emit(events.SEND_ADDITION_USER, {
+      NewUser: updateBody.value[updateBody.value.length - 1],
+      user_id: updateBody.user
+    });
+  }
   Object.assign(setting, updateBody);
   await setting.save();
   return setting;

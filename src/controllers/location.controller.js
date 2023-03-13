@@ -32,6 +32,7 @@ const createLocation = catchAsync(async (req, res) => {
       latitude: req.body.lat,
       longitude: req.body.lng,
     },
+    lastSeen: new Date(),
     subCategories: req.body.subCategories,
   });
   res.status(httpStatus.CREATED).send(location);
@@ -124,11 +125,16 @@ const getLocation = catchAsync(async (req, res) => {
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
+
+  const data = {
+    lastSeen: new Date()
+  };
+
+  await locationService.updateLocationById(req.params.locationId, data);
   res.send(location);
 });
 
 const updateLocation = catchAsync(async (req, res) => {
-  // console.log(req.params)
   const images = await Promise.all(
     req.files.map(async (file) => {
       const media = await uploadMedia(file, req.user._id);

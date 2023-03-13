@@ -2,7 +2,7 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
-const { userService, adminService } = require("@services");
+const { userService, adminService, postService, reviewService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 import { Parser } from "json2csv";
 import pick from "../utils/pick";
@@ -20,12 +20,26 @@ const updateUserByID = catchAsync(async (req, res) => {
 
   await adminService.userUpdate(id, req.body);
 
-  const user = await adminService.getUserByID(id);
+  const user = await userService.getUserById(id);
 
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
   }
   res.send({ data: user });
+});
+
+const updateActivityByID = catchAsync(async (req, res) => {
+  const { id, type } = req.params;
+
+  console.log(type);
+  await adminService.ActivityUpdate(id, type, req.body);
+
+  const acitvity = await adminService.getActivitiesById({ id: id, type: type });
+
+  if (!acitvity) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
+  }
+  res.send({ data: acitvity });
 });
 
 const getSearchActivities = catchAsync(async (req, res) => {
@@ -38,15 +52,15 @@ const getSearchActivities = catchAsync(async (req, res) => {
 });
 
 const deleteActivitesByID = catchAsync(async (req, res) => {
-  console.log(req.query);
   const data = {
     status: "deleted",
   };
 
-  const activities = await adminService.deleteActivitiesById(req.query, data);
+  const activities = await adminService.deleteActivitiesById(req.body, data);
 
   res.send(activities);
 });
+
 
 const getSearchPartners = catchAsync(async (req, res) => {
   const partners = await adminService.searchPartner(req.query);
@@ -117,8 +131,35 @@ const getLocationByID = catchAsync(async (req, res) => {
   res.send({ data: location });
 });
 
+const getActivityByID = catchAsync(async (req, res) => {
+  const acitvity = await adminService.getActivitiesById(req.query);
+  if (!acitvity) {
+    throw new ApiError(httpStatus.NOT_FOUND, "acitvity not found");
+  }
+  res.send({ data: acitvity });
+});
+
+const getActivityImageRemoveByID = catchAsync(async (req, res) => {
+  const { id } = req.query;
+  const activity = await adminService.getUpdateActivityById(req.query);
+  if (!activity) {
+    throw new ApiError(httpStatus.NOT_FOUND, "acitvity not found");
+  }
+
+  const newArray = activity.images.filter(item => item.toString() !== req.query.imageid);
+
+  switch (req.query.type) {
+    case 'Post':
+      await postService.updatePostById(id, { images: newArray });
+    case 'Review':
+      await reviewService.updateReviewById(id, { images: newArray });
+  }
+  const result = await adminService.getActivitiesById(req.query);
+  res.send({ data: result });
+});
+
+
 const ChangeAvatar = catchAsync(async (req, res) => {
-  console.log(req.params);
   const { id } = req.params;
   if (!req.file) {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
@@ -134,6 +175,28 @@ const ChangeAvatar = catchAsync(async (req, res) => {
 
   return res.json({ success: true, avatar: media });
 });
+
+const uploadActivityImage = catchAsync(async (req, res) => {
+  const { id, type } = req.params;
+  if (!req.file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
+  }
+
+  const activity = await adminService.getUpdateActivityById({ id: id, type: type });
+
+  const media = await uploadMedia(req.file, id, true);
+  activity.images.push(media._id);
+
+  switch (type) {
+    case 'Post':
+      await postService.updatePostById(id, { images: activity.images });
+    case 'Review':
+      await reviewService.updateReviewById(id, { images: activity.images });
+  }
+
+  return res.json({ success: true, avatar: media });
+});
+
 
 const getMonthlyRevenue = catchAsync(async (req, res) => {
   const revenue = await adminService.getMonthlyRevenue(req.query);
@@ -175,13 +238,11 @@ const getLatestTransactions = catchAsync(async (req, res) => {
   res.send(transactions);
 });
 
+
 const getLatestActivities = catchAsync(async (req, res) => {
+
   const { limit, page, type } = pick(req.query, ["limit", "page", "type"]);
-  const activities = await adminService.getLatestActivities({
-    limit,
-    page,
-    type,
-  });
+  const activities = await adminService.getLatestActivities(req.query);
 
   if (!activities) {
     throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
@@ -212,4 +273,9 @@ module.exports = {
   getLatestTransactions,
   getLatestActivities,
   deleteUserByID,
+  getActivityByID,
+  uploadActivityImage,
+  getActivityImageRemoveByID,
+  updateActivityByID
 };
+

@@ -30,7 +30,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       status: {
         type: String,
-        enum: ["active", "pending", "deleted"],
+        enum: ["active", "deleted"],
         default: "active",
       },
       isActive: {

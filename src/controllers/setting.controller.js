@@ -6,7 +6,7 @@ const pick = require("../utils/pick");
 
 const getUserSettings = catchAsync(async (req, res) => {
   let filter = {};
-  let options = pick(req.query, ["limit", "page", "sort"]);
+  let options = pick(req.query, ["limit", "page", "sort"] );
   const userId = req.user._id;
   const result = await settingService.querySettings(
     { ...filter, user: userId },
@@ -19,14 +19,13 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
     key: req.body.key,
     user: req.user._id,
   });
-  console.log(result);
+
   if (result.length == 0) {
     const createBody = { ...req.body, user: req.user._id };
     const setting = await settingService.createSetting(createBody);
     res.status(httpStatus.CREATED).send({ success: true, setting });
   } else {
     const updateBody = req.body;
-    console.log(result);
     let updatedResult = await Promise.all(
       result.map(async (setting) => {
         let updatedSetting;

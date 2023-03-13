@@ -20,7 +20,6 @@ const queryOrders = async (filter, options) => {
 
 const getOrderById = async (id, populate) => {
   const order = await Order.findById(id).populate(populate);
-  console.log(order);
   if (!order) {
     throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
   }

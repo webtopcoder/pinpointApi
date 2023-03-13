@@ -8,6 +8,7 @@ const userEvents = {
   SEND_INVITE: "user.sendInvite",
   SEND_NOTIFICATION: "user.sendNotification",
   ADMIN_SEND_MAIL: "admin.sendMail",
+  SEND_ADDITION_USER: "user.sendAdditionUser",
 };
 
 const authEvents = {
@@ -29,6 +30,9 @@ Object.keys(events).forEach((event) => {
           break;
         case events.VERIFY_EMAIL:
           await emailService.sendVerificationEmail(data);
+          break;
+        case events.SEND_ADDITION_USER:
+          await emailService.sendAdditionUserEmail(data);
           break;
         case events.RESET_PASSWORD:
           await emailService.sendResetPasswordEmail(data);

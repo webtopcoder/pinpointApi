@@ -11,6 +11,7 @@ export const STATUS_PENDING = 'pending';
 export const STATUS_ACTIVE = 'active';
 export const STATUS_INACTIVE = 'inactive';
 export const STATUS_DELETED = 'deleted';
+export const STATUS_DECLINED = 'declined';
 
 export const ISTRUE = 'true';
 export const ISFALSE = 'false';

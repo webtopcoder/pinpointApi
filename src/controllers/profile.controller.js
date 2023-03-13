@@ -92,6 +92,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   const followerCount = (await followService.getFollowers(userId)).length;
+  const locationCount = (await locationService.getLocationsByPartnerId(userId, {})).length;
   let is_followed = false;
   if (req.user) {
     is_followed = await followService.getFollowStatus(req.user._id, userId);
@@ -102,6 +103,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
       avatar: user?.profile?.avatar,
       favorites: 0,
       followers: followerCount,
+      location: locationCount,
       username: user?.username,
       fullname: user?.name,
       usertype: user?.role,
@@ -200,7 +202,6 @@ const createPost = catchAsync(async (req, res) => {
           return;
         }
         const to_user = await userService.getUserByUsername(mention);
-        console.log(to_user);
         if (to_user) {
           const shoutout_data = {
             from: req.user._id,

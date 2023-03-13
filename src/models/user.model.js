@@ -147,6 +147,11 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
     return !!user;
   };
 
+  UserSchema.statics.usernameTaken = async function (username, excludeUserId) {
+    const user = await this.findOne({ username, _id: { $ne: excludeUserId } });
+    return !!user;
+  };
+
   /**
    * Check if password matches the user's password
    * @param {string} password

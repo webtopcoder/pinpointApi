@@ -20,7 +20,6 @@ const queryTransactions = async (filter, options) => {
 
 const getTransactionById = async (id, populate) => {
   const transaction = await Transaction.findById(id).populate(populate);
-  console.log(transaction);
   if (!transaction) {
     throw new ApiError(httpStatus.NOT_FOUND, "Transaction not found");
   }

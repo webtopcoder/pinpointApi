@@ -65,6 +65,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Boolean,
         default: false,
       },
+      lastSeen: {
+        type: Date,
+      },
       departureAt: {
         type: Date,
       },

@@ -15,6 +15,10 @@ const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
+
+  if (await User.usernameTaken(userBody.username)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User Name already taken");
+  }
   const user = await User.create(userBody);
   return user;
 };
@@ -497,7 +501,7 @@ const getProfileImages = async (userId, options) => {
     });
     return acc;
   }, []);
-  
+
   return images;
 };
 

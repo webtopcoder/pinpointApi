@@ -36,6 +36,7 @@ const createReview = async (reviewBody) => {
 
 const updateReviewById = async (reviewId, updateBody) => {
   const review = await getReviewById(reviewId);
+
   if (!review) {
     throw new ApiError(httpStatus.NOT_FOUND, "Review not found");
   }

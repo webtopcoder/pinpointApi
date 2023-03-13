@@ -91,6 +91,19 @@ const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   await sendEmail(to, subject, html);
 };
 
+const sendAdditionUserEmail = async ({ NewUser, user_id }) => {
+  
+  const user = await userService.getUserById(user_id);
+  const link = `${config.frontend_url}/home`;
+  const defaultMessage = `<p>Hi, <br><p>I am going to invite our platform.</p><br><p><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
+  <br><p>If you did not request this, please ignore this email.</p>`;
+  const subject = "Invitation";
+  const to = NewUser.email;
+  const html = message ? message : defaultMessage;
+
+  await sendEmail(to, subject, html);
+};
+
 module.exports = {
   transport,
   sendEmail,
@@ -98,4 +111,5 @@ module.exports = {
   sendVerificationEmail,
   sendInviteEmail,
   sendMailFromAdmin,
+  sendAdditionUserEmail
 };

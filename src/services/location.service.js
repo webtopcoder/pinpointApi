@@ -8,7 +8,7 @@ const followService = require("./follow.service");
 const userService = require("./user.service");
 
 const getLocationById = async (id) => {
-  return Location.findById(id)
+  const originallocation = await Location.findById(id)
     .populate({
       path: "partner",
       populate: { path: "profile.avatar" },
@@ -36,6 +36,8 @@ const getLocationById = async (id) => {
     .populate({
       path: "arrivalImages",
     });
+
+  return originallocation;
 };
 
 const deleteLocationByID = async (id, updateBody) => {

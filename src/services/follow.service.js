@@ -112,7 +112,6 @@ const acceptFollowing = async (id, type, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, "follow not found");
   }
 
-  console.log(follow.follower)
   Object.assign(follow, updateBody);
   await follow.save();
 

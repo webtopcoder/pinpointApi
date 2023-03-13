@@ -7,8 +7,6 @@ const userService = require("./user.service");
 const { EventEmitter, events } = require("../events");
 
 const createShoutout = async (shoutoutBody) => {
-
-  console.log(shoutoutBody)
   const shoutout = await Shoutout.create(shoutoutBody);
 
   const shoutoutUser = await userService.getUserById(shoutoutBody.from);
@@ -36,7 +34,6 @@ const queryShoutouts = async (filter, options) => {
 
 const getShoutoutById = async (id, populate) => {
   const shoutout = await Shoutout.findById(id).populate(populate);
-  console.log(shoutout);
   if (!shoutout) {
     throw new ApiError(httpStatus.NOT_FOUND, "Shoutout not found");
   }

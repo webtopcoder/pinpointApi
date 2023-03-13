@@ -14,6 +14,7 @@ const httpStatus = require("http-status"),
     STATUS_INACTIVE,
     STATUS_PENDING,
     STATUS_DELETED,
+    STATUS_DECLINED,
     ROLE_USER,
     ROLE_PARTNER,
     ISFALSE,
@@ -380,6 +381,17 @@ const searchActivities = async (req) => {
 const getActivitiesById = (query) => {
   switch (query.type) {
     case "Post":
+      return Post.findById(query.id).populate("from to images");
+    case "Review":
+      return Review.findById(query.id).populate("user location images");
+    case "Shoutout":
+      return Shoutout.findById(query.id).populate("from to post");
+  }
+};
+
+const getUpdateActivityById = (query) => {
+  switch (query.type) {
+    case "Post":
       return Post.findById(query.id);
     case "Review":
       return Review.findById(query.id);
@@ -394,7 +406,6 @@ const deleteActivitiesById = async (query, updateBody) => {
   if (!activities) {
     throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
   }
-
   Object.assign(activities, updateBody);
   await activities.save();
   return activities;
@@ -441,6 +452,18 @@ const userUpdate = async (id, payload) => {
   await User.updateOne({ _id: id }, data, { new: true });
 };
 
+const ActivityUpdate = async (id, type, updateBody) => {
+
+  const Activity = await getUpdateActivityById({ id: id, type: type });
+  if (!Activity) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Activity not found");
+  }
+  Object.assign(Activity, updateBody);
+  await Activity.save();
+  return Activity;
+};
+
+
 const searchPartner = async (reqQuery) => {
   reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
 
@@ -466,7 +489,7 @@ const searchPartner = async (reqQuery) => {
   query.role = ROLE_PARTNER;
   query.status =
     reqQuery.status === "all" || undefined || null || ""
-      ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE] }
+      ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE, STATUS_DECLINED, STATUS_PENDING, STATUS_DELETED] }
       : reqQuery.status;
 
   pipeline.push({
@@ -500,9 +523,9 @@ const searchPartner = async (reqQuery) => {
           as: "category",
         },
       },
-      {
-        $unwind: "$category",
-      },
+      // {
+      //   $unwind: "$category",
+      // },
       {
         $lookup: {
           from: "settings",
@@ -546,6 +569,7 @@ const searchPartner = async (reqQuery) => {
     ]),
     User.countDocuments(query),
   ]);
+
 
   const topCities = await getTopCities({
     role: ROLE_PARTNER,
@@ -619,60 +643,63 @@ const getLatestTransactions = (filter, options) => {
   });
 };
 
-const getLatestActivities = async ({ limit = 5, page = 1, type }) => {
-  switch (type) {
-    case "user":
-      return {
-        data: await User.find({ role: ROLE_USER })
-          .sort({ createdAt: -1 })
-          .skip(limit * (page - 1))
-          .limit(limit)
-          .populate("profile.avatar"),
+const getLatestActivities = async (req) => {
+  req?.status ? req.status : (req.status = "all");
 
-        total: await User.countDocuments({ role: ROLE_USER }),
-      };
-    case "partner":
+  let query = {};
+
+  if (req.q) {
+    const regexp = new RegExp(
+      req.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+      "i"
+    );
+
+    query.$or = [
+      {
+        content: { $regex: regexp },
+      },
+    ];
+  }
+
+  query.status =
+    req.status === "all" || undefined || null || ""
+      ? { $in: [STATUS_DELETED, STATUS_ACTIVE] }
+      : req.status;
+
+  switch (req.type) {
+    case "Post":
       return {
-        data: await User.find({ role: ROLE_PARTNER })
+        data: await Post.find(query)
           .sort({ createdAt: -1 })
-          .skip(limit * (page - 1))
-          .limit(limit)
-          .populate("profile.avatar"),
-        total: await User.countDocuments({ role: ROLE_PARTNER }),
-      };
-    case "post":
-      return {
-        data: await Post.find({})
-          .sort({ createdAt: -1 })
-          .skip(limit * (page - 1))
-          .limit(limit)
+          .skip(req.limit * (req.page - 1))
+          .limit(req.limit)
           .populate("from to like images"),
-        total: await Post.countDocuments({}),
+        total: await Post.countDocuments(query),
       };
-    case "review":
+    case "Review":
       return {
         data: await Review.find({})
           .sort({ createdAt: -1 })
-          .skip(limit * (page - 1))
-          .limit(limit)
+          .skip(req.limit * (req.page - 1))
+          .limit(req.limit)
           .populate("like images user location"),
         total: await Review.countDocuments({}),
       };
-    case "shoutout":
+    case "Shoutout":
       return {
         data: await Shoutout.find({})
           .sort({ createdAt: -1 })
-          .skip(limit * (page - 1))
-          .limit(limit)
+          .skip(req.limit * (req.page - 1))
+          .limit(req.limit)
           .populate("from to post post.like post.images"),
         total: await Shoutout.countDocuments({}),
       };
-    case "media":
+    case "Media":
       return {
         data: await Media.find({})
           .sort({ createdAt: -1 })
-          .skip(limit * (page - 1))
-          .limit(limit)
+          .skip(req.limit * (req.page - 1))
+          .limit(req.limit)
           .populate("user"),
         total: await Media.countDocuments({}),
       };
@@ -712,4 +739,6 @@ module.exports = {
   getLatestTransactions,
   getLatestActivities,
   deleteUserByID,
+  getUpdateActivityById,
+  ActivityUpdate
 };
