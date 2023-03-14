@@ -3,9 +3,20 @@ const { Post } = require("../models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort");
+const { EventEmitter, events } = require("../events");
 
 const createPost = async (postBody) => {
-  const post = await Post.create(postBody);
+  const createdPost = await Post.create(postBody);
+  const post = await getPostById(createdPost._id, "from to");
+
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: post.to._id.toString(),
+    actor: post.from._id.toString(),
+    title: "New post",
+    description: `You have a new post from @${post.from.username}`,
+    url: `/profile/${post.to._id.toString()}/activity`,
+    type: "post",
+  });
   return post;
 };
 
@@ -23,7 +34,7 @@ const getPostById = async (postId, populate) => {
 };
 
 const updatePostById = async (userId, updateBody) => {
-  const post = await getPostById(userId, "");
+  const post = await getPostById(userId);
   if (!post) {
     throw new ApiError(httpStatus.NOT_FOUND, "post not found");
   }
@@ -37,5 +48,5 @@ module.exports = {
   createPost,
   getPosts,
   getPostById,
-  updatePostById
+  updatePostById,
 };

@@ -1,35 +1,38 @@
 const httpStatus = require("http-status"),
   { Review } = require("@models"),
   ApiError = require("@utils/ApiError"),
-  customLabels = require("@utils/customLabels"),
-  defaultSort = require("@utils/defaultSort");
-const { EventEmitter, events } = require("../events");
+  { EventEmitter, events } = require("../events");
 
-const getReviewById = async (id) => {
+const getReviewById = async (id, populate) => {
   return Review.findById(id)
     .populate("location")
     .populate("images")
-    .populate("like");
+    .populate("like")
+    .populate(populate);
 };
 
-const getReviewByLocationId = async (locationId, filter) => {
+const getReviewByLocationId = async (locationId, filter, populate) => {
   return Review.find({ ...filter, location: locationId })
     .populate("location")
     .populate("images")
-    .populate("like");
+    .populate("like")
+    .populate(populate);
 };
 
 const createReview = async (reviewBody) => {
-  const review = await Review.create(reviewBody);
+  const createdReview = await Review.create(reviewBody);
+  const review = await getReviewById(createdReview._id, "user");
 
-  /* EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: mail.to,
-    actor: mail.from,
-    title: "New message",
-    description: `You have a new message from @${from_user.username}`,
-    url: `/message/${mail._id}`,
-    type: "mail",
-  }); */
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: review.location.partner.toString(),
+    actor: review.user._id.toString(),
+    title: "New review",
+    description: `You have a new review from @${review.user.username}`,
+    url: `/profile/${review.location.partner.toString()}/locations/${
+      review.location._id
+    }`,
+    type: "review",
+  });
 
   return review;
 };
