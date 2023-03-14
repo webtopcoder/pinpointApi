@@ -11,6 +11,7 @@ const {
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
+const { EventEmitter, events } = require("../events");
 
 const createLocation = catchAsync(async (req, res) => {
   const images = await Promise.all(
@@ -127,7 +128,7 @@ const getLocation = catchAsync(async (req, res) => {
   }
 
   const data = {
-    lastSeen: new Date()
+    lastSeen: new Date(),
   };
 
   await locationService.updateLocationById(req.params.locationId, data);
@@ -240,7 +241,7 @@ const reviewLocation = catchAsync(async (req, res) => {
     count: 0,
   });
 
-  const review = await Review.create({
+  const review = await reviewService.createReview({
     location: locationId,
     user: req.user._id,
     images,
@@ -264,13 +265,20 @@ const checkIn = catchAsync(async (req, res) => {
 
   const ischeckedin = location.checkIn.includes(req.user.id);
   if (ischeckedin) {
-    res.send({ count: location.checkIn.length, type: 'warning', message: "You are already checked in." });
-  }
-  else {
+    res.send({
+      count: location.checkIn.length,
+      type: "warning",
+      message: "You are already checked in.",
+    });
+  } else {
     const result = await locationService.updateLocationById(locationId, {
       checkIn: [...location.checkIn, req.user._id],
     });
-    res.send({ count: result.checkIn.length, type: 'success', message: "You are checked in successfully." });
+    res.send({
+      count: result.checkIn.length,
+      type: "success",
+      message: "You are checked in successfully.",
+    });
   }
 });
 
@@ -309,7 +317,7 @@ const likeLocation = catchAsync(async (req, res) => {
 
 const likeReview = catchAsync(async (req, res) => {
   const { reviewId } = req.params;
-  const review = await reviewService.getReviewById(reviewId);
+  const review = await reviewService.getReviewById(reviewId, "user");
   if (!review) {
     throw new ApiError(httpStatus.NOT_FOUND, "Review not found");
   }
@@ -333,6 +341,21 @@ const likeReview = catchAsync(async (req, res) => {
   } else {
     review.like.users.push(req.user._id);
     review.like.count += 1;
+
+    if (review.user._id.toString() !== req.user.id.toString()) {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: review.user._id.toString(),
+        actor: req.user.id.toString(),
+        title: "New review like",
+        description: `${req.user.username} has liked review ${
+          review.text
+            ? review.text.slice(0, 20) + (review.text.length > 20 ? "..." : "")
+            : review._id
+        } `,
+        url: `/profile/${review.location.partner.toString()}/locations/${review.location._id.toString()}/`,
+        type: "like",
+      });
+    }
   }
 
   await likeService.updateLikeById(review.like._id, review.like);
@@ -394,5 +417,5 @@ module.exports = {
   favoriteLocation,
   unfavoriteLocation,
   getFavoriteLocations,
-  checkIn
+  checkIn,
 };

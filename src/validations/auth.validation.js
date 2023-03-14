@@ -8,15 +8,22 @@ const register = {
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     role: Joi.string().required().valid("user", "partner"),
-    username: Joi.string().required(),
-    address: Joi.object()
-      .keys({
-        address: Joi.string(),
-        state: Joi.string().required(),
-        city: Joi.string().required(),
-        latitude: Joi.number(),
-        longitude: Joi.number(),
+    username: Joi.string()
+      .required()
+      .min(3)
+      .custom((value, helpers) => {
+        if (!/^[a-zA-Z0-9_]*$/.test(value)) {
+          return helpers.error("any.invalid");
+        }
+        return value;
       }),
+    address: Joi.object().keys({
+      address: Joi.string(),
+      state: Joi.string().required(),
+      city: Joi.string().required(),
+      latitude: Joi.number(),
+      longitude: Joi.number(),
+    }),
     category: Joi.string().custom(objectId),
     dob: Joi.when("role", {
       is: "user",

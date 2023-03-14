@@ -44,6 +44,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     deletedAt: true,
     overrideMethods: "all",
   });
+
   Post.plugin(toJSON);
   Post.plugin(mongoosePaginate);
 

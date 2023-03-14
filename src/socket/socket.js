@@ -55,6 +55,18 @@ const Action = {
       to,
     });
   },
+  defaultNotification: async (from, to, notification) => {
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      message: notification.description,
+      to,
+    });
+  },
 };
 
 module.exports = {

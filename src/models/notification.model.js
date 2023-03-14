@@ -30,11 +30,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         enum: [
           "follow",
           "like",
-          "comment",
           "mention",
           "mail",
           "addLocation",
           "shoutout",
+          "review",
+          "post",
         ],
         required: true,
       },
@@ -56,17 +57,19 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     recipient = recipient._id.toString();
     switch (type) {
       case "follow":
-        await Action.follow(actor, recipient);
+        await Action.follow(actor, recipient, notification);
         break;
       case "mail":
-        await Action.mail(actor, recipient);
+        await Action.mail(actor, recipient, notification);
         break;
       case "addLocation":
-        await Action.addLocation(actor, recipient);
+        await Action.addLocation(actor, recipient, notification);
         break;
       case "shoutout":
-        await Action.shoutout(actor, recipient);
+        await Action.shoutout(actor, recipient, notification);
+        break;
       default:
+        await Action.defaultNotification(actor, recipient, notification);
         break;
     }
   });
