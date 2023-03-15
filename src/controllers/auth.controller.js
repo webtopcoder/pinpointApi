@@ -5,7 +5,6 @@ const ApiError = require("@utils/ApiError");
 const { authService, userService, tokenService } = require("@services");
 
 const register = catchAsync(async (req, res) => {
-
   const user = await userService.createUser(req.body);
   EventEmitter.emit(events.VERIFY_EMAIL, user.id);
   res.send({
@@ -25,7 +24,7 @@ const login = catchAsync(async (req, res, next) => {
   }
   user = user.toJSON();
   let tokens;
-  if (role === 'partner' && user.status !== 'active') tokens = ''
+  if (role === "partner" && user.status !== "active") tokens = "";
   else tokens = await tokenService.generateAuthTokens(user);
   console.log(user, tokens);
   res.send({
