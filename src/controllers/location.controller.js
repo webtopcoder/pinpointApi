@@ -187,6 +187,13 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
+  if (!req.user.activeSubscription) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You're not subscribed to this service"
+    );
+  }
+
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {
       const media = await uploadMedia(file, req.user._id);
@@ -214,6 +221,13 @@ const quickDeparture = catchAsync(async (req, res) => {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "You don't have permission to update this location"
+    );
+  }
+
+  if (!req.user.activeSubscription) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You're not subscribed to this service"
     );
   }
 
