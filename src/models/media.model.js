@@ -18,7 +18,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: String,
         default: "",
       },
-
+      status: {
+        type: String,
+        enum: ["active", "pending", "deleted"],
+        default: "active",
+      },
       mimetype: {
         type: String,
       },

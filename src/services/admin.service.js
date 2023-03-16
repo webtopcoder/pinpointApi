@@ -25,6 +25,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 const userService = require("./user.service");
+const { query } = require("express");
 
 const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
   const usersWithCities = await User.find({
@@ -163,6 +164,8 @@ const getUserStats = async (
  * @returns {Promise<User>}
  */
 const searchUser = async (reqQuery) => {
+
+
   reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
 
   let query = {};
@@ -385,8 +388,17 @@ const getActivitiesById = (query) => {
     case "Review":
       return Review.findById(query.id).populate("user location images");
     case "Shoutout":
-      return Shoutout.findById(query.id).populate("from to post");
+      return Shoutout.findOne({ $or: [{ _id: query.id }, { post: query.id }] }).populate(["from", "to", {
+        path: "post", populate: "images"
+      }]);
+    case "Media":
+      return Media.findById({ id: query.id, status: 'active' }).populate("user");
   }
+
+  options.populate = [
+    "follower",
+    { path: "follower", populate: "profile.avatar" },
+  ];
 };
 
 const getUpdateActivityById = (query) => {
@@ -455,11 +467,18 @@ const userUpdate = async (id, payload) => {
 const ActivityUpdate = async (id, type, updateBody) => {
 
   const Activity = await getUpdateActivityById({ id: id, type: type });
+
   if (!Activity) {
     throw new ApiError(httpStatus.NOT_FOUND, "Activity not found");
   }
   Object.assign(Activity, updateBody);
   await Activity.save();
+
+  if (type === "Shoutout") {
+    const sub_Activity = await getUpdateActivityById({ id: Activity.post.toString(), type: "Post" });
+    Object.assign(sub_Activity, updateBody);
+    await sub_Activity.save();
+  }
   return Activity;
 };
 
@@ -696,7 +715,7 @@ const getLatestActivities = async (req) => {
       };
     case "Media":
       return {
-        data: await Media.find({})
+        data: await Media.find({ status: 'active' })
           .sort({ createdAt: -1 })
           .skip(req.limit * (req.page - 1))
           .limit(req.limit)

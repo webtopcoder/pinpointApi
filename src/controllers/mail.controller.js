@@ -425,6 +425,7 @@ const sendMessageByAdmin = catchAsync(async (req, res) => {
     filename: attachment.originalname,
     path: path.resolve(__dirname, "../../", attachment.path),
   }));
+  
   const to = user.email;
 
   EventEmitter.emit(events.ADMIN_SEND_MAIL, {

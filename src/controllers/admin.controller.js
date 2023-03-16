@@ -98,8 +98,13 @@ const getUsersForCSV = catchAsync(async (req, res) => {
       value: "status",
     },
   ];
+  console.log(req.query);
 
-  const { data } = await adminService.searchPartner({ ...req, limit: 9999 });
+  if (req.query.role == "user")
+    var { data } = await adminService.searchUser({ ...req.query, limit: 9999 });
+  else
+    var { data } = await adminService.searchPartner({ ...req.query, limit: 9999 });
+
   if (!data) {
     throw new ApiError(httpStatus.NOT_FOUND, "partners not found");
   }
@@ -145,14 +150,18 @@ const getActivityImageRemoveByID = catchAsync(async (req, res) => {
   if (!activity) {
     throw new ApiError(httpStatus.NOT_FOUND, "acitvity not found");
   }
-
   const newArray = activity.images.filter(item => item.toString() !== req.query.imageid);
 
   switch (req.query.type) {
     case 'Post':
       await postService.updatePostById(id, { images: newArray });
+      break;
     case 'Review':
       await reviewService.updateReviewById(id, { images: newArray });
+      break;
+    default:
+      await postService.updatePostById(id, { images: newArray });
+      break;
   }
   const result = await adminService.getActivitiesById(req.query);
   res.send({ data: result });
@@ -190,10 +199,14 @@ const uploadActivityImage = catchAsync(async (req, res) => {
   switch (type) {
     case 'Post':
       await postService.updatePostById(id, { images: activity.images });
+      break;
     case 'Review':
       await reviewService.updateReviewById(id, { images: activity.images });
+      break;
+    default:
+      await postService.updatePostById(id, { images: activity.images });
+      break;
   }
-
   return res.json({ success: true, avatar: media });
 });
 
