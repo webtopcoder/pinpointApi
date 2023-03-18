@@ -26,7 +26,6 @@ const login = catchAsync(async (req, res, next) => {
   let tokens;
   if (role === "partner" && user.status !== "active") tokens = "";
   else tokens = await tokenService.generateAuthTokens(user);
-  console.log(user, tokens);
   res.send({
     user,
     tokens,
@@ -42,14 +41,16 @@ const adminLogin = catchAsync(async (req, res) => {
       .json({ code: 400, message: "Unable to login." });
   }
   admin = admin.toJSON();
+
   const tokens = await tokenService.generateAuthTokens(admin);
+
   res.send({
     data: { admin, tokens },
   });
 });
 
 const getAdmin = catchAsync(async (req, res) => {
-  res.send({ data: req.user });
+  res.send({ data: "success" });
 });
 
 const logout = catchAsync(async (req, res) => {

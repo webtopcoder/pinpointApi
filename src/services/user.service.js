@@ -75,7 +75,7 @@ const getUserByEmail = (email) => {
 };
 
 const getAdminByEmail = (email) => {
-  return Admin.findOne({ email });
+  return User.findOne({ email }).select("_id firstName lastName username email password");
 };
 
 const getAdminByID = (id) => {

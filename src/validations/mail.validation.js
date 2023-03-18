@@ -42,6 +42,7 @@ const sendMessageByAdmin = {
   body: Joi.object().keys({
     subject: Joi.string().required(),
     message: Joi.string().required(),
+    to: Joi.string().required()
   }),
 };
 

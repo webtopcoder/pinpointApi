@@ -417,23 +417,30 @@ const bulkActions = catchAsync(async (req, res) => {
 const sendMessageByAdmin = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const user = await userService.getUserById(userId);
+  let mailsToSend;
+
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
-  const { subject, message } = req.body;
-  const attachments = req.files.map((attachment) => ({
-    filename: attachment.originalname,
-    path: path.resolve(__dirname, "../../", attachment.path),
-  }));
-  
-  const to = user.email;
+  const { to, subject, message } = req.body;
+  const from = req.user._id;
+  const files = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
 
-  EventEmitter.emit(events.ADMIN_SEND_MAIL, {
+  mailsToSend = [{
+    from,
+    isNotice: false,
     to,
+    files,
     subject,
     message,
-    attachments,
-  });
+  }];
+
+  await mailService.createMail(mailsToSend);
 
   return res
     .status(httpStatus.CREATED)

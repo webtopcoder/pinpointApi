@@ -28,7 +28,6 @@ const auth =
   (allowAnonymous = false, isAdmin = false) =>
   async (req, res, next) => {
 
-    console.log(req.user);
     const passportMiddleware = allowAnonymous ? ["jwt", "anonymous"] : ["jwt"];
     return new Promise((resolve, reject) => {
       passport.authenticate(
@@ -38,7 +37,6 @@ const auth =
       )(req, res, next);
     })
       .then((user) => {
-        console.log(isAdmin, user.role);
         if (isAdmin && user.role !== "admin") {
           throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");
         }
