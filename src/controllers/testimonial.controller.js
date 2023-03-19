@@ -7,6 +7,7 @@ const ApiError = require("../utils/ApiError");
 
 const gettestimonialForTestimonialSection = catchAsync(async (req, res) => {
   const testimoials = await testimonialService.gettestimonialForTestimonialSection();
+
   res.send({
     data: testimoials,
   });

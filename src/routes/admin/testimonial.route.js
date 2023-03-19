@@ -18,6 +18,11 @@ router
     testimonialController.createTestimonial
   );
 
+router.get(
+  "/all",
+  testimonialController.gettestimonialForTestimonialSection
+)
+
 router
   .route("/:id/avatar/upload")
   .post(

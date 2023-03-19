@@ -5,7 +5,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("@utils/defaultSort");
 
 const gettestimonialForTestimonialSection = async () => {
-  const testimonials = await Testimonial.find({ isArchived: false });
+  const testimonials = await Testimonial.find({ isArchived: true }).populate(["files"]);
   return testimonials;
 };
 
@@ -15,7 +15,7 @@ const getTestimonials = async (filter, options) => {
     customLabels,
     sort: defaultSort,
   });
-  return testimonials;
+  return testimonials; 
 };
 
 const getTestimonialById = async (testimonialId) => {
