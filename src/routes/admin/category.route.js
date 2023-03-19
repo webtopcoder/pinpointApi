@@ -18,6 +18,10 @@ router
   );
 
 router
+  .route("/all")
+  .get(auth(false, true), categoryController.getAllCategories)
+
+router
   .route("/subcategories")
   .get(
     auth(false, true),

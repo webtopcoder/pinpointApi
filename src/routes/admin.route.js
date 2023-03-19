@@ -67,6 +67,8 @@ router
 router.use("/activities", require("./admin/activity.route"));
 router.use("/categories", require("./admin/category.route"));
 router.use("/faqs", require("./admin/faq.route"));
+router.use("/testimonial", require("./admin/testimonial.route"));
+router.use("/contact", require("./admin/contact.route"));
 router.use("/message", require("./admin/message.route"));
 router.use("/partnership", require("./admin/partnership.route"));
 

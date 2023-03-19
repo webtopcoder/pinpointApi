@@ -5,11 +5,17 @@ const { categoryService } = require("@services");
 const { mediaService } = require("../services");
 
 const getCategories = catchAsync(async (req, res) => {
-  if (req.query.sort) {
-    req.query.sort = Object.fromEntries(
-      req.query.sort.split(",").map((field) => field.split(":"))
-    );
-  }
+
+  const allcategories = await categoryService.getAllCategories();
+  res.status(httpStatus.OK).send({
+    success: true,
+    allcategories,
+    total: await Category.countDocuments(),
+  });
+});
+
+const getAllCategories = catchAsync(async (req, res) => {
+ 
   const categories = await categoryService.getCategories(req.query);
   res.status(httpStatus.OK).send({
     success: true,
@@ -143,4 +149,5 @@ module.exports = {
   deleteCategory,
   deleteSubCategory,
   getSubCategoriesGroupedByCategories,
+  getAllCategories
 };

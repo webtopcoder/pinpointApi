@@ -174,7 +174,7 @@ const ChangeAvatar = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
   }
 
-  const user = await adminService.getUserByIDForAvatar(id);
+  const user = await userService.getUserById(id);
 
   const media = await uploadMedia(req.file, id, true);
 

@@ -18,6 +18,14 @@ const getCategories = async (query) => {
   return categories;
 };
 
+const getAllCategories = async (query) => {
+  const categories = await Category.find();
+  if (!categories) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
+  }
+  return categories;
+};
+
 const getSubCategories = async (query) => {
   const subCategories = await SubCategory.find()
     .sort(query.sort ?? defaultSort)
@@ -176,4 +184,5 @@ module.exports = {
   updateSubCategory,
   deleteCategory,
   deleteSubCategory,
+  getAllCategories
 };

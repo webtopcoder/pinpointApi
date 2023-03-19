@@ -50,7 +50,7 @@ const adminLogin = catchAsync(async (req, res) => {
 });
 
 const getAdmin = catchAsync(async (req, res) => {
-  res.send({ data: "success" });
+  res.send({ data: req.user });
 });
 
 const logout = catchAsync(async (req, res) => {

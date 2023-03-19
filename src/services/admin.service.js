@@ -542,9 +542,12 @@ const searchPartner = async (reqQuery) => {
           as: "category",
         },
       },
-      // {
-      //   $unwind: "$category",
-      // },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: "settings",
