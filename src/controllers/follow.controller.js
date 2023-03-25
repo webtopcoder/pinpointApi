@@ -6,38 +6,13 @@ const ApiError = require("../utils/ApiError");
 const { Follow } = require("../models");
 
 const getFollowers = catchAsync(async (req, res) => {
-  const { userId } = req.params;
-  let filter = {}
-  // let filter = pick(req.query, [
-  //   "q",
-  // ]);
-
-  // console.log(filter.q);
-  // if (filter.q !== "") {
-  //   filter["$or"] = [
-  //     { firstName: { $regex: filter.q, $options: "i" } },
-  //     { lastName: { $regex: filter.q, $options: "i" } },
-  //     { username: { $regex: filter.q, $options: "i" } },
-  //   ];
-  //   delete filter.q;
-  // }
-  // else delete filter.q;
+  const { userId } = pick(req.params, ["userId"]);
+  let filter = pick(req.query, ["q"]);
 
   let options = pick(req.query, ["limit", "page", "sort"]);
 
-  options.populate = [
-    "follower",
-    { path: "follower", populate: "profile.avatar" },
-  ];
+  const followers = await followService.getFollowers(userId, filter, options);
 
-  const followers = await followService.queryFollows(
-    {
-      ...filter,
-      following: userId,
-      status: { $in: ['active', 'pending'] }
-    },
-    options
-  );
   res.status(httpStatus.OK).send({ success: true, data: followers });
 });
 
@@ -73,7 +48,6 @@ const acceptFollowingRequest = catchAsync(async (req, res) => {
   });
   res.status(httpStatus.NO_CONTENT).send();
 });
-
 
 const getOwnFollowerAndFollowing = catchAsync(async (req, res) => {
   const { _id: userId } = req.user;

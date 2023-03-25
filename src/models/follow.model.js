@@ -1,5 +1,6 @@
 const { toJSON, diffHistory } = require("./plugins");
 const softDelete = require("mongoose-delete");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Follow = new Schema(
@@ -14,7 +15,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       status: {
         type: String,
-        enum: ["pending", "decline", "active",],
+        enum: ["pending", "decline", "active"],
         default: "pending",
       },
     },
@@ -32,6 +33,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   });
   Follow.plugin(toJSON);
   Follow.plugin(mongoosePaginate);
+  Follow.plugin(aggregatePaginate);
 
   /**
    * @typedef Follow
