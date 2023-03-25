@@ -91,7 +91,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
-  const followerCount = (await followService.getFollowers(userId)).length;
+  const followerCount = (await followService.getFollowers(userId)).totalResults;
   const locationCount = (
     await locationService.getLocationsByPartnerId(userId, {})
   ).length;

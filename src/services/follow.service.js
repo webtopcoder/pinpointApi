@@ -12,7 +12,7 @@ const { ObjectId } = require("bson");
  * @param {ObjectId} userId
  * @returns {Promise<Follow[]>}
  */
-const getFollowers = async (userId, { q }, options) => {
+const getFollowers = async (userId, filter, options) => {
   const followAggregate = Follow.aggregate([
     {
       $lookup: {
@@ -29,21 +29,21 @@ const getFollowers = async (userId, { q }, options) => {
                       {
                         $regexMatch: {
                           input: "$firstName",
-                          regex: q,
+                          regex: filter?.q ?? "",
                           options: "i",
                         },
                       },
                       {
                         $regexMatch: {
                           input: "$lastName",
-                          regex: q,
+                          regex: filter?.q ?? "",
                           options: "i",
                         },
                       },
                       {
                         $regexMatch: {
                           input: "$username",
-                          regex: q,
+                          regex: filter?.q ?? "",
                           options: "i",
                         },
                       },
