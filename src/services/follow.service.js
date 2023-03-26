@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { Follow } = require("@models"),
+  { Follow, Media } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
@@ -12,20 +12,115 @@ const { ObjectId } = require("bson");
  * @param {ObjectId} userId
  * @returns {Promise<Follow[]>}
  */
-const getFollowers = async (userId) => {
-  const follows = await Follow.find({
-    following: userId,
-    status: 'active'
-  })
-    .populate("follower")
-    .select("-following");
+const getFollowers = async (userId, filter, options) => {
+  const followAggregate = Follow.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        let: { follower: "$follower" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$$follower", "$_id"] },
+                  {
+                    $or: [
+                      {
+                        $regexMatch: {
+                          input: "$firstName",
+                          regex: filter?.q ?? "",
+                          options: "i",
+                        },
+                      },
+                      {
+                        $regexMatch: {
+                          input: "$lastName",
+                          regex: filter?.q ?? "",
+                          options: "i",
+                        },
+                      },
+                      {
+                        $regexMatch: {
+                          input: "$username",
+                          regex: filter?.q ?? "",
+                          options: "i",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            $addFields: {
+              name: {
+                $concat: ["$firstName", " ", "$lastName"],
+              },
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              username: 1,
+              profile: {
+                avatar: 1,
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: Media.collection.name,
+              let: { avatar: "$profile.avatar" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$_id", "$$avatar"] },
+                  },
+                },
+              ],
+              as: "profile.avatar",
+            },
+          },
+          {
+            $unwind: {
+              path: "$profile.avatar",
+            },
+          },
+        ],
+        as: "follower",
+      },
+    },
+    {
+      $project: {
+        follower: {
+          $arrayElemAt: ["$follower", 0],
+        },
+        following: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+    {
+      $match: {
+        following: new ObjectId(userId),
+        follower: { $ne: null },
+      },
+    },
+  ]);
+
+  const follows = await Follow.aggregatePaginate(followAggregate, {
+    sort: defaultSort,
+    customLabels,
+    ...options,
+  });
+
   return follows;
 };
 
 const getFollowById = async (id) => {
-  const follows = await Follow.findById(
-    id,
-  )
+  const follows = await Follow.findById(id);
   return follows;
 };
 
@@ -67,16 +162,15 @@ const followOrUnfollow = async (userId, followingUser) => {
   if (follows) {
     if (follows.status === "decline")
       res = {
-        type: 'warning',
-        message: 'you are already declined'
-      }
+        type: "warning",
+        message: "you are already declined",
+      };
     else if (follows.status === "pending")
       res = {
-        type: 'warning',
-        message: 'you are on pending.'
-      }
-    else
-      follows.delete();
+        type: "warning",
+        message: "you are on pending.",
+      };
+    else follows.delete();
     return res;
   }
 
@@ -99,9 +193,9 @@ const followOrUnfollow = async (userId, followingUser) => {
   });
 
   res = {
-    type: 'success',
-    message: 'Requested Successfully.'
-  }
+    type: "success",
+    message: "Requested Successfully.",
+  };
 
   return res;
 };
@@ -119,7 +213,7 @@ const acceptFollowing = async (id, type, updateBody) => {
     const followData = {
       follower: follow.following,
       following: follow.follower,
-      status: 'active'
+      status: "active",
     };
 
     // EventEmitter.emit(events.SEND_NOTIFICATION, {
@@ -140,7 +234,7 @@ const getFollowStatus = async (userId, followingUser) => {
   const followData = {
     follower: userId,
     following: followingUser,
-    status: 'active'
+    status: "active",
   };
 
   const follows = await Follow.findOne(followData);
@@ -464,5 +558,5 @@ module.exports = {
   queryFollows,
   getFollowAndFollowings,
   acceptFollowing,
-  getFollowById
+  getFollowById,
 };
