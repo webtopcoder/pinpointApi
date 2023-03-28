@@ -193,9 +193,9 @@ const createPost = catchAsync(async (req, res) => {
               }
 
               if (item.follower) {
-                user = item.follower;
+                user = item?.follower;
               }
-              return user.username;
+              return user?.username;
             })
           )
         );

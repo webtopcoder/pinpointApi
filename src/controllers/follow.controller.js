@@ -16,6 +16,13 @@ const getFollowers = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ success: true, data: followers });
 });
 
+// const getFollowers = catchAsync(async (req, res) => {
+
+//   const followers = await followService.queryFollows(req);
+
+//   res.status(httpStatus.OK).send({ success: true, data: followers });
+// });
+
 const getFollowings = catchAsync(async (req, res) => {
   const { userId } = req.params;
   let filter = {};

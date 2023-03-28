@@ -251,6 +251,254 @@ const queryFollows = async (filters, options) => {
   return follows;
 };
 
+// const queryFollows = async (req) => {
+
+//   const { userId } = req.params;
+
+//   let filter = pick(req.query, ["q", "limit", "page", "sort"]);
+
+//   // const follows = await Follow.paginate(filters, {
+//   //   sort: defaultSort,
+//   //   customLabels,
+//   //   ...options,
+//   // });
+
+  
+
+//   let postAndFollows = await Follow.aggregate([
+//     {
+//       $match: {
+//         following: new ObjectId(userId.toString()),
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: Media.collection.name,
+//         localField: "profile.avatar",
+//         foreignField: "_id",
+//         as: "profile.avatar",
+//       },
+//     },
+//     {
+//       $unwind: "$profile.avatar",
+//     },
+//     {
+//       $lookup: {
+//         from: "posts",
+//         let: { userId: "$_id" },
+//         pipeline: [
+//           {
+//             $match: {
+//               $expr: {
+//                 $or: [
+//                   { $eq: ["$from", "$$userId"] },
+//                   { $eq: ["$to", "$$userId"] },
+//                 ],
+//               },
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: Like.collection.name,
+//               localField: "like",
+//               foreignField: "_id",
+//               as: "like",
+//             },
+//           },
+//           {
+//             $unwind: "$like",
+//           },
+//           {
+//             $lookup: {
+//               from: Media.collection.name,
+//               localField: "images",
+//               foreignField: "_id",
+//               as: "images",
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "users",
+//               localField: "from",
+//               foreignField: "_id",
+//               pipeline: [
+//                 {
+//                   $lookup: {
+//                     from: Media.collection.name,
+//                     localField: "profile.avatar",
+//                     foreignField: "_id",
+//                     as: "profile.avatar",
+//                   },
+//                 },
+//                 {
+//                   $unwind: "$profile.avatar",
+//                 },
+//               ],
+//               as: "from",
+//             },
+//           },
+//           {
+//             $unwind: "$from",
+//           },
+//           {
+//             $lookup: {
+//               from: "users",
+//               localField: "to",
+//               foreignField: "_id",
+//               pipeline: [
+//                 {
+//                   $lookup: {
+//                     from: Media.collection.name,
+//                     localField: "profile.avatar",
+//                     foreignField: "_id",
+//                     as: "profile.avatar",
+//                   },
+//                 },
+//                 {
+//                   $unwind: "$profile.avatar",
+//                 },
+//               ],
+//               as: "to",
+//             },
+//           },
+//           {
+//             $unwind: "$to",
+//           },
+//           {
+//             $project: {
+//               from_user: {
+//                 username: "$from.username",
+//                 avatar: "$from.profile.avatar",
+//                 _id: "$from._id",
+//               },
+//               to_user: {
+//                 username: "$to.username",
+//                 avatar: "$to.profile.avatar",
+//                 _id: "$to._id",
+//               },
+//               content: "$content",
+//               image: "$images",
+//               like: "$like",
+//               createdAt: "$createdAt",
+//               updatedAt: "$updatedAt",
+//               type: "post",
+//             },
+//           },
+//           {
+//             $match: {
+//               $or: [
+//                 { "from.username": new RegExp(search, "i") },
+//                 { "to.username": new RegExp(search, "i") },
+//                 { content: new RegExp(search, "i") },
+//               ],
+//             },
+//           },
+//           {
+//             $sort: { updatedAt: -1 },
+//           },
+//         ],
+//         as: "posts",
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "follows",
+//         let: { userId: "$_id" },
+//         pipeline: [
+//           {
+//             $match: {
+//               $expr: {
+//                 $or: [
+//                   { $eq: ["$follower", "$$userId"] },
+//                   { $eq: ["$following", "$$userId"] },
+//                 ],
+//               },
+//             },
+//           },
+//           {
+//             $lookup: {
+//               from: "users",
+//               localField: "follower",
+//               foreignField: "_id",
+//               pipeline: [
+//                 {
+//                   $lookup: {
+//                     from: Media.collection.name,
+//                     localField: "profile.avatar",
+//                     foreignField: "_id",
+//                     as: "profile.avatar",
+//                   },
+//                 },
+//                 {
+//                   $unwind: "$profile.avatar",
+//                 },
+//               ],
+//               as: "follower",
+//             },
+//           },
+//           {
+//             $unwind: "$follower",
+//           },
+//           {
+//             $lookup: {
+//               from: "users",
+//               localField: "following",
+//               foreignField: "_id",
+//               pipeline: [
+//                 {
+//                   $lookup: {
+//                     from: Media.collection.name,
+//                     localField: "profile.avatar",
+//                     foreignField: "_id",
+//                     as: "profile.avatar",
+//                   },
+//                 },
+//                 {
+//                   $unwind: "$profile.avatar",
+//                 },
+//               ],
+//               as: "following",
+//             },
+//           },
+//           {
+//             $unwind: "$following",
+//           },
+//           {
+//             $project: {
+//               follower: {
+//                 username: "$follower.username",
+//                 avatar: "$follower.profile.avatar",
+//                 _id: "$follower._id",
+//               },
+//               following: {
+//                 username: "$following.username",
+//                 avatar: "$following.profile.avatar",
+//                 _id: "$following._id",
+//               },
+//               createdAt: "$createdAt",
+//               updatedAt: "$updatedAt",
+//               type: "follow",
+//             },
+//           },
+//           {
+//             $sort: { updatedAt: -1 },
+//           },
+//         ],
+//         as: "follows",
+//       },
+//     },
+//     {
+//       $project: {
+//         posts: 1,
+//         follows: 1,
+//       },
+//     },
+//   ]);
+
+
+//   return follows;
+// };
+
 const getFollowAndFollowings = async (userId) => {
   const followAndFollowing = await Follow.aggregate([
     {
