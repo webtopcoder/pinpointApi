@@ -36,6 +36,10 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
       stripeProductId: {
         type: String,
       },
+      trialPeriodDays: {
+        type: Number,
+        default: 0,
+      },
     },
     {
       timestamps: true,

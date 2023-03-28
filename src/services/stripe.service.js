@@ -1,7 +1,66 @@
 const config = require("../config/config");
 const stripe = require("stripe")(config.stripe.secretKey);
 
-const createProduct = async ({ name, description, defaultPrice }) => {
+exports.createCustomer = async ({ email, name, userId }) => {
+  const customer = await stripe.customers.create({
+    email,
+    name,
+    metadata: {
+      userId,
+    },
+  });
+  return customer;
+};
+
+exports.retrieveCustomer = async (customerId) => {
+  const customer = await stripe.customers.retrieve(customerId);
+  return customer;
+};
+
+exports.createSubscription = async ({
+  customerId,
+  priceId,
+  metadata,
+  trialDays,
+}) => {
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: priceId }],
+    payment_behavior: "default_incomplete",
+    metadata,
+    trial_period_days: trialDays,
+    expand: ["latest_invoice.payment_intent"],
+  });
+  return subscription;
+};
+
+exports.retrieveSubscription = async (subscriptionId) => {
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  return subscription;
+};
+
+exports.updateSubscription = async (subscriptionId, { priceId }) => {
+  const price = await stripe.prices.retrieve(priceId);
+  if (!price.active) {
+    throw new Error("Price is not active");
+  }
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+  if (price.currency !== subscription.currency) {
+    throw new Error("Price currency does not match subscription currency");
+  }
+
+  const updatedSubscription = await stripe.subscriptions.update(
+    subscriptionId,
+    {
+      items: [{ price: priceId }],
+    }
+  );
+  return updatedSubscription;
+};
+
+exports.createProduct = async ({ name, description, defaultPrice }) => {
   return await stripe.products.create({
     name,
     description,
@@ -9,19 +68,19 @@ const createProduct = async ({ name, description, defaultPrice }) => {
   });
 };
 
-const updateProduct = async (productId, updateBody) => {
+exports.updateProduct = async (productId, updateBody) => {
   return await stripe.products.update(productId, updateBody);
 };
 
-const retrieveProduct = async (productId) => {
+exports.retrieveProduct = async (productId) => {
   return await stripe.products.retrieve(productId);
 };
 
-const deleteProduct = async (productId) => {
+exports.deleteProduct = async (productId) => {
   return await stripe.products.del(productId);
 };
 
-const createPrice = async ({ productId, unitAmount, currency, interval }) => {
+exports.createPrice = async ({ productId, unitAmount, currency, interval }) => {
   return await stripe.prices.create({
     product: productId,
     unit_amount: unitAmount,
@@ -32,22 +91,12 @@ const createPrice = async ({ productId, unitAmount, currency, interval }) => {
   });
 };
 
-const retrievePrice = async (priceId) => {
+exports.retrievePrice = async (priceId) => {
   const price = await stripe.prices.retrieve(priceId);
   return price;
 };
 
-const updatePrice = async (priceId, updateBody) => {
+exports.updatePrice = async (priceId, updateBody) => {
   const price = await stripe.prices.update(priceId, updateBody);
   return price;
-};
-
-module.exports = {
-  createProduct,
-  updateProduct,
-  retrieveProduct,
-  deleteProduct,
-  createPrice,
-  retrievePrice,
-  updatePrice,
 };

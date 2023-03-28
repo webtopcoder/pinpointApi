@@ -5,6 +5,7 @@ const {
   partnershipService,
   transactionService,
   userService,
+  stripeService,
 } = require("@services");
 const pick = require("../utils/pick");
 const env = require("../config/config");
@@ -65,19 +66,9 @@ const getPartnershipById = catchAsync(async (req, res) => {
 
 const createCustomer = async (req, res) => {
   try {
-    const stripe = new Stripe(env.stripe.secretKey, {
-      apiVersion: "2020-08-27",
-    });
-
-    const data = {
-      email: req.user.email,
-      name: req.user.username,
-    };
-
-    const customer = await stripe.customers.create(data);
-
-    // Optional but recommended
-    // Save the customer object or ID to your database
+    const user = await userService.getUserById(req.user._id);
+    const stripeCustomerId = await user.getStripeCustomerId();
+    const customer = await stripeService.retrieveCustomer(stripeCustomerId);
 
     res.status(200).json({
       code: "customer_created",
@@ -93,42 +84,65 @@ const createCustomer = async (req, res) => {
 };
 
 const subscribePartnership = catchAsync(async (req, res) => {
-  try {
-    const stripe = new Stripe(env.stripe.secretKey, {
-      apiVersion: "2020-08-27",
-    });
+  const { priceId } = req.body;
 
-    const { customerId, priceId } = req.body;
+  const partnership = await Partnership.findOne({
+    stripePriceId: priceId,
+  });
 
-    const subscription = await stripe.subscriptions.create({
-      customer: customerId,
-      items: [{ price: priceId }],
-      payment_behavior: "default_incomplete",
-      metadata: {
-        // You can save details about your user here
-        // Or any other metadata that you would want as reference.
-      },
-      expand: ["latest_invoice.payment_intent"],
-    });
-
-    const updateBody = {
-      ...req.user,
-      activeSubscription: subscription,
-    };
-
-    await userService.updateUserById(req.user._id, updateBody);
-    res.status(200).json({
-      code: "subscription_created",
-      subscriptionId: subscription.id,
-      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(400).json({
-      code: "subscription_creation_failed",
-      error: e,
-    });
+  if (!partnership) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Invalid price id, no partnership found."
+    );
   }
+
+  let subscription;
+
+  if (!req.user.activePartnership) {
+    const user = await userService.getUserById(req.user._id);
+    const stripeCustomerId = await user.getStripeCustomerId();
+
+    if (!stripeCustomerId) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "No customer id found, please create a customer first."
+      );
+    }
+
+    subscription = await stripeService.createSubscription({
+      customerId: stripeCustomerId,
+      priceId,
+      metadata: {
+        userId: req.user._id,
+      },
+      trialDays: partnership.trialPeriodDays ?? 0,
+    });
+  } else {
+    if (partnership._id.toString() === req.user.activePartnership.toString()) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "You already have this partnership"
+      );
+    }
+
+    subscription = await stripeService.updateSubscription(
+      req.user.activeSubscription.id,
+      {
+        priceId,
+      }
+    );
+  }
+
+  await userService.updateUserById(req.user._id, {
+    activeSubscription: subscription,
+  });
+
+  res.status(200).json({
+    code: "subscription_created",
+    subscriptionId: subscription.id,
+    clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+  });
 });
 
 const createTransaction = catchAsync(async (req, res) => {
@@ -178,7 +192,9 @@ const cancelSubscription = async (req, res) => {
       activePartnership: null,
       activeSubscription: null,
     };
+
     await userService.updateUserById(req.user._id, updateUser);
+
     res.status(200).json({
       code: "subscription_deleted",
       deletedSubscription,

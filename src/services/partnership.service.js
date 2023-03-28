@@ -19,7 +19,7 @@ const queryPartnerships = async (filter, options) => {
   return partnerships;
 };
 
-const getPartnerships = async () => Partnership.find();
+const getPartnerships = async (filter) => Partnership.find(filter);
 
 const getPartnershipById = async (id, populate) => {
   const partnership = await Partnership.findById(id).populate(populate);

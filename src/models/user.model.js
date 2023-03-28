@@ -6,6 +6,8 @@ const soft_delete = require("mongoose-delete");
 const SocialSchema = require("./schemas/social.schema");
 const PollSchema = require("./schemas/poll.schema");
 
+const stripeService = require("../services/stripe.service");
+
 module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
   const ProfileSchema = new Schema(
     {
@@ -88,11 +90,6 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         default: 0,
       },
 
-      activePartnership: {
-        type: Types.ObjectId,
-        ref: "Partnership",
-        default: null,
-      },
       locations: [
         {
           type: Types.ObjectId,
@@ -107,6 +104,15 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         },
       ],
 
+      activePartnership: {
+        type: Types.ObjectId,
+        ref: "Partnership",
+        default: null,
+      },
+      stripeCustomerId: {
+        type: String,
+        private: true,
+      },
       // FIX: this should be a virtual field
       activeSubscription: {
         type: Schema.Types.Mixed,
@@ -135,6 +141,23 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
   UserSchema.virtual("name").get(function () {
     return `${this.firstName} ${this.lastName}`;
   });
+
+  UserSchema.methods.getStripeCustomerId = async function () {
+    const user = this;
+    if (!user.stripeCustomerId) {
+      const data = {
+        email: user.email,
+        name: user.username,
+        userId: user._id,
+      };
+
+      const customer = await stripeService.createCustomer(data);
+      user.stripeCustomerId = customer.id;
+      await user.save();
+    }
+
+    return user.stripeCustomerId;
+  };
 
   /**
    * Check if email is taken
