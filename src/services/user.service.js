@@ -70,12 +70,13 @@ const checkUser = (fieldName, fieldValue) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = (email) => {
-
   return User.findOne({ email }).populate("profile.avatar");
 };
 
 const getAdminByEmail = (email) => {
-  return User.findOne({ email }).select("_id firstName lastName username email password");
+  return User.findOne({ email }).select(
+    "_id firstName lastName username email password"
+  );
 };
 
 const getAdminByID = (id) => {
@@ -88,17 +89,17 @@ const getUserByUsername = (username) => {
 
 const getActivePartners = async (status) => {
   const result = await User.find({
-    role: 'partner',
-    status: status
+    role: "partner",
+    status: status,
   })
     .populate([
       {
         path: "category",
         populate: {
-          path: "image"
+          path: "image",
         },
       },
-    ],)
+    ])
     .select("address category");
 
   return result;

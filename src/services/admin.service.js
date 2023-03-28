@@ -164,8 +164,6 @@ const getUserStats = async (
  * @returns {Promise<User>}
  */
 const searchUser = async (reqQuery) => {
-
-
   reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
 
   let query = {};
@@ -388,11 +386,20 @@ const getActivitiesById = (query) => {
     case "Review":
       return Review.findById(query.id).populate("user location images");
     case "Shoutout":
-      return Shoutout.findOne({ $or: [{ _id: query.id }, { post: query.id }] }).populate(["from", "to", {
-        path: "post", populate: "images"
-      }]);
+      return Shoutout.findOne({
+        $or: [{ _id: query.id }, { post: query.id }],
+      }).populate([
+        "from",
+        "to",
+        {
+          path: "post",
+          populate: "images",
+        },
+      ]);
     case "Media":
-      return Media.findById({ id: query.id, status: 'active' }).populate("user");
+      return Media.findById({ id: query.id, status: "active" }).populate(
+        "user"
+      );
   }
 
   options.populate = [
@@ -465,7 +472,6 @@ const userUpdate = async (id, payload) => {
 };
 
 const ActivityUpdate = async (id, type, updateBody) => {
-
   const Activity = await getUpdateActivityById({ id: id, type: type });
 
   if (!Activity) {
@@ -475,13 +481,15 @@ const ActivityUpdate = async (id, type, updateBody) => {
   await Activity.save();
 
   if (type === "Shoutout") {
-    const sub_Activity = await getUpdateActivityById({ id: Activity.post.toString(), type: "Post" });
+    const sub_Activity = await getUpdateActivityById({
+      id: Activity.post.toString(),
+      type: "Post",
+    });
     Object.assign(sub_Activity, updateBody);
     await sub_Activity.save();
   }
   return Activity;
 };
-
 
 const searchPartner = async (reqQuery) => {
   reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
@@ -508,7 +516,15 @@ const searchPartner = async (reqQuery) => {
   query.role = ROLE_PARTNER;
   query.status =
     reqQuery.status === "all" || undefined || null || ""
-      ? { $in: [STATUS_ACTIVE, STATUS_INACTIVE, STATUS_DECLINED, STATUS_PENDING, STATUS_DELETED] }
+      ? {
+          $in: [
+            STATUS_ACTIVE,
+            STATUS_INACTIVE,
+            STATUS_DECLINED,
+            STATUS_PENDING,
+            STATUS_DELETED,
+          ],
+        }
       : reqQuery.status;
 
   pipeline.push({
@@ -591,7 +607,6 @@ const searchPartner = async (reqQuery) => {
     ]),
     User.countDocuments(query),
   ]);
-
 
   const topCities = await getTopCities({
     role: ROLE_PARTNER,
@@ -718,7 +733,7 @@ const getLatestActivities = async (req) => {
       };
     case "Media":
       return {
-        data: await Media.find({ status: 'active' })
+        data: await Media.find({ status: "active" })
           .sort({ createdAt: -1 })
           .skip(req.limit * (req.page - 1))
           .limit(req.limit)
@@ -734,7 +749,7 @@ const getLatestActivities = async (req) => {
 };
 
 const getAdminById = async (id) => {
-  return Admin.findById(id);
+  return User.findById(id);
 };
 
 const deleteUserByID = async (id) => {
@@ -762,5 +777,5 @@ module.exports = {
   getLatestActivities,
   deleteUserByID,
   getUpdateActivityById,
-  ActivityUpdate
+  ActivityUpdate,
 };
