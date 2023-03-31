@@ -2,7 +2,7 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
-const { userService, adminService, postService, reviewService } = require("@services");
+const { userService, adminService, postService, reviewService, locationService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 import { Parser } from "json2csv";
 import pick from "../utils/pick";
@@ -98,7 +98,6 @@ const getUsersForCSV = catchAsync(async (req, res) => {
       value: "status",
     },
   ];
-  console.log(req.query);
 
   if (req.query.role == "user")
     var { data } = await adminService.searchUser({ ...req.query, limit: 9999 });
@@ -129,7 +128,7 @@ const getUserByID = catchAsync(async (req, res) => {
 
 const getLocationByID = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const location = await adminService.getLocationByID(id);
+  const location = await locationService.getLocationById(id);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "location not found");
   }

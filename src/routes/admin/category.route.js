@@ -51,6 +51,10 @@ router
   );
 
 router
+  .route("/getsub/:id")
+  .get(auth(false, true), categoryController.getSubCategoryByCategoryId)
+
+router
   .route("/:categoryId")
   .get(auth(false, true), categoryController.getCategoryById)
   .patch(
