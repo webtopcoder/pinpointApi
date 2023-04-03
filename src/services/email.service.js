@@ -66,9 +66,19 @@ const sendVerificationEmail = async (userId) => {
   let html;
   const subject = "Email Verification";
   const to = user.email;
-  if (user.role === "user") {
-    html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p><br><p>Pinpoint is going to vet out your business to make sure you are legit.</p><br><p> You will receive an email in less than an hour with the results. If approved, you will then be able to login. Thank you!</p><br>
-    <p>If you did not request this, please ignore this email.</p>`;
+  if (user.role === "partner") {
+    html = `<p>Hi, Hi Future Pinpoint Partner,
+    <br><p>Your OTP for your email verification is ${token}</p><br>
+    <p><br><p>
+    PLEASE NOTE: This code will not grant you access to use The Pinpoint Social. This is strictly to
+    verify the email you have signed up with</p><br>
+    <p> Following this verification, a Pinpoint admin will verify your business and manually activate your
+    profile. You will receive an email in less than 24 hours, stating the results of this vetting process.
+    After activation, you will not have access to our interactive map until you have signed up for a
+    Partnership with Pinpoint. At that point you have access to all of the features Pinpoint has to
+    offer!</p><br>
+    <p>If you did not request this, please ignore this email.</p><p><br><p>
+    <p><p><br><p><p>`;
   } else {
     html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p>If you did not request this, please ignore this email.</p>`;
   }
