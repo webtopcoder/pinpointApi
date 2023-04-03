@@ -63,16 +63,19 @@ const createLocation = async (locationBody) => {
   const partner = await userService.getUserById(locationBody.partner);
   const userFollowers = await followService.getFollowers(partner._id);
 
-  userFollowers.forEach((follower) => {
-    EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: follower._id,
-      actor: partner._id,
-      title: "New Location",
-      description: `${partner.username} has added a new location @${locationBody.title}`,
-      url: `/profile/${partner._id}/locations/${location._id}`,
-      type: "addLocation",
+  if (userFollowers.result) {
+    userFollowers.forEach((follower) => {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: follower._id,
+        actor: partner._id,
+        title: "New Location",
+        description: `${partner.username} has added a new location @${locationBody.title}`,
+        url: `/profile/${partner._id}/locations/${location._id}`,
+        type: "addLocation",
+      });
     });
-  });
+
+  }
 
   return location;
 };
