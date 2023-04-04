@@ -23,6 +23,7 @@ exports.createSubscription = async ({
   metadata,
   trialDays,
 }) => {
+
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: priceId }],

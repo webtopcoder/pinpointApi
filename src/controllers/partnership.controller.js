@@ -110,6 +110,8 @@ const subscribePartnership = catchAsync(async (req, res) => {
       );
     }
 
+    console.log(stripeCustomerId, priceId, req.user._id, partnership.trialPeriodDays ?? 0)
+
     subscription = await stripeService.createSubscription({
       customerId: stripeCustomerId,
       priceId,
@@ -133,6 +135,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
       }
     );
   }
+
 
   await userService.updateUserById(req.user._id, {
     activeSubscription: subscription,

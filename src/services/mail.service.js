@@ -15,18 +15,31 @@ const createMail = async (mailBody) => {
     : mailBody.from;
 
   const from_user = await userService.getUserById(sendingUser);
-
-  createdMails.map((item) => {
+  if (Array.isArray(createdMails)) {
+    createdMails.map((item) => {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: item.to,
+        actor: item.from,
+        type: "mail",
+        title: "New message",
+        description: `You have a new message from @${from_user.username}`,
+        url: `/message/${item._id}`,
+        type: "mail",
+      });
+    });
+  }
+  else {
     EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: item.to,
-      actor: item.from,
+      recipient: createdMails.to,
+      actor: createdMails.from,
       type: "mail",
       title: "New message",
       description: `You have a new message from @${from_user.username}`,
-      url: `/message/${item._id}`,
+      url: `/message/${createdMails._id}`,
       type: "mail",
     });
-  });
+  }
+
   return createdMails;
 };
 
