@@ -12,6 +12,7 @@ const env = require("../config/config");
 
 const Stripe = require("stripe");
 const { Partnership } = require("../models");
+const { stripeInstance } = require("../services/stripe.service");
 
 const createPartnership = catchAsync(async (req, res) => {
   const partnership = await partnershipService.createPartnership(req.body);
@@ -68,7 +69,16 @@ const createCustomer = async (req, res) => {
   try {
     const user = await userService.getUserById(req.user._id);
     const stripeCustomerId = await user.getStripeCustomerId();
-    const customer = await stripeService.retrieveCustomer(stripeCustomerId);
+
+    const customer = await stripeService
+      .retrieveCustomer(stripeCustomerId)
+      .catch(async () => {
+        const updatedUser = await userService.updateUserById(req.user._id, {
+          stripeCustomerId: null,
+        });
+
+        return await updatedUser.getStripeCustomerId();
+      });
 
     res.status(200).json({
       code: "customer_created",
@@ -141,10 +151,24 @@ const subscribePartnership = catchAsync(async (req, res) => {
     activeSubscription: subscription,
   });
 
+  let clientSecret, cardPaymentStatus;
+
+  if (!subscription.latest_invoice.payment_intent) {
+    const setupIntent = await stripeInstance.setupIntents.retrieve(
+      subscription.pending_setup_intent
+    );
+    clientSecret = setupIntent.client_secret;
+    cardPaymentStatus = "setupCard";
+  } else {
+    clientSecret = subscription.latest_invoice.payment_intent.client_secret;
+    cardPaymentStatus = "confirmCard";
+  }
+
   res.status(200).json({
     code: "subscription_created",
+    status: cardPaymentStatus,
     subscriptionId: subscription.id,
-    clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+    clientSecret,
   });
 });
 
@@ -153,6 +177,7 @@ const createTransaction = catchAsync(async (req, res) => {
     order: req.body.order,
     amount: req.body.amount,
     currency: req.body.currency,
+    trial: req.body.trial,
     user: req.user,
     status: "completed",
   };
@@ -167,7 +192,9 @@ const createTransaction = catchAsync(async (req, res) => {
   };
 
   await userService.updateUserById(req.user._id, updateUser);
-  res.send(await transactionService.createTransaction(data));
+
+  const transaction = await transactionService.createTransaction(data);
+  res.status(httpStatus.CREATED).send(transaction);
 });
 
 const getUserTransactions = catchAsync(async (req, res) => {
