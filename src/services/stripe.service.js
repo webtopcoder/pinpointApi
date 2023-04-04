@@ -1,6 +1,8 @@
 const config = require("../config/config");
 const stripe = require("stripe")(config.stripe.secretKey);
 
+exports.stripeInstance = stripe;
+
 exports.createCustomer = async ({ email, name, userId }) => {
   const customer = await stripe.customers.create({
     email,
