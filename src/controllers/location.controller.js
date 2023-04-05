@@ -117,6 +117,7 @@ const getLocations = catchAsync(async (req, res) => {
   ];
 
   delete filter.category;
+
   const result = await locationService.queryLocations(filter, options);
   res.send(result);
 });
@@ -361,11 +362,10 @@ const likeReview = catchAsync(async (req, res) => {
         recipient: review.user._id.toString(),
         actor: req.user.id.toString(),
         title: "New review like",
-        description: `${req.user.username} has liked review ${
-          review.text
-            ? review.text.slice(0, 20) + (review.text.length > 20 ? "..." : "")
-            : review._id
-        } `,
+        description: `${req.user.username} has liked review ${review.text
+          ? review.text.slice(0, 20) + (review.text.length > 20 ? "..." : "")
+          : review._id
+          } `,
         url: `/profile/${review.location.partner.toString()}/locations/${review.location._id.toString()}/`,
         type: "like",
       });

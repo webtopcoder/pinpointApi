@@ -250,12 +250,20 @@ const getAllImages = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const images = await userService.getProfileImages(user._id, {
+  const postImgs = await userService.getProfileImages(user._id, {
     page: page ?? 1,
     limit: limit ?? 10,
   });
 
-  return res.json({ success: true, image: images });
+  const locationReviewImgs = await locationService.getReviewImages(user._id, {
+    page: page ?? 1,
+    limit: limit ?? 10,
+  });
+
+  const images = postImgs.concat(locationReviewImgs);
+  let sortedDates = images.sort((p1, p2) => (p1.createdAt < p2.createdAt) ? 1 : (p1.createdAt > p2.createdAt) ? -1 : 0);
+
+  return res.json({ success: true, image: sortedDates });
 });
 
 const getPartnerDashboard = catchAsync(async (req, res) => {
