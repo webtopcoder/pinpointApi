@@ -21,6 +21,12 @@ module.exports.Location = require("./location.model")(
   mongoose,
   mongoosePaginate
 );
+
+module.exports.Arrival = require("./arrival.model")(
+  mongoose,
+  mongoosePaginate
+);
+
 module.exports.Review = require("./review.model")(mongoose, mongoosePaginate);
 module.exports.Notification = require("./notification.model")(
   mongoose,

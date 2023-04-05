@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { Location, Like, Review, Media } = require("@models"),
+  { Location, Like, Review, Media, Arrival } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
@@ -84,6 +84,11 @@ const createLocation = async (locationBody) => {
   }
 
   return location;
+};
+
+const createArrivalById = async (arriveBody) => {
+  const arrival = await Arrival.create({ ...arriveBody});
+  return arrival;
 };
 
 const updateLocationById = async (locationId, updateBody) => {
@@ -175,5 +180,6 @@ module.exports = {
   updateLocationById,
   queryLocations,
   deleteLocationByID,
-  getReviewImages
+  getReviewImages,
+  createArrivalById
 };
