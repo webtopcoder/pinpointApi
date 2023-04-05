@@ -127,7 +127,8 @@ const getUsernameById = catchAsync(async (req, res) => {
 });
 
 const getUser = catchAsync(async (req, res) => {
-  res.send({ success: true, user: req.user });
+  let userinfo = await userService.getUserById(req.user._id);
+  res.send({ success: true, user: userinfo });
 });
 
 module.exports = {

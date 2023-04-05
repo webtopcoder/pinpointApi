@@ -120,8 +120,6 @@ const subscribePartnership = catchAsync(async (req, res) => {
       );
     }
 
-    console.log(stripeCustomerId, priceId, req.user._id, partnership.trialPeriodDays ?? 0)
-
     subscription = await stripeService.createSubscription({
       customerId: stripeCustomerId,
       priceId,
@@ -193,8 +191,10 @@ const createTransaction = catchAsync(async (req, res) => {
 
   await userService.updateUserById(req.user._id, updateUser);
 
+  let userinfo = await userService.getUserById(req.user._id);
+
   const transaction = await transactionService.createTransaction(data);
-  res.status(httpStatus.CREATED).send(transaction);
+  res.status(httpStatus.CREATED).send(userinfo);
 });
 
 const getUserTransactions = catchAsync(async (req, res) => {
@@ -224,10 +224,12 @@ const cancelSubscription = async (req, res) => {
     };
 
     await userService.updateUserById(req.user._id, updateUser);
+    let userinfo = await userService.getUserById(req.user._id);
 
     res.status(200).json({
       code: "subscription_deleted",
       deletedSubscription,
+      user: userinfo
     });
   } catch (e) {
     console.error(e);

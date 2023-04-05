@@ -26,27 +26,26 @@ const verifyCallback = (req, resolve, reject) => async (err, user, info) => {
 
 const auth =
   (allowAnonymous = false, isAdmin = false) =>
-  async (req, res, next) => {
+    async (req, res, next) => {
 
-    const passportMiddleware = allowAnonymous ? ["jwt", "anonymous"] : ["jwt"];
-    return new Promise((resolve, reject) => {
-      passport.authenticate(
-        passportMiddleware,
-        { session: false },
-        verifyCallback(req, resolve, reject)
-      )(req, res, next);
-    })
-      .then((user) => {
-        if (isAdmin && user.role !== "admin") {
-          throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");
-        }
-
-        ns.run(() => {
-          ns.set("user", user);
-          next();
-        });
+      const passportMiddleware = allowAnonymous ? ["jwt", "anonymous"] : ["jwt"];
+      return new Promise((resolve, reject) => {
+        passport.authenticate(
+          passportMiddleware,
+          { session: false },
+          verifyCallback(req, resolve, reject)
+        )(req, res, next);
       })
-      .catch((err) => next(err));
-  };
+        .then((user) => {
+          if (isAdmin && user.role !== "admin") {
+            throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");
+          }
+          ns.run(() => {
+            ns.set("user", user);
+            next();
+          });
+        })
+        .catch((err) => next(err));
+    };
 
 module.exports = auth;
