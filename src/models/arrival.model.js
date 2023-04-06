@@ -18,9 +18,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           },
         ],
       },
-      isActive: {
-        type: Boolean,
-        default: false,
+      like: {
+        type: Types.ObjectId,
+        ref: "Like",
       },
       lastSeen: {
         type: Date,

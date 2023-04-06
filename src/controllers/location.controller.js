@@ -112,6 +112,7 @@ const getLocations = catchAsync(async (req, res) => {
     "like",
     "reviews",
     "images",
+    "isArrival",
     "arrivalImages",
     "subCategories",
   ];
@@ -135,6 +136,12 @@ const getLocation = catchAsync(async (req, res) => {
 
   await locationService.updateLocationById(req.params.locationId, data);
   res.send(location);
+});
+
+const getExpiredArrivals = catchAsync(async (req, res) => {
+  const IsArrival = await locationService.getIsArrival(req.params.locationId);
+  const ExpiredArrivals = await locationService.getExpiredArrivals(req.params.locationId, IsArrival);
+  res.send(ExpiredArrivals);
 });
 
 const updateLocation = catchAsync(async (req, res) => {
@@ -203,26 +210,20 @@ const quickArrival = catchAsync(async (req, res) => {
     })
   );
 
-  const updatedLocation = await locationService.updateLocationById(locationId, {
-    ...req.body,
-    arrivalImages,
-    isActive: true,
-  });
-
-
   const createdArrival = await locationService.createArrivalById({
     location: locationId,
-    arrivalImages,
+    images: arrivalImages,
     isActive: true,
     arrivalText: req.body.arrivalText,
     departureAt: req.body.departureAt,
   });
 
-  // const createdArrival = await locationService.createArrivalById(locationId, {
-  //   ...req.body,
-  //   arrivalImages,
-  //   isActive: true,
-  // });
+  const updatedLocation = await locationService.updateLocationById(locationId, {
+    ...req.body,
+    arrivalImages,
+    isActive: true,
+    isArrival: createdArrival._id
+  });
 
   res.send(updatedLocation);
 });
@@ -250,6 +251,7 @@ const quickDeparture = catchAsync(async (req, res) => {
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     isActive: false,
+    isArrival: null
   });
   res.send(updatedLocation);
 });
@@ -288,22 +290,22 @@ const reviewLocation = catchAsync(async (req, res) => {
 });
 
 const checkIn = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  const { arrivalID } = req.params;
+  const arrival = await locationService.getArrivalById(arrivalID);
+  if (!arrival) {
+    throw new ApiError(httpStatus.NOT_FOUND, "arrival not found");
   }
 
-  const ischeckedin = location.checkIn.includes(req.user.id);
+  const ischeckedin = arrival.checkIn.includes(req.user.id);
   if (ischeckedin) {
     res.send({
-      count: location.checkIn.length,
+      count: arrival.checkIn.length,
       type: "warning",
       message: "You are already checked in.",
     });
   } else {
-    const result = await locationService.updateLocationById(locationId, {
-      checkIn: [...location.checkIn, req.user._id],
+    const result = await locationService.updateArrivalById(arrivalID, {
+      checkIn: [...arrival.checkIn, req.user._id],
     });
     res.send({
       count: result.checkIn.length,
@@ -313,37 +315,79 @@ const checkIn = catchAsync(async (req, res) => {
   }
 });
 
-const likeLocation = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+const likeArrival = catchAsync(async (req, res) => {
+  const { arrivalID } = req.params;
+  const arrival = await locationService.getArrivalById(arrivalID);
+  if (!arrival) {
+    throw new ApiError(httpStatus.NOT_FOUND, "arrival not found");
   }
 
-  if (!location.like) {
-    location.like = await likeService.createLike({
+  if (!arrival.like) {
+    arrival.like = await likeService.createLike({
       users: [],
       count: 0,
     });
 
-    await location.save();
+    await arrival.save();
   }
 
-  const liked = location.like.users.includes(req.user.id);
+  const liked = arrival.like.users.includes(req.user.id);
 
   if (liked) {
-    location.like.users = location.like.users.filter(
+    arrival.like.users = arrival.like.users.filter(
       (user) => user != req.user._id
     );
-    location.like.count -= 1;
+    arrival.like.count -= 1;
   } else {
-    location.like.users.push(req.user._id);
-    location.like.count += 1;
+    arrival.like.users.push(req.user._id);
+    arrival.like.count += 1;
   }
 
-  await likeService.updateLikeById(location.like._id, location.like);
+  await likeService.updateLikeById(arrival.like._id, arrival.like);
 
   res.send({ liked: !liked });
+});
+
+
+
+const favoriteLocation = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  await userService.updateUserById(req.user._id, {
+    favoriteLocations: req.user.favoriteLocations?.includes(location._id)
+      ? req.user.favoriteLocations
+      : [...req.user.favoriteLocations, locationId],
+  });
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const unfavoriteLocation = catchAsync(async (req, res) => {
+  const { locationId } = req.params;
+  const location = await locationService.getLocationById(locationId);
+
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  await userService.updateUserById(req.user._id, {
+    favoriteLocations: req.user.favoriteLocations.filter(
+      (location) => location != locationId
+    ),
+  });
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const getFavoriteLocations = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const locations = await userService.getFavoriteLocations(userId);
+  res.send(locations);
 });
 
 const likeReview = catchAsync(async (req, res) => {
@@ -393,46 +437,6 @@ const likeReview = catchAsync(async (req, res) => {
   res.send({ liked: !liked });
 });
 
-const favoriteLocation = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-  }
-
-  await userService.updateUserById(req.user._id, {
-    favoriteLocations: req.user.favoriteLocations?.includes(location._id)
-      ? req.user.favoriteLocations
-      : [...req.user.favoriteLocations, locationId],
-  });
-
-  res.status(httpStatus.NO_CONTENT).send();
-});
-
-const unfavoriteLocation = catchAsync(async (req, res) => {
-  const { locationId } = req.params;
-  const location = await locationService.getLocationById(locationId);
-
-  if (!location) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-  }
-
-  await userService.updateUserById(req.user._id, {
-    favoriteLocations: req.user.favoriteLocations.filter(
-      (location) => location != locationId
-    ),
-  });
-
-  res.status(httpStatus.NO_CONTENT).send();
-});
-
-const getFavoriteLocations = catchAsync(async (req, res) => {
-  const { userId } = req.params;
-  const locations = await userService.getFavoriteLocations(userId);
-  res.send(locations);
-});
-
 module.exports = {
   createLocation,
   getLocations,
@@ -443,9 +447,10 @@ module.exports = {
   reviewLocation,
   deleteLocation,
   likeReview,
-  likeLocation,
+  likeArrival,
   favoriteLocation,
   unfavoriteLocation,
   getFavoriteLocations,
   checkIn,
+  getExpiredArrivals
 };

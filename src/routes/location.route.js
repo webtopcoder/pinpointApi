@@ -55,9 +55,9 @@ router
     locationController.quickDeparture
   );
 
-router.route("/:locationId/like").post(auth(), locationController.likeLocation);
+router.route("/:arrivalID/like").post(auth(), locationController.likeArrival);
 
-router.route("/:locationId/check-in").post(auth(), locationController.checkIn);
+router.route("/:arrivalID/check-in").post(auth(), locationController.checkIn);
 
 router
   .route("/:locationId/favorite")
@@ -78,5 +78,13 @@ router
     locationController.updateLocation
   )
   .delete(auth(), locationController.deleteLocation);
+
+router
+  .route("/arrival/:locationId")
+  .get(
+    auth(true),
+    validate(locationValidation.getLocation),
+    locationController.getExpiredArrivals
+  )
 
 module.exports = router;

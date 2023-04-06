@@ -9,7 +9,7 @@ const userService = require("./user.service");
 
 const getLocationById = async (id) => {
 
-  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false } })
+  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
 
   const originallocation = await Location.findById(id)
     .populate({
@@ -18,6 +18,18 @@ const getLocationById = async (id) => {
     })
     .populate("images")
     .populate("like")
+    .populate("isArrival")
+    .populate({
+      path: "isArrival",
+      populate: [
+        {
+          path: "like",
+        },
+        {
+          path: "images",
+        },
+      ],
+    })
     .populate({
       path: "reviews",
       populate: [
@@ -43,6 +55,35 @@ const getLocationById = async (id) => {
   return originallocation;
 };
 
+const getIsArrival = async (id) => {
+  const ArrivalInfo = await Location.findById(id).select('isArrival')
+    .populate({
+      path: "isArrival",
+    })
+  return ArrivalInfo;
+};
+
+const getArrivalById = async (id) => {
+  const arrival = await Arrival.findById(id)
+    .populate("like")
+  return arrival;
+};
+
+const getExpiredArrivals = async (locationID, isArrival) => {
+  let arrival
+  if (isArrival.isArrival !== null) {
+    arrival = await Arrival.find({ location: locationID, _id: { $ne: isArrival.isArrival._id } })
+      .populate("like")
+      .populate("images")
+  }
+
+  else arrival = await Arrival.find({ location: locationID })
+    .populate("like")
+    .populate("images")
+
+  return arrival;
+};
+
 const deleteLocationByID = async (id, updateBody) => {
   const location = await getLocationById(id);
 
@@ -56,7 +97,7 @@ const deleteLocationByID = async (id, updateBody) => {
 
 const getLocationsByPartnerId = async (partnerId, filter) => {
 
-  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false } })
+  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
 
   return Location.find({ ...filter, partner: partnerId })
     .populate("images")
@@ -87,7 +128,7 @@ const createLocation = async (locationBody) => {
 };
 
 const createArrivalById = async (arriveBody) => {
-  const arrival = await Arrival.create({ ...arriveBody});
+  const arrival = await Arrival.create({ ...arriveBody });
   return arrival;
 };
 
@@ -101,16 +142,26 @@ const updateLocationById = async (locationId, updateBody) => {
   return location;
 };
 
+const updateArrivalById = async (ArrivalID, updateBody) => {
+  const arrival = await getArrivalById(ArrivalID);
+  if (!arrival) {
+    throw new ApiError(httpStatus.NOT_FOUND, "arrival not found");
+  }
+  Object.assign(arrival, updateBody);
+  await arrival.save();
+  return arrival;
+};
+
 const queryLocations = async (filter, options) => {
 
-  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false } })
+  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
 
   const locations = await Location.paginate(filter, {
     customLabels,
     sort: defaultSort,
     ...options,
   });
-  
+
   return locations;
 };
 
@@ -182,5 +233,9 @@ module.exports = {
   queryLocations,
   deleteLocationByID,
   getReviewImages,
-  createArrivalById
+  createArrivalById,
+  getArrivalById,
+  updateArrivalById,
+  getIsArrival,
+  getExpiredArrivals
 };

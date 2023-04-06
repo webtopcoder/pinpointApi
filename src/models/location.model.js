@@ -65,6 +65,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Boolean,
         default: false,
       },
+      isArrival: {
+        type: Types.ObjectId,
+        ref: "Arrival",
+        default: null
+      },
       lastSeen: {
         type: Date,
       },
