@@ -110,6 +110,7 @@ const queryLocations = async (filter, options) => {
     sort: defaultSort,
     ...options,
   });
+  
   return locations;
 };
 

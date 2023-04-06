@@ -88,12 +88,12 @@ const getLocations = catchAsync(async (req, res) => {
 
   if (filter.subCategory) {
     const subCategories = await Promise.all(
-      filter.subCategory.split(",").map(async (subCategoryName) => {
-        return subCategoryName;
+      filter.subCategory.split(",").map(async (subCategoryID) => {
+        return subCategoryID;
       })
     );
 
-    filter.subCategories = { $in: subCategories };
+    filter.subCategories = { $all: subCategories };
     delete filter.subCategory;
   }
 
@@ -119,6 +119,7 @@ const getLocations = catchAsync(async (req, res) => {
   delete filter.category;
 
   const result = await locationService.queryLocations(filter, options);
+
   res.send(result);
 });
 
