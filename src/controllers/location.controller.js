@@ -189,12 +189,12 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  // if (!req.user.activeSubscription) {
-  //   throw new ApiError(
-  //     httpStatus.FORBIDDEN,
-  //     "You're not subscribed to this service"
-  //   );
-  // }
+  if (!req.user.activeSubscription) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You're not subscribed to this service"
+    );
+  }
 
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {
