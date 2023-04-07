@@ -50,6 +50,7 @@ const sendResetPasswordEmail = async (userId) => {
   const user = await userService.getUserById(userId);
   const token = await tokenService.generateResetPasswordToken(user);
 
+  console.log(user.email);
   const subject = "Reset password";
   const to = user.email;
   const link = `${config.frontend_url}/authentication/create-password/?token=${token}`;
