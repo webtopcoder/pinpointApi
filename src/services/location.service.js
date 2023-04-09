@@ -176,7 +176,6 @@ const getReviewImages = async (userId, options) => {
     return acc;
   }, []);
 
-  console.log(locationIDs)
 
   const imagesInReview = await Review.aggregate([
     {

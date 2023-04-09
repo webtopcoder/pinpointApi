@@ -130,16 +130,22 @@ const getLocations = catchAsync(async (req, res) => {
 
 const getLocation = catchAsync(async (req, res) => {
   const location = await locationService.getLocationById(req.params.locationId);
+  const IsArrival = await locationService.getIsArrival(req.params.locationId);
+  const ExpiredArrivals = await locationService.getExpiredArrivals(req.params.locationId, IsArrival);
+  const userinfo = await userService.getUserById(req.user._id);
+
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
+
+  const favorited = userinfo.favoriteLocations.includes(req.params.locationId) ? true : false;
 
   const data = {
     lastSeen: new Date(),
   };
 
   await locationService.updateLocationById(req.params.locationId, data);
-  res.send(location);
+  res.send({ location: location, expiredArrival: ExpiredArrivals, isFavorite: favorited });
 });
 
 const getExpiredArrivals = catchAsync(async (req, res) => {
@@ -200,12 +206,12 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req.user.activeSubscription) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You're not subscribed to this service"
-    );
-  }
+  // if (!req.user.activeSubscription) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "You're not subscribed to this service"
+  //   );
+  // }
 
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {

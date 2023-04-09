@@ -507,7 +507,14 @@ const getProfileImages = async (userId, options) => {
 };
 
 const getFavoriteLocations = async (userId) => {
-  const locations = await User.findById(userId).populate("favoriteLocations");
+  const locations = await User.findById(userId).populate({
+    path: "favoriteLocations", populate: [
+      {
+        path: "images",
+      },
+    ],
+  });
+
   return locations.favoriteLocations;
 };
 

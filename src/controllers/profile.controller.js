@@ -85,12 +85,22 @@ const getProfile = catchAsync(async (req, res) => {
   res.json({ success: true, data: user.profile });
 });
 
+const getFavorited = catchAsync(async (req, res) => {
+  const userinfo = await userService.getUserById(req.user._id);
+
+  const favorited = userinfo.favoriteLocations.includes(req.params.locationID) ? true : false;
+
+  res.send({ success: favorited });
+});
+
+
 const getProfileHeaderInfo = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const user = await userService.getUserById(userId);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
+
   const followerCount = (await followService.getFollowers(userId)).totalResults;
   const locationCount = (
     await locationService.getLocationsByPartnerId(userId, {})
@@ -129,7 +139,24 @@ const getProfileActivity = catchAsync(async (req, res) => {
     search,
   });
 
-  if (page == 1) {
+  return res.json({
+    success: true,
+    about: user.profile?.about,
+    notification: user.profile?.notification,
+    social: user.profile?.social,
+    posts: post,
+    image: images,
+  });
+});
+
+const updateProfileView = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  if (req.user.id !== userId) {
     try {
       await userService.updateUserById(user._id, {
         profileViews: (user.profileViews ?? 0) + 1,
@@ -141,11 +168,6 @@ const getProfileActivity = catchAsync(async (req, res) => {
 
   return res.json({
     success: true,
-    about: user.profile?.about,
-    notification: user.profile?.notification,
-    social: user.profile?.social,
-    posts: post,
-    image: images,
   });
 });
 
@@ -321,4 +343,6 @@ module.exports = {
   getPollForProfile,
   getAllImages,
   getPartnerDashboard,
+  updateProfileView,
+  getFavorited
 };

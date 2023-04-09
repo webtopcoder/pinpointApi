@@ -27,7 +27,7 @@ router
   .route("/review/:reviewId/like")
   .post(auth(), locationController.likeReview);
 
-// router.route("/favorite/:userId").get(locationController.getFavoriteLocations);
+router.route("/favorite/:userId").get(locationController.getFavoriteLocations);
 
 router
   .route("/:locationId/review")

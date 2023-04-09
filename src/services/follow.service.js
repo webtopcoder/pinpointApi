@@ -98,6 +98,7 @@ const getFollowers = async (userId, filter, options) => {
           $arrayElemAt: ["$follower", 0],
         },
         following: 1,
+        status: 1,
         createdAt: 1,
         updatedAt: 1,
       },
@@ -106,6 +107,7 @@ const getFollowers = async (userId, filter, options) => {
       $match: {
         following: new ObjectId(userId),
         follower: { $ne: null },
+        status: { $ne: 'decline' }
       },
     },
   ]);
@@ -147,11 +149,16 @@ const getFollowings = async (userId) => {
  */
 const followOrUnfollow = async (userId, followingUser) => {
   let res;
-  const followData = {
-    follower: userId,
-    following: followingUser,
-  };
-  const follows = await Follow.findOne(followData);
+  const followData = [
+    {
+      follower: userId,
+      following: followingUser,
+    }, {
+      follower: followingUser,
+      following: userId,
+    }
+  ]
+
   const followingUserValid = await userService.getUserById(followingUser);
   const followerUserValid = await userService.getUserById(userId);
 
@@ -159,38 +166,42 @@ const followOrUnfollow = async (userId, followingUser) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  if (follows) {
-    if (follows.status === "decline")
-      res = {
-        type: "warning",
-        message: "you are already declined",
-      };
-    else if (follows.status === "pending")
-      res = {
-        type: "warning",
-        message: "you are on pending.",
-      };
-    else follows.delete();
-    return res;
-  }
+  followData?.map(async (item) => {
+    const follows = await Follow.findOne(item);
+    if (follows) {
+      if (follows.status === "decline")
+        res = {
+          type: "warning",
+          message: "you are already declined",
+        };
+      else if (follows.status === "pending")
+        res = {
+          type: "warning",
+          message: "you are on pending.",
+        };
+      else follows.remove();
+      return res;
+    }
 
-  let follow = await Follow.findOneDeleted(followData);
+    let follow = await Follow.findOneDeleted(item);
 
-  if (follow) {
-    follow.restore();
-  } else {
-    follow = await Follow.create(followData);
-  }
+    if (follow) {
+      follow.restore();
+    } else {
+      follow = await Follow.create(item);
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: followingUser,
+        actor: userId,
+        title: "New Follower",
+        description: `You have a new follower @${followerUserValid.username}`,
+        url: `/profile/${userId}/activity`,
+        type: "follow",
+      });
+    }
+  })
 
   // TODO: make template for notification
-  EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: followingUser,
-    actor: userId,
-    title: "New Follower",
-    description: `You have a new follower @${followerUserValid.username}`,
-    url: `/profile/${userId}/activity`,
-    type: "follow",
-  });
+
 
   res = {
     type: "success",
@@ -210,11 +221,11 @@ const acceptFollowing = async (id, type, updateBody) => {
   await follow.save();
 
   if (type === "active") {
-    const followData = {
-      follower: follow.following,
-      following: follow.follower,
-      status: "active",
-    };
+    // const followData = {
+    //   follower: follow.following,
+    //   following: follow.follower,
+    //   status: "active",
+    // };
 
     // EventEmitter.emit(events.SEND_NOTIFICATION, {
     //   recipient: follow.following,
@@ -224,7 +235,7 @@ const acceptFollowing = async (id, type, updateBody) => {
     //   type: "followAccept",
     // });
 
-    await Follow.create(followData);
+    await Follow.update({ follower: follow.following, following: follow.follower }, { status: "active" });
   }
 
   return follow;
@@ -263,7 +274,7 @@ const queryFollows = async (filters, options) => {
 //   //   ...options,
 //   // });
 
-  
+
 
 //   let postAndFollows = await Follow.aggregate([
 //     {

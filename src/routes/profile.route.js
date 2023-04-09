@@ -55,6 +55,14 @@ router
   .get(auth(true), profileController.getProfileHeaderInfo);
 
 router
+  .route("/getFavortied/:locationID")
+  .get(auth(true), profileController.getFavorited);
+
+router
+  .route("/updateProfileView/:userId")
+  .get(auth(true), profileController.updateProfileView);
+
+router
   .route("/:userId/activity")
   .get(auth(true), profileController.getProfileActivity);
 

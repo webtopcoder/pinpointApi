@@ -31,7 +31,6 @@ const updateUserByID = catchAsync(async (req, res) => {
 const updateActivityByID = catchAsync(async (req, res) => {
   const { id, type } = req.params;
 
-  console.log(type);
   await adminService.ActivityUpdate(id, type, req.body);
 
   const acitvity = await adminService.getActivitiesById({ id: id, type: type });
