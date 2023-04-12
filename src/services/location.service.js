@@ -74,15 +74,17 @@ const getExpiredArrivals = async (locationID, isArrival) => {
   if (isArrival.isArrival !== null) {
     arrival = await Arrival.find({ location: locationID, _id: { $ne: isArrival.isArrival._id } })
       .populate("like")
+      .populate("location")
       .populate("images")
       .sort({ "createdAt": 1 })
   }
 
   else arrival = await Arrival.find({ location: locationID })
     .populate("like")
+    .populate("location")
     .populate("images")
     .sort({ "createdAt": 1 })
-
+    
   return arrival;
 };
 

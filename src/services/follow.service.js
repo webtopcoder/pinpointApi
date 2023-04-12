@@ -189,19 +189,19 @@ const followOrUnfollow = async (userId, followingUser) => {
       follow.restore();
     } else {
       follow = await Follow.create(item);
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: followingUser,
-        actor: userId,
-        title: "New Follower",
-        description: `You have a new follower @${followerUserValid.username}`,
-        url: `/profile/${userId}/activity`,
-        type: "follow",
-      });
+
     }
   })
 
   // TODO: make template for notification
-
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: followingUser,
+    actor: userId,
+    title: "New Follower",
+    description: `You have a new follower @${followerUserValid.username}`,
+    url: `/profile/${userId}/activity`,
+    type: "follow",
+  });
 
   res = {
     type: "success",

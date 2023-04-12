@@ -244,10 +244,14 @@ const getUserActivity = async (userId, { page, search }) => {
               from_user: {
                 username: "$from.username",
                 avatar: "$from.profile.avatar",
+                firstname: "$from.firstName",
+                lastname: "$from.lastName",
                 _id: "$from._id",
               },
               to_user: {
                 username: "$to.username",
+                firstname: "$from.firstName",
+                lastname: "$from.lastName",
                 avatar: "$to.profile.avatar",
                 _id: "$to._id",
               },
