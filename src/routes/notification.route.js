@@ -1,6 +1,6 @@
 const express = require("express");
 const auth = require("@middlewares/auth");
-const { notificationController } = require("@controllers");
+const { notificationController, profileController } = require("@controllers");
 
 const router = express.Router();
 
@@ -9,6 +9,13 @@ router
   .get(
     auth(),
     notificationController.getNotifications
+  );
+
+router
+  .route("/clear")
+  .get(
+    auth(),
+    notificationController.clearNotifications
   );
 
 router

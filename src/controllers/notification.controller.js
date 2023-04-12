@@ -16,7 +16,8 @@ const getNotificationById = catchAsync(async (req, res) => {
 
 const getNotifications = catchAsync(async (req, res) => {
   let filter = pick(req.query, []);
-  let options = pick(req.query, ["limit", "page", "sort"]);
+  let options = pick(req.query, ["limit", "sort"]);
+  console.log(options)
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
@@ -24,41 +25,42 @@ const getNotifications = catchAsync(async (req, res) => {
   filter = {
     ...filter,
     recipient: req.user._id,
+    is_read: false
   };
+  options.sort = "-createdAt"
+
   options.populate = [
     "recipient",
     "actor",
-    "recipient.profile.avatar",
-    "actor.profile.avatar",
+    { path: "actor", populate: "profile.avatar" },
+    { path: "recipient", populate: "profile.avatar" },
   ];
+
   const result = await notificationService.queryNotifications(filter, options);
   res.send(result);
 });
 
-const markAsRead = catchAsync(async (req, res) => {
-  const notification = await notificationService.getNotificationById(
-    req.params.id
-  );
-  if (!notification) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
-  }
+const clearNotifications = catchAsync(async (req, res) => {
 
-  if (
-    notification.recipient != req.user._id &&
-    req.user._id != notification.actor
-  ) {
-    throw new ApiError(httpStatus.FORBIDDEN, "Forbidden");
-  }
+  const result = await notificationService.clearNotifications(req.user._id);
+
+  res.send(result);
+});
+
+
+const markAsRead = catchAsync(async (req, res) => {
 
   await notificationService.updateNotificationById(req.params.id, {
     is_read: true,
   });
 
-  res.status(httpStatus.NO_CONTENT).send();
+
+  res.send({ "success": true });
 });
 
 module.exports = {
   getNotificationById,
   getNotifications,
   markAsRead,
+  clearNotifications
 };

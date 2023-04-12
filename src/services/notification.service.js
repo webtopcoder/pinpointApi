@@ -16,13 +16,15 @@ const getPrevNotification = async ({ actor, recipient, type }) => {
 
 const sendNotification = async (notificationBody) => {
   let notification;
-  const prevNotification = await getPrevNotification(notificationBody);
-  if (prevNotification) {
-    notification = Object.assign(prevNotification, notificationBody);
-    await notification.save();
-  } else {
-    notification = await createNotification(notificationBody);
-  }
+  notification = await createNotification(notificationBody);
+
+  // const prevNotification = await getPrevNotification(notificationBody);
+  // if (prevNotification) {
+  //   notification = Object.assign(prevNotification, notificationBody);
+  //   await notification.save();
+  // } else {
+  //   notification = await createNotification(notificationBody);
+  // }
 
   return notification;
 };
@@ -36,6 +38,12 @@ const queryNotifications = async (filter, options) => {
   return notifications;
 };
 
+const clearNotifications = async (userid) => {
+  await Notification.updateMany({ "recipient": userid }, { $set: { is_read: true } })
+  const result = Notification.find({ "recipient": userid, is_read: false })
+  return result;
+};
+
 const getNotificationById = async (id, populate) => {
   const notification = await Notification.findById(id).populate(populate);
   if (!notification) {
@@ -45,13 +53,9 @@ const getNotificationById = async (id, populate) => {
 };
 
 const updateNotificationById = async (notificationId, updateBody) => {
-  const notification = await getNotificationById(notificationId);
-  if (!notification) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Notification not found");
-  }
-  Object.assign(notification, updateBody);
-  await notification.save();
-  return notification;
+
+  await Notification.update({ "_id": notificationId }, { $set: updateBody })
+  return true;
 };
 
 const deleteNotificationById = async (notificationId) => {
@@ -70,4 +74,5 @@ module.exports = {
   getNotificationById,
   updateNotificationById,
   deleteNotificationById,
+  clearNotifications
 };

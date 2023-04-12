@@ -6,6 +6,7 @@ const {
   shoutoutService,
   likeService,
   locationService,
+  notificationService
 } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
@@ -330,6 +331,15 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
   });
 });
 
+const markAsRead = catchAsync(async (req, res) => {
+ 
+  await notificationService.updateNotificationById(req.params.id, {
+    is_read: true,
+  });
+
+  res.send({ "success": true });
+});
+
 module.exports = {
   createPost,
   editProfile,
@@ -344,5 +354,6 @@ module.exports = {
   getAllImages,
   getPartnerDashboard,
   updateProfileView,
-  getFavorited
+  getFavorited,
+  markAsRead
 };
