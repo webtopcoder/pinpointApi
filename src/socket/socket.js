@@ -13,6 +13,7 @@ const Action = {
 
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "follow",
       message: from_user.username + " is following you!",
       to,
     });
@@ -25,6 +26,7 @@ const Action = {
     }
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "mail",
       message: from_user.username + " has sent you a message!",
       to,
     });
@@ -35,9 +37,10 @@ const Action = {
     if (!room) {
       throw new Error("Room not found");
     }
-
+    
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "addlocation",
       message: from_user.username + " has added new location!",
       to,
     });
@@ -51,6 +54,7 @@ const Action = {
 
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "shoutout",
       message: from_user.username + " has given you a shoutout!",
       to,
     });
@@ -63,6 +67,7 @@ const Action = {
 
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "default",
       message: notification.description,
       to,
     });
@@ -96,7 +101,6 @@ module.exports = {
 
         socket.emit("roomId", socket.id);
       });
-
       socket.on("disconnect", function (reason) {
         console.log(reason);
       });
