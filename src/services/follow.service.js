@@ -172,7 +172,7 @@ const followOrUnfollow = async (userId, followingUser) => {
       actor: userId,
       title: "New Follower",
       description: ` @${followerUserValid.username} removed your following.`,
-      url: `/profile/${userId}/followers`,
+      url: `/profile/${followingUser}/followers`,
       type: "follow",
       flag: "removing"
     })
@@ -183,7 +183,7 @@ const followOrUnfollow = async (userId, followingUser) => {
       actor: userId,
       title: "New Follower",
       description: `You have a new follower @${followerUserValid.username}`,
-      url: `/profile/${userId}/followers`,
+      url: `/profile/${followingUser}/followers`,
       type: "follow",
       flag: "creating"
     })
@@ -254,7 +254,7 @@ const acceptFollowing = async (id, type, updateBody) => {
       actor: follow.following,
       title: "New Follower",
       description: `@${followingUserValid.username} accepted your following request`,
-      url: `/profile/${follow.following}/followers`,
+      url: `/profile/${follow.follower}/followers`,
       type: "follow",
       flag: "accepting"
     });
@@ -268,7 +268,7 @@ const acceptFollowing = async (id, type, updateBody) => {
       actor: follow.following,
       title: "New Follower",
       description: `@${followingUserValid.username} declined your following request`,
-      url: `/profile/${follow.following}/followers`,
+      url: `/profile/${follow.follower}/followers`,
       type: "follow",
       flag: "declining"
     });
