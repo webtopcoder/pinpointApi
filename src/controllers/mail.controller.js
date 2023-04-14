@@ -437,6 +437,7 @@ const sendMessageByAdmin = catchAsync(async (req, res) => {
     from,
     isNotice: false,
     to,
+    role: user.role,
     files,
     subject,
     message,
