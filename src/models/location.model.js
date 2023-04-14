@@ -93,7 +93,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           ref: "SubCategory",
         },
       ],
-      checkIn: [
+      favoriteUsers: [
         {
           type: Types.ObjectId,
           ref: "User",

@@ -36,11 +36,12 @@ const compose = catchAsync(async (req, res) => {
       });
     }
 
-    mailsToSend = to_user.results.map((user) => {
+   mailsToSend = to_user.results.map((user) => {
       return {
         from,
         isNotice: false,
         to: user._id,
+        role: user.role,
         files,
         subject,
         message,
@@ -54,6 +55,7 @@ const compose = catchAsync(async (req, res) => {
           return {
             from,
             to: follow.follower._id,
+            role: follow.follower.role,
             isNotice: true,
             files,
             subject,

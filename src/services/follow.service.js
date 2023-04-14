@@ -158,15 +158,42 @@ const followOrUnfollow = async (userId, followingUser) => {
       following: userId,
     }
   ]
-
   const followingUserValid = await userService.getUserById(followingUser);
   const followerUserValid = await userService.getUserById(userId);
+
+  const notifyFlag = await Follow.findOne({
+    follower: userId,
+    following: followingUser,
+  });
+
+  if (notifyFlag) {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: followingUser,
+      actor: userId,
+      title: "New Follower",
+      description: ` @${followerUserValid.username} removed your following.`,
+      url: `/profile/${userId}/followers`,
+      type: "follow",
+      flag: "removing"
+    })
+  }
+  else {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: followingUser,
+      actor: userId,
+      title: "New Follower",
+      description: `You have a new follower @${followerUserValid.username}`,
+      url: `/profile/${userId}/followers`,
+      type: "follow",
+      flag: "creating"
+    })
+  }
 
   if (!followingUserValid || !followerUserValid) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  followData?.map(async (item) => {
+  followData?.map(async (item, index) => {
     const follows = await Follow.findOne(item);
     if (follows) {
       if (follows.status === "decline")
@@ -174,12 +201,18 @@ const followOrUnfollow = async (userId, followingUser) => {
           type: "warning",
           message: "you are already declined",
         };
-      else if (follows.status === "pending")
+      else if (follows.status === "pending" || follows.status === "requesting")
         res = {
           type: "warning",
           message: "you are on pending.",
         };
-      else follows.remove();
+      else {
+        follows.remove();
+        res = {
+          type: "warning",
+          message: "unfriend successfully.",
+        };
+      }
       return res;
     }
 
@@ -188,20 +221,14 @@ const followOrUnfollow = async (userId, followingUser) => {
     if (follow) {
       follow.restore();
     } else {
-      follow = await Follow.create(item);
-
+      const newItem = {
+        ...item,
+        status: index === 0 ? "pending" : "requesting",
+      };
+      follow = await Follow.create(newItem);
     }
   })
 
-  // TODO: make template for notification
-  EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: followingUser,
-    actor: userId,
-    title: "New Follower",
-    description: `You have a new follower @${followerUserValid.username}`,
-    url: `/profile/${userId}/activity`,
-    type: "follow",
-  });
 
   res = {
     type: "success",
@@ -218,24 +245,33 @@ const acceptFollowing = async (id, type, updateBody) => {
   }
 
   Object.assign(follow, updateBody);
-  await follow.save();
+  type === "active" ? await follow.save() : await follow.remove();
 
+  const followingUserValid = await userService.getUserById(follow.following);
   if (type === "active") {
-    // const followData = {
-    //   follower: follow.following,
-    //   following: follow.follower,
-    //   status: "active",
-    // };
-
-    // EventEmitter.emit(events.SEND_NOTIFICATION, {
-    //   recipient: follow.following,
-    //   actor: follow.follower,
-    //   title: "New Follower",
-    //   url: `/profile/${userId}/activity`,
-    //   type: "followAccept",
-    // });
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: follow.follower,
+      actor: follow.following,
+      title: "New Follower",
+      description: `@${followingUserValid.username} accepted your following request`,
+      url: `/profile/${follow.following}/followers`,
+      type: "follow",
+      flag: "accepting"
+    });
 
     await Follow.update({ follower: follow.following, following: follow.follower }, { status: "active" });
+  }
+  else {
+    await Follow.remove({ follower: follow.following, following: follow.follower });
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: follow.follower,
+      actor: follow.following,
+      title: "New Follower",
+      description: `@${followingUserValid.username} declined your following request`,
+      url: `/profile/${follow.following}/followers`,
+      type: "follow",
+      flag: "declining"
+    });
   }
 
   return follow;

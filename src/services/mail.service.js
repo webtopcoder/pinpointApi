@@ -23,7 +23,7 @@ const createMail = async (mailBody) => {
         type: "mail",
         title: "New message",
         description: `You have a new message from @${from_user.username}`,
-        url: `/message/${item._id}`,
+        url: `/${item.role}/message`,
         type: "mail",
       });
     });
@@ -35,7 +35,7 @@ const createMail = async (mailBody) => {
       type: "mail",
       title: "New message",
       description: `You have a new message from @${from_user.username}`,
-      url: `/message/${createdMails._id}`,
+      url: `/${item.role}/message`,
       type: "mail",
     });
   }

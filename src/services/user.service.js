@@ -346,11 +346,15 @@ const getUserActivity = async (userId, { page, search }) => {
             $project: {
               follower: {
                 username: "$follower.username",
+                firstname: "$follower.firstName",
+                lastname: "$follower.lastName",
                 avatar: "$follower.profile.avatar",
                 _id: "$follower._id",
               },
               following: {
                 username: "$following.username",
+                firstname: "$follower.firstName",
+                lastname: "$follower.lastName",
                 avatar: "$following.profile.avatar",
                 _id: "$following._id",
               },

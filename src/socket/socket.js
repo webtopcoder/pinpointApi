@@ -4,19 +4,46 @@ const { User } = require("../models");
 const UserList = [];
 let socketHandle = null;
 const Action = {
-  follow: async (from, to) => {
+  follow: async (from, to, flag) => {
     const from_user = await User.findById(from);
+    const to_user = await User.findById(to);
     const room = _.find(UserList, { userid: from });
     if (!room) {
       throw new Error("Room not found");
     }
-
     socketHandle.id = room.roomId;
-    socketHandle.broadcast.emit(`notification-${to}`, {
-      type: "follow",
-      message: from_user.username + " is following you!",
-      to,
-    });
+
+    switch (flag) {
+      case "removing":
+        socketHandle.broadcast.emit(`notification-${to}`, {
+          type: "follow",
+          message: from_user.username + " removed you!",
+          to,
+        });
+        break;
+      case "accepting":
+        socketHandle.broadcast.emit(`notification-${to}`, {
+          type: "follow",
+          message: from_user.username + " accepted you!",
+          to,
+        });
+        break;
+      case "declining":
+        socketHandle.broadcast.emit(`notification-${to}`, {
+          type: "follow",
+          message: from_user.username + " declined you!",
+          to,
+        });
+        break;
+      default:
+        socketHandle.broadcast.emit(`notification-${to}`, {
+          type: "follow",
+          message: from_user.username + " following you!",
+          to,
+        });
+        break;
+    }
+
   },
   mail: async (from, to) => {
     const from_user = await User.findById(from);
@@ -37,11 +64,11 @@ const Action = {
     if (!room) {
       throw new Error("Room not found");
     }
-    
+
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "addlocation",
-      message: from_user.username + " has added new location!",
+      message: from_user.username + " arrived your favorite location!",
       to,
     });
   },

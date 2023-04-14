@@ -15,7 +15,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       status: {
         type: String,
-        enum: ["pending", "decline", "active"],
+        enum: ["pending", "decline", "active", "requesting"],
         default: "pending",
       },
     },

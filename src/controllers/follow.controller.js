@@ -76,7 +76,7 @@ const unfriend = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Follow not found");
   }
 
-  await followService.followOrUnfollow(userId, req.user._id);
+  await followService.followOrUnfollow(req.user._id, userId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

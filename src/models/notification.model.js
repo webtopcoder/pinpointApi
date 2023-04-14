@@ -13,6 +13,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: String,
         required: true,
       },
+      flag: {
+        type: String,
+        default: null,
+      },
       actor: {
         type: Types.ObjectId,
         ref: "User",
@@ -52,12 +56,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
 
   Notification.post("save", async function () {
     const notification = this.toJSON();
-    let { actor, recipient, type } = notification;
+    let { actor, recipient, type, flag } = notification;
     actor = actor._id.toString();
     recipient = recipient._id.toString();
     switch (type) {
       case "follow":
-        await Action.follow(actor, recipient, notification);
+        await Action.follow(actor, recipient, flag, notification);
         break;
       case "mail":
         await Action.mail(actor, recipient, notification);

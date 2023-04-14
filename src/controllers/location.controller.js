@@ -7,6 +7,7 @@ const {
   reviewService,
   categoryService,
   userService,
+  settingService
 } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
@@ -235,6 +236,25 @@ const quickArrival = catchAsync(async (req, res) => {
     isArrival: createdArrival._id
   });
 
+  location.favoriteUsers.map(async item => {
+
+    const result = await settingService.getSettings({
+      key: "user:location",
+      user: item,
+    });
+    if (result.length !== 0 && result[0].value !== "false") {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: item,
+        actor: location.partner._id,
+        type: "addLocation",
+        title: "New message",
+        description: `${location.partner.username} arrived your favorite location.`,
+        url: `/user/map/interactive-map/`,
+      });
+    }
+
+  });
+
   res.send(updatedLocation);
 });
 
@@ -252,12 +272,12 @@ const quickDeparture = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req.user.activeSubscription) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You're not subscribed to this service"
-    );
-  }
+  // if (!req.user.activeSubscription) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "You're not subscribed to this service"
+  //   );
+  // }
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     isActive: false,
@@ -358,8 +378,6 @@ const likeArrival = catchAsync(async (req, res) => {
   res.send({ liked: !liked });
 });
 
-
-
 const favoriteLocation = catchAsync(async (req, res) => {
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
@@ -368,13 +386,19 @@ const favoriteLocation = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
 
+  await locationService.updateLocationById(locationId, {
+    favoriteUsers: location.favoriteUsers?.includes(req.user._id)
+      ? location.favoriteUsers
+      : [...location.favoriteUsers, req.user._id],
+  });
+
   await userService.updateUserById(req.user._id, {
     favoriteLocations: req.user.favoriteLocations?.includes(location._id)
       ? req.user.favoriteLocations
       : [...req.user.favoriteLocations, locationId],
   });
 
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.NO_CONTENT).send(); ``
 });
 
 const unfavoriteLocation = catchAsync(async (req, res) => {
@@ -384,6 +408,13 @@ const unfavoriteLocation = catchAsync(async (req, res) => {
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
+
+  await locationService.updateLocationById(locationId, {
+    favoriteUsers: location.favoriteUsers.filter(
+      (user) => user != req.user._id
+    ),
+  });
+
 
   await userService.updateUserById(req.user._id, {
     favoriteLocations: req.user.favoriteLocations.filter(

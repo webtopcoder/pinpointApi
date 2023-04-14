@@ -16,6 +16,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "User",
       },
+      role: {
+        type: String,
+        enum: ["user", "partner", "admin"],
+      },
       to_invite_email: {
         type: String,
       },
