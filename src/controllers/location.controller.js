@@ -238,21 +238,20 @@ const quickArrival = catchAsync(async (req, res) => {
 
   location.favoriteUsers.map(async item => {
 
-    const result = await settingService.getSettings({
-      key: "user:location",
-      user: item,
+    // const result = await settingService.getSettings({
+    //   key: "user:location",
+    //   user: item,
+    // });
+    // if (result.length !== 0 && result[0].value !== "false") {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: item,
+      actor: location.partner._id,
+      type: "addLocation",
+      title: "New message",
+      description: `${location.partner.username} arrived your favorite location.`,
+      url: `/user/map/interactive-map/`,
     });
-    if (result.length !== 0 && result[0].value !== "false") {
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: item,
-        actor: location.partner._id,
-        type: "addLocation",
-        title: "New message",
-        description: `${location.partner.username} arrived your favorite location.`,
-        url: `/user/map/interactive-map/`,
-      });
-    }
-
+    // }
   });
 
   res.send(updatedLocation);
