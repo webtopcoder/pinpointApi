@@ -36,7 +36,7 @@ const compose = catchAsync(async (req, res) => {
       });
     }
 
-   mailsToSend = to_user.results.map((user) => {
+    mailsToSend = to_user.results.map((user) => {
       return {
         from,
         isNotice: false,
@@ -49,9 +49,9 @@ const compose = catchAsync(async (req, res) => {
     });
   } else {
     mailsToSend = await followService
-      .getFollowers(req.user._id)
+      .getFollowers(req.user._id, {}, {})
       .then((follows) => {
-        return follows.map((follow) => {
+        return follows.results.map((follow) => {
           return {
             from,
             to: follow.follower._id,

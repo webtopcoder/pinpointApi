@@ -28,17 +28,6 @@ const createMail = async (mailBody) => {
       });
     });
   }
-  else {
-    EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: createdMails.to,
-      actor: createdMails.from,
-      type: "mail",
-      title: "New message",
-      description: `You have a new message from @${from_user.username}`,
-      url: `/${item.role}/message`,
-      type: "mail",
-    });
-  }
 
   return createdMails;
 };
