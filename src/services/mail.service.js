@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Mail } = require("@models"),
+  { User, Mail, MailReply, Media } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
@@ -24,28 +24,181 @@ const createMail = async (mailBody) => {
         title: "New message",
         description: `You have a new message from @${from_user.username}`,
         url: `/${item.role}/message`,
-        type: "mail",
       });
     });
   }
+};
 
-  return createdMails;
+const createReply = async (mailBody) => {
+  const createdReply = await MailReply.create(mailBody);
+
+  const from_user = await userService.getUserById(mailBody.from);
+  const to_user = await userService.getUserById(mailBody.to);
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: mailBody.to,
+    actor: mailBody.from,
+    type: "reply",
+    title: "New message",
+    description: `You have a replying new message from @${from_user.username}`,
+    url: `/${to_user.role}/message`,
+  });
+  return createdReply;
 };
 
 const getMailById = async (mailId) => {
   return Mail.findById(mailId);
 };
 
-const queryMails = async (filter, options) => {
-  const mails = await Mail.paginate(filter, {
+const queryReplyMails = async (flag, filter, options) => {
+
+  flag ? await MailReply.updateMany(filter, { $set: { is_read: true } }) : ''
+
+  const replyMails = await MailReply.paginate(filter, {
     customLabels,
-    sort: defaultSort,
     ...options,
   });
+
+  return replyMails;
+};
+
+
+const queryMails = async (filter, options) => {
+  const pipeline = [];
+  pipeline.push({
+    $match: filter,
+  });
+
+  const aggregateMail = Mail.aggregate([
+    ...pipeline,
+    {
+      $lookup: {
+        from: "mailreplies",
+        localField: "_id",
+        foreignField: "reply",
+        as: "replies",
+        pipeline: [
+          {
+            $match: {
+              is_read: false,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: Media.collection.name,
+        localField: "files",
+        foreignField: "_id",
+        as: "files",
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "from",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $addFields: {
+              name: {
+                $concat: ["$firstName", " ", "$lastName"],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: Media.collection.name,
+              let: { avatar: "$profile.avatar" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$_id", "$$avatar"] },
+                  },
+                },
+              ],
+              as: "profile.avatar",
+            },
+          },
+          {
+            $unwind: {
+              path: "$profile.avatar",
+            },
+          },
+        ],
+        as: "from",
+      },
+    },
+    {
+      $unwind: {
+        path: "$from",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "to",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $addFields: {
+              name: {
+                $concat: ["$firstName", " ", "$lastName"],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: Media.collection.name,
+              let: { avatar: "$profile.avatar" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$_id", "$$avatar"] },
+                  },
+                },
+              ],
+              as: "profile.avatar",
+            },
+          },
+          {
+            $unwind: {
+              path: "$profile.avatar",
+            },
+          },
+        ],
+        as: "to",
+      },
+    },
+    {
+      $unwind: {
+        path: "$to",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $addFields: {
+        repliesCount: {
+          $size: "$replies",
+        },
+      },
+    },
+  ])
+
+  const mails = await Mail.aggregatePaginate(aggregateMail, {
+    sort: defaultSort,
+    customLabels,
+    ...options,
+  });
+
   return mails;
 };
 
 const updateMail = async (mailId, updateBody) => {
+
+  await MailReply.updateMany({ "reply": mailId }, { $set: { is_read: true } })
+
   const mail = await Mail.findById(mailId);
   if (!mail) {
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
@@ -176,6 +329,7 @@ const bulkUpdate = async (mailIds, updateBody, userId) => {
 
 module.exports = {
   createMail,
+  createReply,
   queryMails,
   updateMail,
   invite,
@@ -185,4 +339,5 @@ module.exports = {
   getMailById,
   bulkDelete,
   bulkUpdate,
+  queryReplyMails
 };

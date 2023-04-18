@@ -1,34 +1,25 @@
 const { toJSON, diffHistory } = require("./plugins");
 const softDelete = require("mongoose-delete");
-const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
-  const Mail = new Schema(
+  const Mailreply = new Schema(
     {
       from: {
         type: Types.ObjectId,
         ref: "User",
       },
-      isNotice: {
-        type: Boolean,
-        default: false,
-      },
       to: {
         type: Types.ObjectId,
         ref: "User",
+      },
+      reply: {
+        type: Types.ObjectId,
+        ref: "Mail",
       },
       role: {
         type: String,
         enum: ["user", "partner", "admin"],
       },
-      to_invite_email: {
-        type: String,
-      },
-      invite_count: {
-        type: Number,
-        default: 0,
-      },
-      subject: { type: String },
       message: { type: String },
       files: {
         type: [
@@ -39,7 +30,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         ],
         default: [],
       },
-      type: { type: String, default: "usual", enum: ["usual", "invite"] },
       to_is_deleted: { type: Boolean, default: false },
       from_is_deleted: { type: Boolean, default: false },
       is_read: { type: Boolean, default: false },
@@ -51,17 +41,16 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Mail.plugin(softDelete, {
+  Mailreply.plugin(softDelete, {
     deletedBy: true,
     deletedAt: true,
     overrideMethods: "all",
   });
-  Mail.plugin(toJSON);
-  Mail.plugin(mongoosePaginate);
-  Mail.plugin(aggregatePaginate);
+  Mailreply.plugin(toJSON);
+  Mailreply.plugin(mongoosePaginate);
 
   /**
-   * @typedef Mail
+   * @typedef Mailreply
    */
-  return model("Mail", Mail);
+  return model("Mailreply", Mailreply);
 };

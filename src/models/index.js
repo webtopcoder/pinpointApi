@@ -4,6 +4,7 @@ const mongoose = require("mongoose-fill");
 module.exports.User = require("./user.model")(mongoose, mongoosePaginate);
 module.exports.Token = require("./token.model")(mongoose, mongoosePaginate);
 module.exports.Mail = require("./mail.model")(mongoose, mongoosePaginate);
+module.exports.MailReply = require("./mailreply.model")(mongoose, mongoosePaginate);
 module.exports.Like = require("./like.model")(mongoose, mongoosePaginate);
 module.exports.Contact = require("./contact.model")(mongoose, mongoosePaginate);
 module.exports.Category = require("./category.model")(

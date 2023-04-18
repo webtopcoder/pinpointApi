@@ -12,6 +12,17 @@ const createMail = {
     .xor("isNotice", "to"),
 };
 
+const createReply = {
+  body: Joi.object()
+    .keys({
+      from: Joi.string(),
+      role: Joi.string(),
+      reply: Joi.string().custom(objectId),
+      to: Joi.string(),
+      message: Joi.string().required(),
+    })
+};
+
 const invite = {
   body: Joi.object().keys({
     email: Joi.string().required(),
@@ -48,6 +59,7 @@ const sendMessageByAdmin = {
 
 module.exports = {
   createMail,
+  createReply,
   invite,
   updateMail,
   bulkActions,

@@ -7,6 +7,8 @@ const { uploadMedia } = require("../services/media.service");
 const followService = require("../services/follow.service");
 const path = require("path");
 const { EventEmitter, events } = require("../events");
+const { ObjectID } = require("bson");
+
 
 const compose = catchAsync(async (req, res) => {
   const { to, subject, message, isNotice } = req.body;
@@ -63,16 +65,64 @@ const compose = catchAsync(async (req, res) => {
           };
         });
       });
-
   }
-
 
   await mailService.createMail(mailsToSend);
 
   return res.json({ success: true, msg: "Sent successfully!" });
 });
 
+const reply = catchAsync(async (req, res) => {
+
+  const files = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
+  await mailService.createReply({ ...req.body, files });
+
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
+
+  filter = {
+    reply: req.body.reply,
+  };
+
+  options.limit = 10000;
+  options.sort = "-createdAt";
+
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+  ];
+  const result = await mailService.queryReplyMails(false, filter, options);
+
+  return res.json({ result: result, msg: "Reply successfully!" });
+});
+
 const getInbox = catchAsync(async (req, res) => {
+
   let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
   let options = pick(req.query, ["sort", "limit", "page"]);
   if (options.sort) {
@@ -83,7 +133,7 @@ const getInbox = catchAsync(async (req, res) => {
     options.sort = "-createdAt";
   }
 
-  filter.to = req.user._id;
+  filter.to = new ObjectID(req.user._id);
   filter.to_is_deleted = false;
   if (filter.q) {
     const query = filter.q;
@@ -121,6 +171,7 @@ const getInbox = catchAsync(async (req, res) => {
       },
     },
   ];
+
   const result = await mailService.queryMails(filter, options);
   res.send(result);
 });
@@ -143,7 +194,7 @@ const getSent = catchAsync(async (req, res) => {
   }
 
   filter = {
-    from: req.user._id,
+    from: new ObjectID(req.user._id),
     from_is_deleted: false,
     type: "usual",
     isNotice: false,
@@ -247,6 +298,49 @@ const invite = catchAsync(async (req, res) => {
   return res.json({ success: true, msg: "Invite sent successfully!" });
 });
 
+const getReplyById = catchAsync(async (req, res) => {
+
+  const { replyId } = req.params;
+
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
+  options.limit = 10000;
+
+  filter = {
+    reply: replyId,
+  };
+
+  options.sort = "-createdAt";
+
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+  ];
+
+  const result = await mailService.queryReplyMails(true, filter, options);
+
+  res.send(result);
+});
+
 const getInvitation = catchAsync(async (req, res) => {
   let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
   let options = pick(req.query, ["sort", "limit", "page"]);
@@ -296,7 +390,7 @@ const getInvitation = catchAsync(async (req, res) => {
       },
     },
   ];
-  const result = await mailService.queryMails(filter, options);
+  const result = await mailService.queryMailsReply(filter, options);
   res.send(result);
 });
 
@@ -452,6 +546,7 @@ const sendMessageByAdmin = catchAsync(async (req, res) => {
 
 module.exports = {
   compose,
+  reply,
   getInbox,
   getSent,
   deleteMail,
@@ -465,4 +560,5 @@ module.exports = {
   updateMail,
   bulkActions,
   sendMessageByAdmin,
+  getReplyById
 };

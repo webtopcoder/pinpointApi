@@ -40,6 +40,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           "shoutout",
           "review",
           "post",
+          "reply"
         ],
         required: true,
       },

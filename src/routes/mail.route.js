@@ -17,6 +17,15 @@ router
   );
 
 router
+  .route("/reply")
+  .post(
+    auth(),
+    upload.array("files", 5),
+    validate(mailValidation.createReply),
+    mailController.reply
+  );
+
+router
   .route("/invite")
   .post(auth(), validate(mailValidation.invite), mailController.invite);
 
@@ -51,5 +60,9 @@ router
 router
   .route("/:mailId/resend-invite")
   .post(auth(), mailController.resendInvite);
+
+router
+  .route("/:replyId/reply")
+  .post(auth(), mailController.getReplyById);
 
 module.exports = router;
