@@ -19,6 +19,10 @@ router
   .delete(auth(), partnershipController.cancelSubscription);
 
 router
+  .route("/removePartnership")
+  .delete(auth(), partnershipController.removePartnership);
+
+router
   .route("/create-transaction")
   .post(auth(), partnershipController.createTransaction);
 

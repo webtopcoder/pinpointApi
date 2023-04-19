@@ -240,6 +240,30 @@ const cancelSubscription = async (req, res) => {
   }
 };
 
+const removePartnership = async (req, res) => {
+  try {
+    const updateUser = {
+      ...req.user,
+      activePartnership: null,
+      activeSubscription: null,
+    };
+
+    await userService.updateUserById(req.user._id, updateUser);
+    let userinfo = await userService.getUserById(req.user._id);
+
+    res.status(200).json({
+      code: "subscription_deleted",
+      user: userinfo
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(400).json({
+      code: "subscription_deletion_failed",
+      error: e,
+    });
+  }
+};
+
 module.exports = {
   createPartnership,
   updatePartnership,
@@ -251,4 +275,5 @@ module.exports = {
   cancelSubscription,
   createTransaction,
   getUserTransactions,
+  removePartnership
 };
