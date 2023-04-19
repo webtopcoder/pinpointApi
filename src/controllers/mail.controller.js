@@ -133,7 +133,12 @@ const getInbox = catchAsync(async (req, res) => {
     options.sort = "-createdAt";
   }
 
-  filter.to = new ObjectID(req.user._id);
+  const replyfromSent = await mailService.queryreplyfromSent(req.user._id);
+  if (replyfromSent)
+    filter = { $or: [{ to: new ObjectID(req.user._id) }, { $and: [{ from: new ObjectID(req.user._id) }, { to: { $in: replyfromSent } }] }] };
+  else
+    filter.to = new ObjectID(req.user._id)
+
   filter.to_is_deleted = false;
   if (filter.q) {
     const query = filter.q;
@@ -237,6 +242,7 @@ const getSent = catchAsync(async (req, res) => {
       },
     },
   ];
+
   const result = await mailService.queryMails(filter, options);
 
   res.send(result);

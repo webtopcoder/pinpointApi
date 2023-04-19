@@ -61,6 +61,16 @@ const queryReplyMails = async (flag, filter, options) => {
   return replyMails;
 };
 
+const queryreplyfromSent = async (user_id) => {
+
+  const replyMails = await MailReply.find({ 'to': user_id }).select('from');
+  const fromIDs = replyMails.reduce((acc, reply) => {
+    acc.push(reply.from)
+    return acc;
+  }, []);
+
+  return fromIDs;
+};
 
 const queryMails = async (filter, options) => {
   const pipeline = [];
@@ -183,6 +193,12 @@ const queryMails = async (filter, options) => {
           $size: "$replies",
         },
       },
+    },
+    {
+      $skip: (parseInt(options.page) - 1) * options.limit,
+    },
+    {
+      $limit: parseInt(options.limit),
     },
   ])
 
@@ -339,5 +355,6 @@ module.exports = {
   getMailById,
   bulkDelete,
   bulkUpdate,
-  queryReplyMails
+  queryReplyMails,
+  queryreplyfromSent
 };
