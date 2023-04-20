@@ -229,7 +229,7 @@ const getUserActivity = async (userId, { page, search }) => {
             },
           },
           {
-            $unwind: "$'from'",
+            $unwind: "$from",
           },
           {
             $lookup: {
@@ -470,7 +470,6 @@ const getUserActivity = async (userId, { page, search }) => {
     images,
   };
 };
-
 const getProfileImages = async (userId, options) => {
   const imagesInPost = await Post.aggregate([
     {
