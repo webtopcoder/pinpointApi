@@ -32,6 +32,13 @@ const login = catchAsync(async (req, res, next) => {
   });
 });
 
+const getDefaultAvatar = catchAsync(async (req, res) => {
+  const DefaultAvatar = await userService.getDefaultAvatar();
+  res.send({
+    result: DefaultAvatar
+  });
+});
+
 const adminLogin = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   let admin = await authService.loginAdminWithEmailAndPassword(email, password);
@@ -147,4 +154,5 @@ module.exports = {
   verifyEmail,
   getUser,
   getActivePartners,
+  getDefaultAvatar
 };

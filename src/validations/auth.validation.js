@@ -24,6 +24,9 @@ const register = {
       latitude: Joi.number(),
       longitude: Joi.number(),
     }),
+    profile: Joi.object().keys({
+      avatar: Joi.string().custom(objectId),
+    }),
     category: Joi.string().custom(objectId),
     dob: Joi.when("role", {
       is: "user",

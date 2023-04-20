@@ -46,6 +46,7 @@ router.post(
   authController.verifyEmail
 );
 
+router.get("/getDefaultAvatar", authController.getDefaultAvatar);
 router.get("/partners", authController.getActivePartners);
 router.get("/me", auth(), authController.getUser);
 router.get("/username", auth(), authController.getUsernameById);

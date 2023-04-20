@@ -26,11 +26,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       mimetype: {
         type: String,
       },
-
       user: {
         type: Types.ObjectId,
         ref: "User",
-        required: true,
       },
       isPublic: {
         type: Boolean,

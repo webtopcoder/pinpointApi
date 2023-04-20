@@ -23,6 +23,22 @@ const createUser = async (userBody) => {
   return user;
 };
 
+const getDefaultAvatar = async () => {
+  const defaultAvatar = await Media.findOne({ mimetype: "default" });
+  if (defaultAvatar) {
+    return defaultAvatar.id
+  }
+  else {
+    const file = {
+      path: "default.png",
+      mimetype: "default",
+      size: 0,
+    }
+    const newAvatar = await mediaService.uploadMedia(file, "63d1b714d4ae07b0bf2b0c63");
+    return newAvatar.id;
+  }
+};
+
 /**
  * Query for users
  * @param {Object} filter - Mongo filter
@@ -213,7 +229,7 @@ const getUserActivity = async (userId, { page, search }) => {
             },
           },
           {
-            $unwind: "$from",
+            $unwind: "$'from'",
           },
           {
             $lookup: {
@@ -541,4 +557,5 @@ module.exports = {
   getProfileImages,
   getFavoriteLocations,
   getActivePartners,
+  getDefaultAvatar
 };
