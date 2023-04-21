@@ -35,7 +35,7 @@ const login = catchAsync(async (req, res, next) => {
 const getDefaultAvatar = catchAsync(async (req, res) => {
   const DefaultAvatar = await userService.getDefaultAvatar();
   res.send({
-    result: DefaultAvatar
+    result: DefaultAvatar,
   });
 });
 
@@ -109,7 +109,7 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   }
 
   if (user && user.isEmailVerified) {
-    throw new ApiError(httpStatus.OK, "Email is already verified.");
+    throw new ApiError(httpStatus.BAD_REQUEST, "Email is already verified.");
   }
 
   EventEmitter.emit(events.VERIFY_EMAIL, user.id);
@@ -154,5 +154,5 @@ module.exports = {
   verifyEmail,
   getUser,
   getActivePartners,
-  getDefaultAvatar
+  getDefaultAvatar,
 };
