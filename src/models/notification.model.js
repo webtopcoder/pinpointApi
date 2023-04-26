@@ -73,6 +73,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       case "shoutout":
         await Action.shoutout(actor, recipient, notification);
         break;
+      case "post":
+        await Action.post(actor, recipient, notification);
+        break;
       default:
         await Action.defaultNotification(actor, recipient, notification);
         break;

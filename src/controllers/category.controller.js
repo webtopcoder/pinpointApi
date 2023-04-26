@@ -15,7 +15,12 @@ const getCategories = catchAsync(async (req, res) => {
 });
 
 const getAllCategories = catchAsync(async (req, res) => {
- 
+
+  if (req.query.sort) {
+    req.query.sort = Object.fromEntries(
+      req.query.sort.split(",").map((field) => field.split(":"))
+    );
+  }
   const categories = await categoryService.getCategories(req.query);
   res.status(httpStatus.OK).send({
     success: true,

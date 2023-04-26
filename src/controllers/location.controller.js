@@ -132,7 +132,7 @@ const getLocations = catchAsync(async (req, res) => {
 const getLocation = catchAsync(async (req, res) => {
   const location = await locationService.getLocationById(req.params.locationId);
   const IsArrival = await locationService.getIsArrival(req.params.locationId);
-  const ExpiredArrivals = await locationService.getExpiredArrivals(req.params.locationId, IsArrival);
+  const ExpiredArrivals = await locationService.getExpiredArrivals(req.params.locationId, req.params.expand, IsArrival);
   const userinfo = await userService.getUserById(req.user._id);
 
   if (!location) {

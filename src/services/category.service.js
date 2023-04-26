@@ -20,6 +20,7 @@ const getCategories = async (query) => {
 
 const getAllCategories = async (query) => {
   const categories = await Category.find();
+
   if (!categories) {
     throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
   }

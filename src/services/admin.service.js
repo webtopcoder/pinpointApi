@@ -171,10 +171,23 @@ const searchUser = async (reqQuery) => {
   if (reqQuery.q) {
     query.$or = [
       {
-        username: { $regex: reqQuery.q, $options: "ig" },
+        username: { $regex: reqQuery.q },
       },
       {
-        email: { $regex: reqQuery.q, $options: "ig" },
+        firstName: { $regex: reqQuery.q },
+      },
+      {
+        lastName: { $regex: reqQuery.q },
+      },
+      {
+        email: { $regex: reqQuery.q },
+      },
+      {
+        "address.city": { $regex: reqQuery.q, $options: "i" },
+      },
+      {
+        "address.state": { $regex: reqQuery.q, $options: "i" },
+
       },
     ];
   }
@@ -286,10 +299,9 @@ const searchLocation = async (req) => {
       },
     ];
   }
-  query.isActive =
-    req.status === "all" || undefined || null || ""
-      ? { $in: [ISTRUE, ISFALSE] }
-      : req.status;
+
+  req.subCategory ? query.subCategories = req.subCategory : '';
+  req.isActive ? query.isActive = req.isActive : '';
 
   let sort = {};
   if (req.sort && req.sortBy) {
@@ -498,17 +510,29 @@ const searchPartner = async (reqQuery) => {
   let query = {};
 
   if (reqQuery.q) {
-    const regexp = new RegExp(
-      reqQuery.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
-      "i"
-    );
+    // const regexp = new RegExp(
+    //   reqQuery.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+    //   "i"
+    // );
 
     query.$or = [
       {
-        username: { $regex: regexp },
+        username: { $regex: reqQuery.q },
       },
       {
-        email: { $regex: regexp },
+        firstName: { $regex: reqQuery.q },
+      },
+      {
+        lastName: { $regex: reqQuery.q },
+      },
+      {
+        email: { $regex: reqQuery.q },
+      },
+      {
+        "address.city": { $regex: reqQuery.q, $options: "i" },
+      },
+      {
+        "address.state": { $regex: reqQuery.q, $options: "i" },
       },
     ];
   }
@@ -517,14 +541,14 @@ const searchPartner = async (reqQuery) => {
   query.status =
     reqQuery.status === "all" || undefined || null || ""
       ? {
-          $in: [
-            STATUS_ACTIVE,
-            STATUS_INACTIVE,
-            STATUS_DECLINED,
-            STATUS_PENDING,
-            STATUS_DELETED,
-          ],
-        }
+        $in: [
+          STATUS_ACTIVE,
+          STATUS_INACTIVE,
+          STATUS_DECLINED,
+          STATUS_PENDING,
+          STATUS_DELETED,
+        ],
+      }
       : reqQuery.status;
 
   pipeline.push({
@@ -698,6 +722,13 @@ const getLatestActivities = async (req) => {
     ];
   }
 
+  let sort = {};
+  if (req.sort && req.sortBy) {
+    sort = {
+      [req.sortBy]: req.sort,
+    };
+  }
+
   query.status =
     req.status === "all" || undefined || null || ""
       ? { $in: [STATUS_DELETED, STATUS_ACTIVE] }
@@ -707,7 +738,7 @@ const getLatestActivities = async (req) => {
     case "Post":
       return {
         data: await Post.find(query)
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .skip(req.limit * (req.page - 1))
           .limit(req.limit)
           .populate("from to like images"),
@@ -716,7 +747,7 @@ const getLatestActivities = async (req) => {
     case "Review":
       return {
         data: await Review.find({})
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .skip(req.limit * (req.page - 1))
           .limit(req.limit)
           .populate("like images user location"),
@@ -725,7 +756,7 @@ const getLatestActivities = async (req) => {
     case "Shoutout":
       return {
         data: await Shoutout.find({})
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .skip(req.limit * (req.page - 1))
           .limit(req.limit)
           .populate("from to post post.like post.images"),
@@ -734,7 +765,7 @@ const getLatestActivities = async (req) => {
     case "Media":
       return {
         data: await Media.find({ status: "active" })
-          .sort({ createdAt: -1 })
+          .sort(sort)
           .skip(req.limit * (req.page - 1))
           .limit(req.limit)
           .populate("user"),
@@ -752,8 +783,8 @@ const getAdminById = async (id) => {
   return User.findById(id);
 };
 
-const deleteUserByID = async (id) => {
-  const user = await userService.getUserById(id);
+const deleteUserByID = async (user_id) => {
+  const user = await userService.getUserById(user_id);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }

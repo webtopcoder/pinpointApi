@@ -12,6 +12,7 @@ const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
 const { Post, Location, Follow } = require("../models");
 const { uploadMedia } = require("../services/media.service");
+const { EventEmitter, events } = require("../events");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -131,7 +132,6 @@ const getProfileActivity = catchAsync(async (req, res) => {
 
   page = page ? parseInt(page) : 1;
 
-  console.log(userId)
   const user = await userService.getUserById(userId);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
@@ -186,6 +186,7 @@ const createPost = catchAsync(async (req, res) => {
   );
 
   const to_user = await userService.getUserById(userId);
+  const from_user = await userService.getUserById(req.user._id);
 
   const like = await likeService.createLike();
 
@@ -240,6 +241,16 @@ const createPost = catchAsync(async (req, res) => {
         }
       })
     );
+  }
+  else {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: to_user._id.toString(),
+      actor: req.user._id.toString(),
+      title: "post",
+      description: `${from_user.username} has posted on your activity page`,
+      url: `/profile/${to_user._id.toString()}/activity/`,
+      type: "post",
+    });
   }
 
   return res.json({ success: true, msg: "Post successfully!" });
@@ -334,7 +345,7 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
 });
 
 const markAsRead = catchAsync(async (req, res) => {
- 
+
   await notificationService.updateNotificationById(req.params.id, {
     is_read: true,
   });

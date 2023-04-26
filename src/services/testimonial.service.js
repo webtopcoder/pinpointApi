@@ -5,7 +5,9 @@ const httpStatus = require("http-status"),
   defaultSort = require("@utils/defaultSort");
 
 const gettestimonialForTestimonialSection = async () => {
-  const testimonials = await Testimonial.find({ isArchived: true }).populate(["files"]);
+
+  const testimonials = await Testimonial.find({ isArchived: true }).populate(["image"]);
+
   return testimonials;
 };
 
@@ -13,13 +15,12 @@ const getTestimonials = async (filter, options) => {
   const testimonials = await Testimonial.paginate(filter, {
     ...options,
     customLabels,
-    sort: defaultSort,
   });
-  return testimonials; 
+  return testimonials;
 };
 
 const getTestimonialById = async (testimonialId) => {
-  const testimonial = await Testimonial.findById(testimonialId).populate(["files"]);
+  const testimonial = await Testimonial.findById(testimonialId).populate(["image"]);
   if (!testimonial) {
     throw new ApiError(httpStatus.NOT_FOUND, "Testimonial not found");
   }

@@ -13,7 +13,6 @@ const getFaqs = async (filter, options) => {
   const faqs = await FAQ.paginate(filter, {
     ...options,
     customLabels,
-    sort: defaultSort,
   });
   return faqs;
 };

@@ -19,7 +19,6 @@ const getContacts = async (filter, options) => {
   const contact = await Contact.paginate(filter, {
     ...options,
     customLabels,
-    sort: defaultSort,
   });
   return contact;
 };

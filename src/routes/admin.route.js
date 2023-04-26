@@ -13,7 +13,7 @@ router
 
 router
   .route("/locations/search")
-  .get(auth(false, true), locationController.getLocations);
+  .get(auth(false, true), adminController.getSearchLocations);
 
 router
   .route("/locations/:id/view")

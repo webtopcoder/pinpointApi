@@ -11,6 +11,8 @@ const getLatestActivities = {
     type: Joi.string()
       .valid("Post", "Shoutout", "Media", "Review")
       .default("Post"),
+    sort: Joi.string().default("createdAt:desc"),
+
   }),
 };
 

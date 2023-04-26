@@ -59,13 +59,10 @@ const queryUsers = async (filter, options) => {
   return users;
 };
 
-/**
- * Get user by id
- * @param {ObjectId} id
- * @returns {Promise<User>}
- */
-const getUserById = (id) => {
-  return User.findById(id).populate("profile.avatar");
+const getUserById = async (userId) => {
+
+  const user = await User.findById(userId).populate("profile.avatar");
+  return user;
 };
 
 /**

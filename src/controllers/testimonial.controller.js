@@ -44,23 +44,12 @@ const getTestimonialById = catchAsync(async (req, res) => {
 
 const createTestimonial = catchAsync(async (req, res) => {
 
-  const { username, content, occupation } = req.body;
+  if (req.file) {
+    const media = await uploadMedia(req.file, req.user._id, true);
+    req.body.image = media._id;
+  }
 
-  const files = await Promise.all(
-    req.files.map(async (file) => {
-      const media = await uploadMedia(file, req.user._id);
-      return media._id;
-    })
-  );
-
-  let testimonialCreate = {
-    username,
-    content,
-    occupation,
-    files
-  };
-
-  const testimoial = await testimonialService.createTestimonial(testimonialCreate);
+  const testimoial = await testimonialService.createTestimonial(req.body);
   res.status(httpStatus.CREATED).send(testimoial);
 });
 
@@ -82,7 +71,7 @@ const ChangeAvatar = catchAsync(async (req, res) => {
 
   const media = await uploadMedia(req.file, id, true);
   await testimonialService.updateTestimonialById(id, {
-    files: media._id
+    image: media._id
   });
 
   return res.json({ success: true, avatar: media });

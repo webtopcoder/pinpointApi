@@ -11,7 +11,6 @@ router
   .route("/recent-activities")
   .get(
     auth(false, true),
-    validate(adminValidation.getLatestActivities),
     adminController.getLatestActivities
   );
 
@@ -44,4 +43,7 @@ router
   .put(auth(false, true), adminController.updateActivityByID)
 
 router
+  .route("/image/:id")
+  .delete(auth(false, true), adminController.deleteImageByID);
+
 module.exports = router;

@@ -34,6 +34,7 @@ const getLocations = {
 const getLocation = {
   params: Joi.object().keys({
     locationId: Joi.string().custom(objectId),
+    expand: Joi.boolean()
   }),
 };
 

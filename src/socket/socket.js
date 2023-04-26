@@ -86,6 +86,21 @@ const Action = {
       to,
     });
   },
+
+  post: async (from, to) => {
+    const from_user = await User.findById(from);
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "post",
+      message: from_user.username + " has posted on your activity page",
+      to,
+    });
+  },
   defaultNotification: async (from, to, notification) => {
     const room = _.find(UserList, { userid: from });
     if (!room) {

@@ -86,6 +86,7 @@ const uploadMedia = async (file, userId, isPublic = true) => {
   return media;
 };
 
+
 module.exports = {
   createMedia,
   queryMedias,

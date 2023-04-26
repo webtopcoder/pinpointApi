@@ -9,7 +9,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(auth(false, true), categoryController.getCategories)
+  .get(auth(false, true), categoryController.getAllCategories)
   .post(
     auth(false, true),
     upload.single("image"),

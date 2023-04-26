@@ -2,7 +2,7 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
-const { userService, adminService, postService, reviewService, locationService } = require("@services");
+const { userService, adminService, postService, reviewService, locationService, mediaService } = require("@services");
 const { uploadMedia } = require("../services/media.service");
 import { Parser } from "json2csv";
 import pick from "../utils/pick";
@@ -14,6 +14,15 @@ const getSearchUsers = catchAsync(async (req, res) => {
   }
   res.send({ data: users });
 });
+
+const getSearchLocations = catchAsync(async (req, res) => {
+  const locations = await adminService.searchLocation(req.query);
+  if (!locations) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Locations not found");
+  }
+  res.send({ data: locations });
+});
+
 
 const updateUserByID = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -252,7 +261,6 @@ const getLatestTransactions = catchAsync(async (req, res) => {
 
 const getLatestActivities = catchAsync(async (req, res) => {
 
-  const { limit, page, type } = pick(req.query, ["limit", "page", "type"]);
   const activities = await adminService.getLatestActivities(req.query);
 
   if (!activities) {
@@ -269,8 +277,16 @@ const deleteUserByID = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const deleteImageByID = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  await mediaService.deleteMediaById(id);
+
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 module.exports = {
   getSearchUsers,
+  getSearchLocations,
   getSearchActivities,
   getLocationByID,
   updateUserByID,
@@ -287,6 +303,7 @@ module.exports = {
   getActivityByID,
   uploadActivityImage,
   getActivityImageRemoveByID,
-  updateActivityByID
+  updateActivityByID,
+  deleteImageByID
 };
 

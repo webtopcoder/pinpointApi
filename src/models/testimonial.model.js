@@ -16,7 +16,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: String,
         required: true,
       },
-      files: {
+      image: {
         type: Schema.Types.ObjectId,
         ref: "Media",
         default: null,

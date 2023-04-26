@@ -65,7 +65,7 @@ router
   .delete(auth(), locationController.unfavoriteLocation);
 
 router
-  .route("/:locationId")
+  .route("/:locationId/:expand")
   .get(
     auth(true),
     validate(locationValidation.getLocation),

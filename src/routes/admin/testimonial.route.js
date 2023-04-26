@@ -13,7 +13,7 @@ router
   .get(auth(false, true), testimonialController.getTestimonials)
   .post(
     auth(false, true),
-    upload.array("attachments"),
+    upload.single("image"),
     validate(testimonialValidation.createTestimonial),
     testimonialController.createTestimonial
   );

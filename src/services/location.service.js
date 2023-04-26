@@ -69,23 +69,27 @@ const getArrivalById = async (id) => {
   return arrival;
 };
 
-const getExpiredArrivals = async (locationID, isArrival) => {
-  let arrival
-  if (isArrival.isArrival !== null) {
-    arrival = await Arrival.find({ location: locationID, _id: { $ne: isArrival.isArrival._id } })
+const getExpiredArrivals = async (locationID, expand, isArrival) => {
+
+  let query;
+  isArrival.isArrival !== null ? query = { location: locationID, _id: { $ne: isArrival.isArrival._id } } : query = { location: locationID }
+  const [
+    arrivalData,
+    total
+  ] = await Promise.all([
+    Arrival.find(query)
       .populate("like")
       .populate("location")
       .populate("images")
       .sort({ "createdAt": 1 })
-  }
+      .limit(expand ? 9999 : 3),
+    Arrival.countDocuments(query),
+  ]);
 
-  else arrival = await Arrival.find({ location: locationID })
-    .populate("like")
-    .populate("location")
-    .populate("images")
-    .sort({ "createdAt": 1 })
-    
-  return arrival;
+  return {
+    arrivalData,
+    total
+  }
 };
 
 const deleteLocationByID = async (id, updateBody) => {
