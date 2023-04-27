@@ -39,7 +39,7 @@ const createReply = async (mailBody) => {
     actor: mailBody.from,
     type: "reply",
     title: "New message",
-    description: `You have a replying new message from @${from_user.username}`,
+    description: `You have a new message from @${from_user.username}`,
     url: `/${to_user.role}/message`,
   });
   return createdReply;
