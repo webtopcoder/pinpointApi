@@ -6,6 +6,7 @@ const httpStatus = require("http-status"),
 const { EventEmitter, events } = require("../events");
 const userService = require("./user.service");
 const mongoose = require("mongoose-fill");
+const { ObjectID } = require("bson");
 
 const createMail = async (mailBody) => {
   const createdMails = await Mail.create(mailBody);
@@ -89,6 +90,7 @@ const queryMails = async (filter, options) => {
         pipeline: [
           {
             $match: {
+              to: new ObjectID(options.userID),
               is_read: false,
             },
           },
@@ -211,9 +213,9 @@ const queryMails = async (filter, options) => {
   return mails;
 };
 
-const updateMail = async (mailId, updateBody) => {
+const updateMail = async (mailId, updateBody, userId) => {
 
-  await MailReply.updateMany({ "reply": mailId }, { $set: { is_read: true } })
+  await MailReply.updateMany([{ "reply": mailId, "to": new ObjectID(userId) }], { $set: { is_read: true } })
 
   const mail = await Mail.findById(mailId);
   if (!mail) {

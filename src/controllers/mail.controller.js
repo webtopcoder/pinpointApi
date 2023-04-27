@@ -8,6 +8,7 @@ const followService = require("../services/follow.service");
 const path = require("path");
 const { EventEmitter, events } = require("../events");
 const { ObjectID } = require("bson");
+const { objectId } = require("../validations/custom.validation");
 
 
 const compose = catchAsync(async (req, res) => {
@@ -132,6 +133,8 @@ const getInbox = catchAsync(async (req, res) => {
   } else {
     options.sort = "-createdAt";
   }
+
+  options.userID = req.user._id
 
   const replyfromSent = await mailService.queryreplyfromSent(req.user._id);
   if (replyfromSent)
@@ -314,6 +317,7 @@ const getReplyById = catchAsync(async (req, res) => {
 
   filter = {
     reply: replyId,
+    to: new ObjectID(req.user._id)
   };
 
   options.sort = "-createdAt";
@@ -492,7 +496,7 @@ const updateMail = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
   }
 
-  await mailService.updateMail(mailId, req.body);
+  await mailService.updateMail(mailId, req.body, userId);
 
   return res.json({ success: true, message: "Mail updated successfully!" });
 });
