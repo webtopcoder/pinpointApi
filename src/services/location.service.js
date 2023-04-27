@@ -81,7 +81,7 @@ const getExpiredArrivals = async (locationID, expand, isArrival) => {
       .populate("like")
       .populate("location")
       .populate("images")
-      .sort({ "createdAt": 1 })
+      .sort({ "createdAt": -1 })
       .limit(expand ? 9999 : 3),
     Arrival.countDocuments(query),
   ]);
