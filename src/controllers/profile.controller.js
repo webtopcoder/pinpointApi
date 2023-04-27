@@ -236,13 +236,12 @@ const createPost = catchAsync(async (req, res) => {
             to: to_user._id,
             post: newPost._id,
           };
-
           await shoutoutService.createShoutout(shoutout_data);
         }
       })
     );
   }
-  else {
+  else if (to_user._id !== req.user._id) {
     EventEmitter.emit(events.SEND_NOTIFICATION, {
       recipient: to_user._id.toString(),
       actor: req.user._id.toString(),
