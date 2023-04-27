@@ -64,6 +64,7 @@ const getFollowers = async (userId, filter, options) => {
             $project: {
               name: 1,
               username: 1,
+              role: 1,
               profile: {
                 avatar: 1,
               },
