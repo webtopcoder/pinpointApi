@@ -473,7 +473,16 @@ const getNotices = catchAsync(async (req, res) => {
 });
 
 const getPendingInvites = catchAsync(async (req, res) => {
-  const result = await mailService.getPendingInvites(req.user._id);
+
+  let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
+  let options = pick(req.query, ["sort", "limit", "page"]);
+
+  filter.from = req.user._id;
+  filter.type = 'invite';
+  filter.is_read = false;
+  filter.from_is_deleted = false;
+
+  const result = await mailService.getPendingInvites(filter, options);
   res.send(result);
 });
 

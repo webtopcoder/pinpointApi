@@ -196,12 +196,6 @@ const queryMails = async (filter, options) => {
         },
       },
     },
-    {
-      $skip: (parseInt(options.page) - 1) * options.limit,
-    },
-    {
-      $limit: parseInt(options.limit),
-    },
   ])
 
   const mails = await Mail.aggregatePaginate(aggregateMail, {
@@ -209,7 +203,6 @@ const queryMails = async (filter, options) => {
     customLabels,
     ...options,
   });
-
   return mails;
 };
 
@@ -266,13 +259,14 @@ const resendInvite = async (mailId) => {
   return mail;
 };
 
-const getPendingInvites = async (userId) => {
-  const mails = await queryMails({
-    from: userId,
-    type: "invite",
-    is_read: false,
-    from_is_deleted: false,
+const getPendingInvites = async (filter, options) => {
+
+  const mails = await Mail.paginate(filter, {
+    ...options,
+    customLabels,
+    sort: defaultSort,
   });
+
   return mails;
 };
 
