@@ -42,6 +42,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       type: { type: String, default: "usual", enum: ["usual", "invite"] },
       to_is_deleted: { type: Boolean, default: false },
       from_is_deleted: { type: Boolean, default: false },
+      reply: { type: Boolean, default: false },
       is_read: { type: Boolean, default: false },
     },
     {

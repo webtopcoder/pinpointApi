@@ -138,7 +138,7 @@ const getInbox = catchAsync(async (req, res) => {
 
   const replyfromSent = await mailService.queryreplyfromSent(req.user._id);
   if (replyfromSent)
-    filter = { $or: [{ to: new ObjectID(req.user._id) }, { $and: [{ from: new ObjectID(req.user._id) }, { to: { $in: replyfromSent } }] }] };
+    filter = { $or: [{ to: new ObjectID(req.user._id) }, { $and: [{ from: new ObjectID(req.user._id) }, { reply: true }] }] };
   else
     filter.to = new ObjectID(req.user._id)
 

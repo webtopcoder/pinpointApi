@@ -43,6 +43,14 @@ const createReply = async (mailBody) => {
     description: `You have a new message from @${from_user.username}`,
     url: `/${to_user.role}/message`,
   });
+
+  const mail = await Mail.findById(createdReply.reply);
+  if (!mail) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Mail not found");
+  }
+  Object.assign(mail, { reply: true });
+  await mail.save();
+
   return createdReply;
 };
 
@@ -64,14 +72,15 @@ const queryReplyMails = async (flag, filter, options) => {
 
 const queryreplyfromSent = async (user_id) => {
 
-  const allreply = await Mail.find().select('_id');
+  const allreply = await Mail.find({ "reply": true }).select('_id');
 
   const allreplyIDs = allreply.reduce((acc, reply) => {
-    acc.push(reply.from)
+    acc.push(reply._id)
     return acc;
   }, []);
 
-  const replyMails = await MailReply.find({ 'to': user_id, '_id': { $in: allreplyIDs } }).select('from');
+  const replyMails = await MailReply.find({ 'to': user_id, 'reply': { $in: allreplyIDs } }).select('from');
+
   const fromIDs = replyMails.reduce((acc, reply) => {
     acc.push(reply.from)
     return acc;
