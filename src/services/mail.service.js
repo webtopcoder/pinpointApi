@@ -64,7 +64,14 @@ const queryReplyMails = async (flag, filter, options) => {
 
 const queryreplyfromSent = async (user_id) => {
 
-  const replyMails = await MailReply.find({ 'to': user_id }).select('from');
+  const allreply = await Mail.find().select('_id');
+
+  const allreplyIDs = allreply.reduce((acc, reply) => {
+    acc.push(reply.from)
+    return acc;
+  }, []);
+
+  const replyMails = await MailReply.find({ 'to': user_id, '_id': { $in: allreplyIDs } }).select('from');
   const fromIDs = replyMails.reduce((acc, reply) => {
     acc.push(reply.from)
     return acc;

@@ -71,6 +71,9 @@ router
     validate(locationValidation.getLocation),
     locationController.getLocation
   )
+
+router
+  .route("/:locationId")
   .patch(
     auth(),
     upload.array("images", 5),
