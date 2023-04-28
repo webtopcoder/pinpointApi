@@ -54,7 +54,7 @@ const queryReplyMails = async (flag, filter, options) => {
 
   flag ? await MailReply.updateMany(filter, { $set: { is_read: true } }) : ''
 
-  const replyMails = await MailReply.paginate(filter, {
+  const replyMails = await MailReply.paginate({ reply: filter.reply }, {
     customLabels,
     ...options,
   });
