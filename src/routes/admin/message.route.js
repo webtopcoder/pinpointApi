@@ -16,4 +16,11 @@ router
     mailController.sendMessageByAdmin
   );
 
+router
+  .route("/")
+  .post(
+    auth(false, true),
+    upload.array("attachments"),
+    mailController.composeMessageByAdmin
+  );
 module.exports = router;

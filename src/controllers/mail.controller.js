@@ -559,6 +559,40 @@ const sendMessageByAdmin = catchAsync(async (req, res) => {
     .json({ success: true, msg: "Message sent successfully!" });
 });
 
+const composeMessageByAdmin = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const user = await userService.getUserById(userId);
+  let mailsToSend;
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const { to, subject, message } = req.body;
+  const from = req.user._id;
+  const files = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
+  mailsToSend = [{
+    from,
+    isNotice: false,
+    to,
+    role: user.role,
+    files,
+    subject,
+    message,
+  }];
+
+  await mailService.createMail(mailsToSend);
+
+  return res
+    .status(httpStatus.CREATED)
+    .json({ success: true, msg: "Message sent successfully!" });
+});
+
 module.exports = {
   compose,
   reply,
@@ -575,5 +609,6 @@ module.exports = {
   updateMail,
   bulkActions,
   sendMessageByAdmin,
+  composeMessageByAdmin,
   getReplyById
 };

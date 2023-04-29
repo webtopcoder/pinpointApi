@@ -7,6 +7,14 @@ const { uploadMedia } = require("../services/media.service");
 import { Parser } from "json2csv";
 import pick from "../utils/pick";
 
+const getAllUsers = catchAsync(async (req, res) => {
+  const users = await adminService.getAllUsers();
+  if (!users) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
+  }
+  res.send({ data: users });
+});
+
 const getSearchUsers = catchAsync(async (req, res) => {
   const users = await adminService.searchUser(req.query);
   if (!users) {
@@ -285,6 +293,7 @@ const deleteImageByID = catchAsync(async (req, res) => {
 });
 
 module.exports = {
+  getAllUsers,
   getSearchUsers,
   getSearchLocations,
   getSearchActivities,

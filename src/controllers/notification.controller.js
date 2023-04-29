@@ -17,7 +17,6 @@ const getNotificationById = catchAsync(async (req, res) => {
 const getNotifications = catchAsync(async (req, res) => {
   let filter = pick(req.query, []);
   let options = pick(req.query, ["limit", "sort"]);
-  console.log(options)
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;

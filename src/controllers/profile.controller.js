@@ -241,7 +241,7 @@ const createPost = catchAsync(async (req, res) => {
       })
     );
   }
-  else if (to_user._id !== req.user._id) {
+  else if (to_user._id.toString() !== req.user.id.toString()) {
     EventEmitter.emit(events.SEND_NOTIFICATION, {
       recipient: to_user._id.toString(),
       actor: req.user._id.toString(),
@@ -285,7 +285,12 @@ const getAllImages = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const postImgs = await userService.getProfileImages(user._id, {
+  const postImgs = await userService.getPostImages(user._id, {
+    page: page ?? 1,
+    limit: limit ?? 10,
+  });
+
+  const shoutImgs = await userService.getShoutImages(user._id, {
     page: page ?? 1,
     limit: limit ?? 10,
   });
@@ -295,7 +300,7 @@ const getAllImages = catchAsync(async (req, res) => {
     limit: limit ?? 10,
   });
 
-  const images = postImgs.concat(locationReviewImgs);
+  const images = (postImgs.concat(locationReviewImgs)).concat(shoutImgs);
   let sortedDates = images.sort((p1, p2) => (p1.createdAt < p2.createdAt) ? 1 : (p1.createdAt > p2.createdAt) ? -1 : 0);
 
   return res.json({ success: true, image: sortedDates });

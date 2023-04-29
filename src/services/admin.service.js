@@ -7,7 +7,6 @@ const httpStatus = require("http-status"),
     Location,
     Transaction,
     Media,
-    Admin,
   } = require("../models"),
   {
     STATUS_ACTIVE,
@@ -26,6 +25,23 @@ const httpStatus = require("http-status"),
   ApiError = require("../utils/ApiError");
 const userService = require("./user.service");
 const { query } = require("express");
+
+const getAllUsers = async () => {
+
+  const [data, total] = await Promise.all([
+    User.find({
+      status: 'active', role: {
+        $ne: 'admin',
+      },
+    }).select('_id username name role'),
+    User.countDocuments(),
+  ]);
+
+  return {
+    data,
+    total,
+  };
+};
 
 const getTopCities = async ({ role = ROLE_USER, limit = 3 }) => {
   const usersWithCities = await User.find({
@@ -793,6 +809,7 @@ const deleteUserByID = async (user_id) => {
 };
 
 module.exports = {
+  getAllUsers,
   getAdminById,
   searchUser,
   userUpdate,

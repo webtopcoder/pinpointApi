@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Admin, Post, Media, Like } = require("../models"),
+  { User, Admin, Post, Media, Like, Shoutout } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -467,7 +467,8 @@ const getUserActivity = async (userId, { page, search }) => {
     images,
   };
 };
-const getProfileImages = async (userId, options) => {
+
+const getPostImages = async (userId, options) => {
   const imagesInPost = await Post.aggregate([
     {
       $match: {
@@ -526,6 +527,87 @@ const getProfileImages = async (userId, options) => {
   return images;
 };
 
+const getShoutImages = async (userId, options) => {
+  const imagesInShout = await Shoutout.aggregate([
+    {
+      $match: { to: new ObjectId(userId) },
+    },
+    {
+      $lookup: {
+        from: "posts",
+        localField: "post",
+        foreignField: "_id",
+        as: "shout",
+        pipeline: [
+          {
+            $lookup: {
+              from: Media.collection.name,
+              localField: "images",
+              foreignField: "_id",
+              as: "images",
+            },
+          },
+          {
+            $project: {
+              image: "$images",
+            },
+          },
+          {
+            $group: {
+              _id: "",
+              image: {
+                $push: "$image",
+              },
+            },
+          },
+          {
+            $unwind: "$image",
+          },
+          {
+            $sort: { updatedAt: -1 },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        shout: "$shout",
+      },
+    },
+    {
+      $group: {
+        _id: "",
+        shout: {
+          $push: "$shout",
+        },
+      },
+    },
+    {
+      $unwind: "$shout",
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+    {
+      $skip: (parseInt(options.page) - 1) * options.limit,
+    },
+    {
+      $limit: parseInt(options.limit),
+    },
+  ]);
+
+  const shoutImages = imagesInShout.reduce((acc, image) => {
+    image.shout.forEach((img1) => {
+      img1.image.forEach((img) => {
+        acc.push(img);
+      });
+    });
+    return acc;
+  }, []);
+
+  return shoutImages;
+};
+
 const getFavoriteLocations = async (userId) => {
   const locations = await User.findById(userId).populate({
     path: "favoriteLocations", populate: [
@@ -550,7 +632,8 @@ module.exports = {
   checkUser,
   getUserActivity,
   getUserByUsername,
-  getProfileImages,
+  getPostImages,
+  getShoutImages,
   getFavoriteLocations,
   getActivePartners,
   getDefaultAvatar

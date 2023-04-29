@@ -8,8 +8,16 @@ const { adminValidation } = require("../validations");
 const router = express.Router();
 
 router
+  .route("/users")
+  .get(auth(false, true), adminController.getAllUsers);
+
+router
   .route("/users/search")
   .get(auth(false, true), adminController.getSearchUsers);
+
+router
+  .route("/partners/search")
+  .get(auth(false, true), adminController.getSearchPartners);
 
 router
   .route("/locations/search")
@@ -22,10 +30,6 @@ router
 router
   .route("/partners/export/csv")
   .get(auth(false, true), adminController.getUsersForCSV);
-
-router
-  .route("/partners/search")
-  .get(auth(false, true), adminController.getSearchPartners);
 
 router
   .route("/users/:id/view")
