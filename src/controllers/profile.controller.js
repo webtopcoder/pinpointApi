@@ -6,7 +6,8 @@ const {
   shoutoutService,
   likeService,
   locationService,
-  notificationService
+  notificationService,
+  postService
 } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
@@ -240,7 +241,13 @@ const createPost = catchAsync(async (req, res) => {
         }
       })
     );
+
+    const shoutUsers = await shoutoutService.getShoutList(newPost._id);
+    await postService.updatePostById(newPost._id, {
+      shoutlist: shoutUsers,
+    });
   }
+
   else if (to_user._id.toString() !== req.user.id.toString()) {
     EventEmitter.emit(events.SEND_NOTIFICATION, {
       recipient: to_user._id.toString(),

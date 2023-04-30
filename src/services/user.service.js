@@ -271,6 +271,7 @@ const getUserActivity = async (userId, { page, search }) => {
               content: "$content",
               image: "$images",
               like: "$like",
+              shortlist: "$shoutlist",
               createdAt: "$createdAt",
               updatedAt: "$updatedAt",
               type: "post",

@@ -23,6 +23,17 @@ const createShoutout = async (shoutoutBody) => {
   return shoutout;
 };
 
+const getShoutList = async (id) => {
+  const shoutoutList = await Shoutout.find({ post: id }).select('to');
+
+  const userIDs = shoutoutList.reduce((acc, shout) => {
+    acc.push(shout.to)
+    return acc;
+  }, []);
+
+  return userIDs;
+};
+
 const queryShoutouts = async (filter, options) => {
   const shoutouts = await Shoutout.paginate(filter, {
     customLabels,
@@ -60,6 +71,7 @@ const deleteShoutoutById = async (shoutoutId) => {
 };
 
 module.exports = {
+  getShoutList,
   createShoutout,
   queryShoutouts,
   getShoutoutById,

@@ -21,6 +21,15 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           },
         ],
       },
+      shoutlist: {
+        type: [
+          {
+            type: Types.ObjectId,
+            ref: "User",
+          },
+        ],
+        default: [],
+      },
       like: {
         type: Types.ObjectId,
         ref: "Like",
