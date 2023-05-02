@@ -12,15 +12,17 @@ router
   .post(
     auth(false, true),
     upload.array("attachments"),
-    validate(mailValidation.sendMessageByAdmin),
+    // validate(mailValidation.sendMessageByAdmin),
     mailController.sendMessageByAdmin
   );
 
 router
-  .route("/")
+  .route("/compose")
   .post(
-    auth(false, true),
-    upload.array("attachments"),
-    mailController.composeMessageByAdmin
+    auth(),
+    upload.array("files", 5),
+    validate(mailValidation.createMail),
+    mailController.composebyAdmin
   );
+
 module.exports = router;

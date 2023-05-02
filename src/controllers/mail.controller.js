@@ -8,7 +8,6 @@ const followService = require("../services/follow.service");
 const path = require("path");
 const { EventEmitter, events } = require("../events");
 const { ObjectID } = require("bson");
-const { objectId } = require("../validations/custom.validation");
 
 
 const compose = catchAsync(async (req, res) => {
@@ -66,6 +65,86 @@ const compose = catchAsync(async (req, res) => {
           };
         });
       });
+  }
+
+  await mailService.createMail(mailsToSend);
+
+  return res.json({ success: true, msg: "Sent successfully!" });
+});
+
+
+const composebyAdmin = catchAsync(async (req, res) => {
+
+  const { to, subject, message, isNotice } = req.body;
+  const from = req.user._id;
+  let to_user;
+  let filter;
+  let mailsToSend;
+
+  const files = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+
+  if (!isNotice) {
+    to_user = await userService.queryUsers(
+      { username: to.split(",").map((name) => name) },
+      {
+        pagination: false,
+      }
+    );
+
+    if (to_user.totalResults === 0) {
+      return res.json({
+        success: false,
+        msg: "Not exist user or user email",
+      });
+    }
+
+    mailsToSend = to_user.results.map((user) => {
+      return {
+        from,
+        isNotice: false,
+        to: user._id,
+        role: user.role,
+        files,
+        subject,
+        message,
+      };
+    });
+  } else {
+
+    switch (isNotice) {
+      case 'users':
+        filter = { role: 'user', status: 'active' }
+        break;
+      case 'partners':
+        filter = { role: 'partner', status: 'active' }
+        break;
+      default:
+        filter = { role: { $ne: 'admin' }, status: 'active' }
+    }
+
+    to_user = await userService.queryUsers(
+      filter,
+      {
+        pagination: false,
+      }
+    );
+
+    mailsToSend = to_user.results.map((user) => {
+      return {
+        from,
+        isNotice: false,
+        to: user._id,
+        role: user.role,
+        files,
+        subject,
+        message,
+      };
+    });
   }
 
   await mailService.createMail(mailsToSend);
@@ -136,9 +215,7 @@ const getInbox = catchAsync(async (req, res) => {
 
   options.userID = req.user._id
 
-  filter = { $or: [{ to: new ObjectID(req.user._id) }, { $and: [{ from: new ObjectID(req.user._id) }, { reply: true }] }] };
-
-  filter.to_is_deleted = false;
+  filter = { $or: [{ $and: [{ to: new ObjectID(req.user._id), to_is_deleted: false }] }, { $and: [{ from: new ObjectID(req.user._id) }, { reply: true }, { from_is_deleted: false }] }] };
   if (filter.q) {
     const query = filter.q;
     delete filter.q;
@@ -272,6 +349,10 @@ const deleteMail = catchAsync(async (req, res) => {
       from_is_deleted: true,
     });
   }
+
+  // await mailService.updateReplyMail({ to: userId }, {
+  //   to_is_deleted: true,
+  // });
 
   res.send({ success: true, message: "Deleted successfully!" });
 });
@@ -595,6 +676,7 @@ const composeMessageByAdmin = catchAsync(async (req, res) => {
 
 module.exports = {
   compose,
+  composebyAdmin,
   reply,
   getInbox,
   getSent,

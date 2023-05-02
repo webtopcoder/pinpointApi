@@ -17,6 +17,15 @@ router
   );
 
 router
+  .route("/composebyAdmin")
+  .post(
+    auth(),
+    upload.array("files", 5),
+    validate(mailValidation.createMailbyAdmin),
+    mailController.composebyAdmin
+  );
+
+router
   .route("/reply")
   .post(
     auth(),

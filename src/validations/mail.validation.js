@@ -4,7 +4,18 @@ const { objectId } = require("./custom.validation");
 const createMail = {
   body: Joi.object()
     .keys({
-      isNotice: Joi.boolean().valid(true),
+      isNotice: Joi.boolean().valid(),
+      to: Joi.string(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+    })
+    .xor("isNotice", "to"),
+};
+
+const createMailbyAdmin = {
+  body: Joi.object()
+    .keys({
+      isNotice: Joi.string(),
       to: Joi.string(),
       subject: Joi.string().required(),
       message: Joi.string().required(),
@@ -64,4 +75,5 @@ module.exports = {
   updateMail,
   bulkActions,
   sendMessageByAdmin,
+  createMailbyAdmin
 };
