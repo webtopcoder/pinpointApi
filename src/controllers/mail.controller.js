@@ -24,20 +24,29 @@ const compose = catchAsync(async (req, res) => {
   );
 
   if (!isNotice) {
-    to_user = await userService.queryUsers(
-      { _id: to.split(",").map((id) => new Object(id)) },
-      {
-        pagination: false,
-      }
-    );
-
-    if (to_user.totalResults === 0) {
-      return res.json({
-        success: false,
-        msg: "Not exist user or user email",
-      });
+    if (to === "admin") {
+      to_user = await userService.queryUsers(
+        { role: "admin" },
+        {
+          pagination: false,
+        }
+      );
     }
+    else {
+      to_user = await userService.queryUsers(
+        { username: to.split(",").map((name) => new Object(name)) },
+        {
+          pagination: false,
+        }
+      );
 
+      if (to_user.totalResults === 0) {
+        return res.json({
+          success: false,
+          msg: "Not exist user or user email",
+        });
+      }
+    }
     mailsToSend = to_user.results.map((user) => {
       return {
         from,
@@ -49,7 +58,8 @@ const compose = catchAsync(async (req, res) => {
         message,
       };
     });
-  } else {
+  }
+  else {
     mailsToSend = await followService
       .getFollowers(req.user._id, {}, {})
       .then((follows) => {
@@ -66,7 +76,6 @@ const compose = catchAsync(async (req, res) => {
         });
       });
   }
-
   await mailService.createMail(mailsToSend);
 
   return res.json({ success: true, msg: "Sent successfully!" });
@@ -210,7 +219,7 @@ const getInbox = catchAsync(async (req, res) => {
       options.sort.split(",").map((field) => field.split(":"))
     );
   } else {
-    options.sort = "-createdAt";
+    options.sort = "-updatedAt";
   }
 
   options.userID = req.user._id
@@ -504,7 +513,7 @@ const getNotices = catchAsync(async (req, res) => {
     options.sort = "-createdAt";
   }
 
-  filter.from = req.user._id;
+  filter.from = new ObjectID(req.user._id);
   filter.from_is_deleted = false;
   filter.isNotice = true;
   if (filter.q) {
