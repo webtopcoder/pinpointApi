@@ -237,7 +237,6 @@ const quickArrival = catchAsync(async (req, res) => {
   });
 
   location.favoriteUsers.map(async item => {
-
     // const result = await settingService.getSettings({
     //   key: "user:location",
     //   user: item,
@@ -248,8 +247,8 @@ const quickArrival = catchAsync(async (req, res) => {
       actor: location.partner._id,
       type: "addLocation",
       title: "New message",
-      description: `${location.partner.username} arrived your favorite location.`,
-      url: `/user/map/interactive-map/`,
+      description: `@${location.partner.username} Your favorite location is active.`,
+      url: `/profile/${item}/favorites/`,
     });
     // }
   });
