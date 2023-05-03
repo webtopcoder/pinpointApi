@@ -68,7 +68,7 @@ const Action = {
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "addlocation",
-      message: from_user.username + " arrived your favorite location!",
+      message: `@${from_user.username} Your favorite location is active.`,
       to,
     });
   },
