@@ -233,7 +233,8 @@ const quickArrival = catchAsync(async (req, res) => {
     ...req.body,
     arrivalImages,
     isActive: true,
-    isArrival: createdArrival._id
+    isArrival: createdArrival._id,
+    departureAt: req.body.departureAt
   });
 
   location.favoriteUsers.map(async item => {
