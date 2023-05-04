@@ -426,6 +426,7 @@ const unfavoriteLocation = catchAsync(async (req, res) => {
 
 const getFavoriteLocations = catchAsync(async (req, res) => {
   const { userId } = req.params;
+
   const locations = await userService.getFavoriteLocations(userId);
   res.send(locations);
 });

@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Admin, Post, Media, Like, Shoutout } = require("../models"),
+  { User, Admin, Post, Media, Like, Shoutout, Location, Arrival } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -610,15 +610,104 @@ const getShoutImages = async (userId, options) => {
 };
 
 const getFavoriteLocations = async (userId) => {
-  const locations = await User.findById(userId).populate({
+  let arr = [];
+  var locations = await User.findById(userId).populate({
     path: "favoriteLocations", populate: [
       {
         path: "images",
       },
+      {
+        path: "reviews"
+      }
     ],
   });
 
-  return locations.favoriteLocations;
+  for (let key = 0; key < locations.favoriteLocations.length; key++) {
+    let item = locations.favoriteLocations[key]._doc;
+    const reviewlikeCount = await Location.aggregate([
+      {
+        $match: {
+          _id: item._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "reviews",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: Like.collection.name,
+                localField: "like",
+                foreignField: "_id",
+                as: "like",
+              },
+            },
+            {
+              $unwind: "$like",
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$like.count" },
+              }
+            },
+          ],
+          as: "reviews",
+        },
+      },
+      {
+        $unwind: "$reviews",
+      },
+      {
+        $project: {
+          total: "$reviews.total",
+        },
+      },
+    ])
+
+    const arrivallikeCount = await Arrival.aggregate([
+      {
+        $match: {
+          location: item._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "like",
+          foreignField: "_id",
+          as: "likescount",
+        },
+      },
+      {
+        $unwind: "$likescount",
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$likescount.count" },
+        },
+      },
+    ]);
+
+    if (!reviewlikeCount.length > 0)
+      reviewlikeCount.push({
+        total: 0
+      })
+
+    if (!arrivallikeCount.length > 0)
+      arrivallikeCount.push({
+        total: 0
+      });
+
+    const totalLike = arrivallikeCount[0].total + reviewlikeCount[0].total;
+    item = { ...item, totalLike };
+    arr.push(item)
+  };
+
+  return arr;
 };
 
 module.exports = {

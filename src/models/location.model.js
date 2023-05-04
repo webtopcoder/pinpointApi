@@ -109,10 +109,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
 
   Location.virtual("rating").get(function () {
     if (this.reviews?.length > 0) {
+      let length = 0;
       const totalRating = this.reviews.reduce((acc, review) => {
+        if (review.rating !== 0) length++
         return acc + review.rating;
       }, 0);
-      return totalRating / this.reviews.length;
+      return totalRating / length;
     }
     return 0;
   });

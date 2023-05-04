@@ -1,9 +1,10 @@
 const httpStatus = require("http-status");
-const { Post } = require("../models"),
+const { Post, Shoutout, Like } = require("../models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort");
 const { EventEmitter, events } = require("../events");
+const { ObjectID } = require("bson");
 
 const createPost = async (postBody) => {
   const createdPost = await Post.create(postBody);
@@ -44,9 +45,93 @@ const updatePostById = async (userId, updateBody) => {
   return post;
 };
 
+const getlikePostCount = async (userId) => {
+  const likePostCount = await Post.aggregate([
+    {
+      $match: {
+        to: new ObjectID(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "likes",
+        localField: "like",
+        foreignField: "_id",
+        as: "likescount",
+      },
+    },
+    {
+      $unwind: "$likescount",
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$likescount.count" },
+      },
+    },
+  ]);
+
+  const likeShoutoutCount = await Shoutout.aggregate([
+    {
+      $match: {
+        to: new ObjectID(userId)
+      },
+    },
+    {
+      $lookup: {
+        from: "posts",
+        localField: "post",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $lookup: {
+              from: Like.collection.name,
+              localField: "like",
+              foreignField: "_id",
+              as: "like",
+            },
+          },
+          {
+            $unwind: "$like",
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$like.count" },
+            }
+          },
+        ],
+        as: "shoutout",
+      },
+    },
+    {
+      $unwind: "$shoutout",
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: "$shoutout.total" },
+      }
+    },
+  ])
+
+  if (!likePostCount.length > 0)
+    likePostCount.push({
+      total: 0
+    });
+
+  if (!likeShoutoutCount.length > 0)
+    likeShoutoutCount.push({
+      total: 0
+    });
+
+  return likePostCount[0].total + likeShoutoutCount[0].total
+};
+
 module.exports = {
   createPost,
   getPosts,
   getPostById,
   updatePostById,
+  getlikePostCount
 };

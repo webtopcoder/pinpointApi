@@ -6,6 +6,7 @@ const httpStatus = require("http-status"),
 const { EventEmitter, events } = require("../events");
 const followService = require("./follow.service");
 const userService = require("./user.service");
+const { ObjectID } = require("bson");
 
 const getLocationById = async (id) => {
 
@@ -164,19 +165,196 @@ const queryLocations = async (filter, options) => {
 
   await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
 
-  const locations = await Location.paginate(filter, {
+  var locations = await Location.paginate(filter, {
     customLabels,
     sort: defaultSort,
     ...options,
   });
 
+
+  for (let key = 0; key < locations.results.length; key++) {
+    let item = locations.results[key]._doc;
+    const reviewlikeCount = await Location.aggregate([
+      {
+        $match: {
+          _id: item._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "reviews",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: Like.collection.name,
+                localField: "like",
+                foreignField: "_id",
+                as: "like",
+              },
+            },
+            {
+              $unwind: "$like",
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$like.count" },
+              }
+            },
+          ],
+          as: "reviews",
+        },
+      },
+      {
+        $unwind: "$reviews",
+      },
+      {
+        $project: {
+          total: "$reviews.total",
+        },
+      },
+    ])
+
+    const arrivallikeCount = await Arrival.aggregate([
+      {
+        $match: {
+          location: item._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "like",
+          foreignField: "_id",
+          as: "likescount",
+        },
+      },
+      {
+        $unwind: "$likescount",
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$likescount.count" },
+        },
+      },
+    ]);
+
+    if (!reviewlikeCount.length > 0)
+      reviewlikeCount.push({
+        total: 0
+      })
+
+    if (!arrivallikeCount.length > 0)
+      arrivallikeCount.push({
+        total: 0
+      });
+
+    const totalLike = arrivallikeCount[0].total + reviewlikeCount[0].total;
+    item = { ...item, totalLike };
+    locations.results[key] = item;
+  };
   return locations;
+
+};
+
+const getlikeLocationCount = async (userId) => {
+
+  var locations = await Location.find({ partner: new ObjectID(userId) });
+  let totalValue = 0;
+
+  for (let key = 0; key < locations.length; key++) {
+    let item = locations[key];
+    const reviewlikeCount = await Location.aggregate([
+      {
+        $match: {
+          _id: item._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "reviews",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: Like.collection.name,
+                localField: "like",
+                foreignField: "_id",
+                as: "like",
+              },
+            },
+            {
+              $unwind: "$like",
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$like.count" },
+              }
+            },
+          ],
+          as: "reviews",
+        },
+      },
+      {
+        $unwind: "$reviews",
+      },
+      {
+        $project: {
+          total: "$reviews.total",
+        },
+      },
+    ])
+
+    const arrivallikeCount = await Arrival.aggregate([
+      {
+        $match: {
+          location: item._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "like",
+          foreignField: "_id",
+          as: "likescount",
+        },
+      },
+      {
+        $unwind: "$likescount",
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$likescount.count" },
+        },
+      },
+    ]);
+
+    if (!reviewlikeCount.length > 0)
+      reviewlikeCount.push({
+        total: 0
+      })
+
+    if (!arrivallikeCount.length > 0)
+      arrivallikeCount.push({
+        total: 0
+      });
+
+    totalValue = arrivallikeCount[0].total + reviewlikeCount[0].total;
+  };
+
+  return totalValue;
+
 };
 
 const getReviewImages = async (userId, options) => {
 
   const locations = await getLocationsByPartnerId(userId, {});
-
   const locationIDs = locations.reduce((acc, location) => {
     acc.push(location._id)
     return acc;
@@ -232,6 +410,21 @@ const getReviewImages = async (userId, options) => {
   return images;
 };
 
+const getRating = async (userId) => {
+
+  const locations = await Location.find({
+    partner: new ObjectID(userId),
+  }).populate("reviews");
+
+  const businessRating = (
+    locations?.reduce((acc, location) => {
+      return acc + (location.rating ?? 0);
+    }, 0) / locations.length
+  ).toFixed(1);
+
+  return businessRating;
+};
+
 module.exports = {
   getLocationById,
   getLocationsByPartnerId,
@@ -244,5 +437,7 @@ module.exports = {
   getArrivalById,
   updateArrivalById,
   getIsArrival,
-  getExpiredArrivals
+  getExpiredArrivals,
+  getlikeLocationCount,
+  getRating
 };

@@ -290,6 +290,7 @@ const getSent = catchAsync(async (req, res) => {
     isNotice: false,
     ...filter,
   };
+  options.userID = req.user._id
 
   if (filter.q) {
     const query = filter.q;
@@ -512,7 +513,8 @@ const getNotices = catchAsync(async (req, res) => {
   } else {
     options.sort = "-createdAt";
   }
-
+  
+  options.userID = req.user._id
   filter.from = new ObjectID(req.user._id);
   filter.from_is_deleted = false;
   filter.isNotice = true;

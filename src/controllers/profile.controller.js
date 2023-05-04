@@ -14,6 +14,7 @@ const followService = require("../services/follow.service");
 const { Post, Location, Follow } = require("../models");
 const { uploadMedia } = require("../services/media.service");
 const { EventEmitter, events } = require("../events");
+const { use } = require("passport");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -113,15 +114,20 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
     is_followed = await followService.getFollowStatus(req.user._id, userId);
   }
 
+  const likesPostCount = await postService.getlikePostCount(userId);
+  const likesLocationCount = await locationService.getlikeLocationCount(userId);
+  const Rating = await locationService.getRating(userId);
+
   return res.json({
     profile: {
       avatar: user?.profile?.avatar,
-      favorites: 0,
+      favorites: likesPostCount + likesLocationCount,
       followers: followerCount,
       location: locationCount,
       username: user?.username,
       fullname: user?.name,
       usertype: user?.role,
+      rating: Rating,
       is_follow: is_followed,
     },
   });
@@ -336,7 +342,7 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
     locations?.reduce((acc, location) => {
       return acc + (location.rating ?? 0);
     }, 0) / locations.length
-  ).toFixed(2);
+  ).toFixed(1);
 
   const profileViews =
     (await userService.getUserById(userId)).profileViews ?? 0;

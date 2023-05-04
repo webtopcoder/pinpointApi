@@ -8,7 +8,6 @@ const { Follow } = require("../models");
 const getFollowers = catchAsync(async (req, res) => {
   const { userId } = pick(req.params, ["userId"]);
 
-  console.log(userId)
   let filter = pick(req.query, ["q"]);
 
   let options = pick(req.query, ["limit", "page", "sort"]);

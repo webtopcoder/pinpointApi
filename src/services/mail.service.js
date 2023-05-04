@@ -74,7 +74,6 @@ const queryreplyfromSent = async (user_id) => {
 
   const allreply = await Mail.find({ "reply": true }).select('_id');
 
-  console.log(allreply)
   const allreplyIDs = allreply.reduce((acc, reply) => {
     acc.push(reply._id)
     return acc;
@@ -292,6 +291,8 @@ const getIsReadEmails = async (userId) => {
     to: userId,
     is_read: false,
     from_is_deleted: false,
+  }, {
+    userID: userId
   });
 
   return mails;
