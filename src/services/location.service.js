@@ -345,7 +345,7 @@ const getlikeLocationCount = async (userId) => {
         total: 0
       });
 
-    totalValue = arrivallikeCount[0].total + reviewlikeCount[0].total;
+    totalValue = totalValue + arrivallikeCount[0].total + reviewlikeCount[0].total;
   };
 
   return totalValue;
