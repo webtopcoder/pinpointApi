@@ -15,6 +15,7 @@ const getShoutoutsByUserId = catchAsync(async (req, res) => {
     options.sort = "-createdAt";
   }
   filter.to = req.params.userid;
+  filter.status = 'active';
   options.populate = [
     "from",
     "to",

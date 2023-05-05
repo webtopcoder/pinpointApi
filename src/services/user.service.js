@@ -183,7 +183,9 @@ const getUserActivity = async (userId, { page, search }) => {
                   { $eq: ["$to", "$$userId"] },
                 ],
               },
+              status: 'active'
             },
+
           },
           {
             $lookup: {
