@@ -10,6 +10,7 @@ module.exports.notificationController = require("./notification.controller");
 module.exports.settingController = require("./setting.controller");
 module.exports.shoutoutController = require("./shoutout.controller");
 module.exports.partnershipController = require("./partnership.controller");
+module.exports.transactionController = require("./transaction.controller");
 module.exports.postController = require("./post.controller");
 module.exports.statisticController = require("./statistic.controller");
 module.exports.adminController = require("./admin.controller");

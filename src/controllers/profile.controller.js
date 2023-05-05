@@ -320,7 +320,7 @@ const getAllImages = catchAsync(async (req, res) => {
 });
 
 const getPartnerDashboard = catchAsync(async (req, res) => {
-
+  
   const userId = req.user._id;
   const partnerLocations = await Location.find({
     partner: userId,

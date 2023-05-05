@@ -70,6 +70,7 @@ router
 
 router.use("/activities", require("./admin/activity.route"));
 router.use("/categories", require("./admin/category.route"));
+router.use("/transactions", require("./admin/transactions.route"));
 router.use("/faqs", require("./admin/faq.route"));
 router.use("/testimonial", require("./admin/testimonial.route"));
 router.use("/contact", require("./admin/contact.route"));
