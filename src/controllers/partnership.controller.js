@@ -144,7 +144,6 @@ const subscribePartnership = catchAsync(async (req, res) => {
     );
   }
 
-
   await userService.updateUserById(req.user._id, {
     activeSubscription: subscription,
   });

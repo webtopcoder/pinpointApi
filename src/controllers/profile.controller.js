@@ -7,7 +7,7 @@ const {
   likeService,
   locationService,
   notificationService,
-  postService
+  postService,
 } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
@@ -320,6 +320,7 @@ const getAllImages = catchAsync(async (req, res) => {
 });
 
 const getPartnerDashboard = catchAsync(async (req, res) => {
+
   const userId = req.user._id;
   const partnerLocations = await Location.find({
     partner: userId,

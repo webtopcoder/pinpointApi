@@ -2,7 +2,7 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
-const { authService, userService, tokenService } = require("@services");
+const { authService, userService, tokenService, stripeService } = require("@services");
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -16,6 +16,7 @@ const register = catchAsync(async (req, res) => {
 
 const login = catchAsync(async (req, res, next) => {
   const { email, password, role } = req.body;
+
   let user = await authService.loginUserWithEmailAndPassword(email, password);
   if (!user || !(Object.keys(user).length > 0) || user.role !== role) {
     return res
@@ -25,7 +26,16 @@ const login = catchAsync(async (req, res, next) => {
   user = user.toJSON();
   let tokens;
   if (user.status !== "active") tokens = "";
-  else tokens = await tokenService.generateAuthTokens(user);
+  else {
+    if (role === "partner" && user.activePartnership !== null) {
+      const updatedSubscription = await stripeService.retrieveSubscription(user.activeSubscription.id);
+      const updatedUser = await userService.updateUserById(req.user._id, {
+        activeSubscription: updatedSubscription,
+      });
+      user = updatedUser
+    }
+    tokens = await tokenService.generateAuthTokens(user);
+  }
   res.send({
     user,
     tokens,
