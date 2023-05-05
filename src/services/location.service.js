@@ -405,6 +405,13 @@ const getReviewImages = async (userId, options) => {
         localField: "images",
         foreignField: "_id",
         as: "images",
+        pipeline: [
+          {
+            $match: {
+              status: 'active',
+            },
+          },
+        ],
       },
     },
     {
