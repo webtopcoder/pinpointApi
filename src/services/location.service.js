@@ -352,6 +352,40 @@ const getlikeLocationCount = async (userId) => {
 
 };
 
+
+const getAllCheckInCount = async (userId) => {
+
+  var locations = await Location.find({ partner: new ObjectID(userId) });
+  let totalValue = 0;
+
+  for (let key = 0; key < locations.length; key++) {
+    let item = locations[key];
+
+    const arrivallikeCount = await Arrival.aggregate([
+      {
+        $match: {
+          location: item._id,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $size: "$checkIn" } },
+        },
+      },
+    ]);
+
+    if (!arrivallikeCount.length > 0)
+      arrivallikeCount.push({
+        total: 0
+      });
+
+    totalValue = totalValue + arrivallikeCount[0].total;
+  };
+
+  return totalValue;
+};
+
 const getReviewImages = async (userId, options) => {
 
   const locations = await getLocationsByPartnerId(userId, {});
@@ -439,5 +473,6 @@ module.exports = {
   getIsArrival,
   getExpiredArrivals,
   getlikeLocationCount,
-  getRating
+  getRating,
+  getAllCheckInCount
 };

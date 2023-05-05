@@ -347,9 +347,7 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
   const profileViews =
     (await userService.getUserById(userId)).profileViews ?? 0;
 
-  const checkIns = locations.reduce((acc, location) => {
-    return acc + (location.checkIn?.length ?? 0);
-  }, 0);
+  const checkIns = await locationService.getAllCheckInCount(userId)
 
   return res.send({
     partnerLocations,
