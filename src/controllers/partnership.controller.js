@@ -216,13 +216,13 @@ const cancelSubscription = async (req, res) => {
 
     const deletedSubscription = await stripe.subscriptions.del(subscriptionId);
 
-    const updateUser = {
-      ...req.user,
-      activePartnership: null,
-      activeSubscription: null,
-    };
+    // const updateUser = {
+    //   ...req.user,
+    //   activePartnership: null,
+    //   activeSubscription: null,
+    // };
 
-    await userService.updateUserById(req.user._id, updateUser);
+    // await userService.updateUserById(req.user._id, updateUser);
     let userinfo = await userService.getUserById(req.user._id);
 
     res.status(200).json({
