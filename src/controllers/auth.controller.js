@@ -29,7 +29,7 @@ const login = catchAsync(async (req, res, next) => {
   else {
     if (role === "partner" && user.activePartnership !== null) {
       const updatedSubscription = await stripeService.retrieveSubscription(user.activeSubscription.id);
-      const updatedUser = await userService.updateUserById(req.user._id, {
+      const updatedUser = await userService.updateUserById(user._id, {
         activeSubscription: updatedSubscription,
       });
       user = updatedUser
