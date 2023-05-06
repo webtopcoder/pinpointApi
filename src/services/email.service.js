@@ -53,7 +53,7 @@ const sendResetPasswordEmail = async (userId) => {
   const subject = "Reset password";
   const to = user.email;
   const link = `${config.frontend_url}/authentication/create-password/?token=${token}`;
-  const html = `<p>Hi, br><p>Please click on the following <a href="${link}">link</a> to reset your password.</p>
+  const html = `<p>Hi, Please click on the following <a href="${link}">link</a> to reset your password.</p>
     <br>Or enter the following OTP to reset your password: <br><p>${link}</p>
     <br><p>If you did not request this, please ignore this email.</p>`;
 
@@ -67,7 +67,7 @@ const sendVerificationEmail = async (userId) => {
   const subject = "Email Verification";
   const to = user.email;
   if (user.role === "partner") {
-    html = `<p>Hi, Hi Future Pinpoint Partner,
+    html = `<p>Hi, Future Pinpoint Partner,
     <br><p>Your OTP for your email verification is ${token}</p><br>
     <p><br><p>
     PLEASE NOTE: This code will not grant you access to use The Pinpoint Social. This is strictly to
