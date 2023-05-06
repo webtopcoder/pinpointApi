@@ -37,7 +37,7 @@ exports.createSubscription = async ({
   return subscription;
 };
 
-exports.retrieveSubscription = async (customerID) => {
+exports.retrieveSubscription = async (subscriptionId) => {
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
   return subscription;
 };
