@@ -24,7 +24,9 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 const userService = require("./user.service");
+const mediaService = require("./media.service");
 const { query } = require("express");
+const mongoose = require("mongoose-fill");
 
 const getAllUsers = async () => {
 
@@ -429,11 +431,6 @@ const getActivitiesById = (query) => {
         "user"
       );
   }
-
-  options.populate = [
-    "follower",
-    { path: "follower", populate: "profile.avatar" },
-  ];
 };
 
 const getUpdateActivityById = (query) => {
@@ -808,6 +805,35 @@ const deleteUserByID = async (user_id) => {
   return user;
 };
 
+const bulkDelete = async (selectedIds, flag) => {
+  const objectMailIds = selectedIds.map((id) => mongoose.Types.ObjectId(id));
+  const data = {
+    status: "deleted",
+  };
+  switch (flag) {
+    case "Post":
+      objectMailIds.map(async activitiID => {
+        await deleteActivitiesById({ id: activitiID, type: flag }, data)
+      });
+      break;
+    case "Review":
+      objectMailIds.map(async activitiID => {
+        await deleteActivitiesById({ id: activitiID, type: flag }, data)
+      });
+      break;
+    case "Shoutout":
+      objectMailIds.map(async activitiID => {
+        await deleteActivitiesById({ id: activitiID, type: flag }, data)
+      });
+      break;
+    case "Media":
+      objectMailIds.map(async activitiID => {
+        await mediaService.deleteMediaById(activitiID)
+      });
+      break;
+  }
+};
+
 module.exports = {
   getAllUsers,
   getAdminById,
@@ -826,4 +852,5 @@ module.exports = {
   deleteUserByID,
   getUpdateActivityById,
   ActivityUpdate,
+  bulkDelete
 };

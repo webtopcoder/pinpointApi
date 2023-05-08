@@ -46,4 +46,11 @@ router
   .route("/image/:id")
   .delete(auth(false, true), adminController.deleteImageByID);
 
+router
+  .route("/bulk-actions")
+  .post(
+    auth(),
+    adminController.bulkActions
+  );
+
 module.exports = router;

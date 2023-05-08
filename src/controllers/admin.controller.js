@@ -292,6 +292,15 @@ const deleteImageByID = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const bulkActions = catchAsync(async (req, res) => {
+  const { action, flag, selectedIds } = req.body;
+  if (action === "delete") {
+    await adminService.bulkDelete(selectedIds, flag);
+  }
+
+  return res.json({ success: true, message: "Action performed successfully!" });
+});
+
 module.exports = {
   getAllUsers,
   getSearchUsers,
@@ -313,6 +322,7 @@ module.exports = {
   uploadActivityImage,
   getActivityImageRemoveByID,
   updateActivityByID,
-  deleteImageByID
+  deleteImageByID,
+  bulkActions
 };
 
