@@ -3,6 +3,7 @@ const httpStatus = require("http-status"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
+const mongoose = require("mongoose-fill");
 
 const getFaqForFAQSection = async () => {
   const faqs = await FAQ.find({ isArchived: false });
@@ -50,6 +51,20 @@ const deleteFaqById = async (faqId) => {
   return faq;
 };
 
+const bulkAction = async (selectedIds, status) => {
+  const objectMailIds = selectedIds.map((id) => mongoose.Types.ObjectId(id));
+  if (status === "deleted") {
+    objectMailIds.map(async activitiID => {
+      await deleteFaqById(activitiID)
+    });
+  }
+  else {
+    objectMailIds.map(async activitiID => {
+      await updateFaqById(activitiID, { isArchived: status })
+    });
+  }
+};
+
 module.exports = {
   getFaqForFAQSection,
   getFaqs,
@@ -57,4 +72,5 @@ module.exports = {
   createFaq,
   updateFaqById,
   deleteFaqById,
+  bulkAction
 };

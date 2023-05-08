@@ -25,4 +25,11 @@ router
   )
   .delete(auth(false, true), faqController.deleteFaqById);
 
+router
+  .route("/bulk-actions")
+  .post(
+    auth(),
+    faqController.bulkActions
+  );
+
 module.exports = router;

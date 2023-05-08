@@ -54,6 +54,13 @@ const deleteFaqById = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const bulkActions = catchAsync(async (req, res) => {
+  const { action, selectedIds } = req.body;
+  await faqService.bulkAction(selectedIds, action);
+
+  return res.json({ success: true, message: "Action performed successfully!" });
+});
+
 module.exports = {
   getFaqForFAQSection,
   getFaqs,
@@ -61,4 +68,5 @@ module.exports = {
   createFaq,
   updateFaqById,
   deleteFaqById,
+  bulkActions
 };
