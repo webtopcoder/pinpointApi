@@ -42,35 +42,31 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: "./public/avatar",
-    filename: (req, file, callBack) => {
-      const parsedPath = path.parse(file.originalname);
-      const ext = parsedPath.ext;
-
-      const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${
-        req.user._id
-      }${ext}`;
-      callBack(null, fileName);
-    },
-  }),
-  limits: {},
-  fileFilter,
-});
+// const upload = multer({
+//   storage: multer.diskStorage({
+//     destination: "./public/avatar",
+//     filename: (req, file, callBack) => {
+//       console.log(234234, req)
+//       const parsedPath = path.parse(file.originalname);
+//       const ext = parsedPath.ext;
+//       const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${ext}`;
+//       callBack(null, fileName);
+//     },
+//   }),
+//   limits: {},
+//   fileFilter,
+// });
 
 const uploadAdmin = multer({
-  
+
   storage: multer.diskStorage({
     destination: "./public/avatar",
     filename: (req, file, callBack) => {
-      const { id } = req.params;
       const parsedPath = path.parse(file.originalname);
       const ext = parsedPath.ext;
 
-      const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${
-        id
-      }${ext}`;
+      const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${req.user._id
+        }${ext}`;
       callBack(null, fileName);
     },
   }),
@@ -78,5 +74,5 @@ const uploadAdmin = multer({
   fileFilter,
 });
 
-module.exports = upload;
+// module.exports = upload;
 module.exports = uploadAdmin;
