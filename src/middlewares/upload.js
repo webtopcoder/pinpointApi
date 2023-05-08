@@ -64,7 +64,6 @@ const uploadAdmin = multer({
     filename: (req, file, callBack) => {
       const parsedPath = path.parse(file.originalname);
       const ext = parsedPath.ext;
-
       const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${req.user._id
         }${ext}`;
       callBack(null, fileName);
