@@ -463,6 +463,7 @@ const getRating = async (userId) => {
     }, 0) / locations.length
   ).toFixed(1);
 
+  console.log(businessRating)
   return businessRating;
 };
 

@@ -805,10 +805,10 @@ const deleteUserByID = async (user_id) => {
   return user;
 };
 
-const bulkDelete = async (selectedIds, flag) => {
+const bulkDelete = async (selectedIds, flag, status) => {
   const objectMailIds = selectedIds.map((id) => mongoose.Types.ObjectId(id));
   const data = {
-    status: "deleted",
+    status: status,
   };
   switch (flag) {
     case "Post":

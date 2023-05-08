@@ -68,12 +68,16 @@ const getSearchActivities = catchAsync(async (req, res) => {
 });
 
 const deleteActivitesByID = catchAsync(async (req, res) => {
-  const data = {
+  let data;
+  if (req.body.status === 'deleted')
+    data = {
+      status: "active",
+    };
+  else data = {
     status: "deleted",
   };
 
   const activities = await adminService.deleteActivitiesById(req.body, data);
-
   res.send(activities);
 });
 
@@ -294,9 +298,7 @@ const deleteImageByID = catchAsync(async (req, res) => {
 
 const bulkActions = catchAsync(async (req, res) => {
   const { action, flag, selectedIds } = req.body;
-  if (action === "delete") {
-    await adminService.bulkDelete(selectedIds, flag);
-  }
+  await adminService.bulkDelete(selectedIds, flag, action);
 
   return res.json({ success: true, message: "Action performed successfully!" });
 });
