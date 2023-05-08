@@ -42,11 +42,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Media.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
   Media.plugin(toJSON);
   Media.plugin(mongoosePaginate);
 

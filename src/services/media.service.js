@@ -70,9 +70,12 @@ const deleteMediaById = async (mediaId) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Media not found");
   }
 
+
   Object.assign(media, { status: 'deleted' });
   await media.save();
   await media.delete();
+  const filePathUrl = `./public/avatar/${media.filepath}`
+  fs.unlink(filePathUrl);
   return media;
 };
 
