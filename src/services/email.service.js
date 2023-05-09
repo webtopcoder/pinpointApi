@@ -89,7 +89,7 @@ const sendVerificationEmail = async (userId) => {
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
   const link = `${config.frontend_url}/home`;
-  const defaultMessage = `"${message}"<br><p>Hi, <br><p>You have been invited to join The Pinpoint Social by ${user.firstName + " " + user.lastName}.</p><br><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>`;
+  const defaultMessage = `"${message}"<br><p>Hi, You have been invited to join The Pinpoint Social by ${user.firstName + " " + user.lastName}.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>`;
   const subject = "Invitation";
   const to = inviteTo;
   const html = defaultMessage;
@@ -101,7 +101,7 @@ const sendAdditionUserEmail = async ({ NewUser, user_id }) => {
 
   const user = await userService.getUserById(user_id);
   const link = `${config.frontend_url}/home`;
-  const defaultMessage = `<p>Hi, <br><p>${user?.email} added you as ${NewUser?.role}.</p><br><p><br><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
+  const defaultMessage = `<p>Hi, ${user?.email} added you as ${NewUser?.role}.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
   <br><p>If you did not request this, please ignore this email.</p>`;
   const subject = "Invitation";
   const to = NewUser.email;
