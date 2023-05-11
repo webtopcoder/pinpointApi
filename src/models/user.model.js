@@ -21,7 +21,7 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
       poll: PollSchema,
       notification: { type: Object },
     },
-    { _id: false }
+    { _id: false },
   );
 
   const UserSchema = new Schema(
@@ -49,7 +49,7 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         validate(value) {
           if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
             throw new Error(
-              "Password must contain at least one letter and one number"
+              "Password must contain at least one letter and one number",
             );
           }
         },
@@ -119,14 +119,14 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         default: null,
       },
       partnershipPriceRenewalDate: {
-        type: String,
+        type: Date,
       },
     },
     {
       timestamps: true,
       toJSON: { virtuals: true },
       toObject: { virtuals: true },
-    }
+    },
   );
 
   UserSchema.index({ email: 1, deletedAt: 1 }, { unique: true });

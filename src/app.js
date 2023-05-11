@@ -31,7 +31,14 @@ app.use(helmet());
 app.use(
   cors({
     origin: "*",
-  })
+  }),
+);
+
+const partnershipController = require("./controllers/partnership.controller");
+app.post(
+  "/api/v1/partnership/webhook",
+  express.raw({ type: "application/json" }),
+  partnershipController.stripeWebhook,
 );
 
 app.use(express.json());
@@ -51,7 +58,7 @@ app.use(cookieParser());
 app.all("*", (req, res, next) => {
   res.header(
     "Cross-Origin-Resource-Policy",
-    "same-site | same-origin | cross-origin"
+    "same-site | same-origin | cross-origin",
   );
   next();
 });

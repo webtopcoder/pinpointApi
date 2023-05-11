@@ -1,5 +1,14 @@
 const httpStatus = require("http-status"),
-  { User, Admin, Post, Media, Like, Shoutout, Location, Arrival } = require("../models"),
+  {
+    User,
+    Admin,
+    Post,
+    Media,
+    Like,
+    Shoutout,
+    Location,
+    Arrival,
+  } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
@@ -26,15 +35,17 @@ const createUser = async (userBody) => {
 const getDefaultAvatar = async () => {
   const defaultAvatar = await Media.findOne({ mimetype: "default" });
   if (defaultAvatar) {
-    return defaultAvatar.id
-  }
-  else {
+    return defaultAvatar.id;
+  } else {
     const file = {
       path: "default.png",
       mimetype: "default",
       size: 0,
-    }
-    const newAvatar = await mediaService.uploadMedia(file, "63d1b714d4ae07b0bf2b0c63");
+    };
+    const newAvatar = await mediaService.uploadMedia(
+      file,
+      "63d1b714d4ae07b0bf2b0c63",
+    );
     return newAvatar.id;
   }
 };
@@ -60,7 +71,6 @@ const queryUsers = async (filter, options) => {
 };
 
 const getUserById = async (userId) => {
-
   const user = await User.findById(userId).populate("profile.avatar");
   return user;
 };
@@ -88,7 +98,7 @@ const getUserByEmail = (email) => {
 
 const getAdminByEmail = (email) => {
   return User.findOne({ email }).select(
-    "_id firstName lastName username email password"
+    "_id firstName lastName username email password",
   );
 };
 
@@ -183,9 +193,8 @@ const getUserActivity = async (userId, { page, search }) => {
                   { $eq: ["$to", "$$userId"] },
                 ],
               },
-              status: 'active'
+              status: "active",
             },
-
           },
           {
             $lookup: {
@@ -458,7 +467,7 @@ const getUserActivity = async (userId, { page, search }) => {
     };
 
   const post = postAndFollowsOfCurrentUser.posts.concat(
-    postAndFollowsOfCurrentUser.follows
+    postAndFollowsOfCurrentUser.follows,
   );
 
   post.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
@@ -494,7 +503,7 @@ const getPostImages = async (userId, options) => {
         pipeline: [
           {
             $match: {
-              status: 'active',
+              status: "active",
             },
           },
         ],
@@ -558,7 +567,7 @@ const getShoutImages = async (userId, options) => {
               pipeline: [
                 {
                   $match: {
-                    status: 'active',
+                    status: "active",
                   },
                 },
               ],
@@ -628,13 +637,14 @@ const getShoutImages = async (userId, options) => {
 const getFavoriteLocations = async (userId) => {
   let arr = [];
   var locations = await User.findById(userId).populate({
-    path: "favoriteLocations", populate: [
+    path: "favoriteLocations",
+    populate: [
       {
         path: "images",
       },
       {
-        path: "reviews"
-      }
+        path: "reviews",
+      },
     ],
   });
 
@@ -667,7 +677,7 @@ const getFavoriteLocations = async (userId) => {
               $group: {
                 _id: null,
                 total: { $sum: "$like.count" },
-              }
+              },
             },
           ],
           as: "reviews",
@@ -681,7 +691,7 @@ const getFavoriteLocations = async (userId) => {
           total: "$reviews.total",
         },
       },
-    ])
+    ]);
 
     const arrivallikeCount = await Arrival.aggregate([
       {
@@ -710,20 +720,24 @@ const getFavoriteLocations = async (userId) => {
 
     if (!reviewlikeCount.length > 0)
       reviewlikeCount.push({
-        total: 0
-      })
+        total: 0,
+      });
 
     if (!arrivallikeCount.length > 0)
       arrivallikeCount.push({
-        total: 0
+        total: 0,
       });
 
     const totalLike = arrivallikeCount[0].total + reviewlikeCount[0].total;
     item = { ...item, totalLike };
-    arr.push(item)
-  };
+    arr.push(item);
+  }
 
   return arr;
+};
+
+const getUserByStripeCustomerId = async (stripeCustomerId) => {
+  return User.findOne({ stripeCustomerId });
 };
 
 module.exports = {
@@ -742,5 +756,6 @@ module.exports = {
   getShoutImages,
   getFavoriteLocations,
   getActivePartners,
-  getDefaultAvatar
+  getDefaultAvatar,
+  getUserByStripeCustomerId,
 };
