@@ -32,9 +32,10 @@ router.route("/:userId/unfriend").delete(auth(), followController.unfriend);
 
 router
   .route("/:userId/following")
-  .get(auth(true), followController.getFollowings);
+  .get(auth(), followController.getFollowings);
+
 router
   .route("/:userId/follower")
-  .get(auth(true), followController.getFollowers);
+  .get(auth(), followController.getFollowers);
 
 module.exports = router;
