@@ -409,6 +409,7 @@ const getReviewImages = async (userId, options) => {
           {
             $match: {
               status: 'active',
+              mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
             },
           },
         ],

@@ -495,6 +495,7 @@ const getPostImages = async (userId, options) => {
           {
             $match: {
               status: 'active',
+              mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
             },
           },
         ],
@@ -559,6 +560,7 @@ const getShoutImages = async (userId, options) => {
                 {
                   $match: {
                     status: 'active',
+                    mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
                   },
                 },
               ],
