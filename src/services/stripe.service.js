@@ -25,7 +25,6 @@ exports.createSubscription = async ({
   metadata,
   trialDays,
 }) => {
-
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: priceId }],
@@ -33,6 +32,11 @@ exports.createSubscription = async ({
     metadata,
     trial_period_days: trialDays,
     expand: ["latest_invoice.payment_intent"],
+    trial_settings: {
+      end_behavior: {
+        missing_payment_method: "cancel",
+      },
+    },
   });
   return subscription;
 };
@@ -58,13 +62,13 @@ exports.updateSubscription = async (subscriptionId, { priceId }) => {
     subscriptionId,
     {
       items: [{ price: priceId }],
-    }
+    },
   );
   return updatedSubscription;
 };
 
 exports.createProduct = async ({ name, description, defaultPrice }) => {
-  return await stripe.products.create({
+  return stripe.products.create({
     name,
     description,
     default_price_data: defaultPrice,
@@ -72,19 +76,19 @@ exports.createProduct = async ({ name, description, defaultPrice }) => {
 };
 
 exports.updateProduct = async (productId, updateBody) => {
-  return await stripe.products.update(productId, updateBody);
+  return stripe.products.update(productId, updateBody);
 };
 
 exports.retrieveProduct = async (productId) => {
-  return await stripe.products.retrieve(productId);
+  return stripe.products.retrieve(productId);
 };
 
 exports.deleteProduct = async (productId) => {
-  return await stripe.products.del(productId);
+  return stripe.products.del(productId);
 };
 
 exports.createPrice = async ({ productId, unitAmount, currency, interval }) => {
-  return await stripe.prices.create({
+  return stripe.prices.create({
     product: productId,
     unit_amount: unitAmount,
     currency,
@@ -102,4 +106,11 @@ exports.retrievePrice = async (priceId) => {
 exports.updatePrice = async (priceId, updateBody) => {
   const price = await stripe.prices.update(priceId, updateBody);
   return price;
+};
+
+exports.constructEvent = (req) => {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret = config.stripe.webhookSecret;
+  const event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  return event;
 };

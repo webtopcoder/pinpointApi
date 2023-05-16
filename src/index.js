@@ -3,6 +3,7 @@ const { app } = require("./app");
 const config = require("./config/config");
 const logger = require("./config/logger");
 const { Socket } = require("./socket/socket");
+const crons = require("./crons");
 
 let server;
 
@@ -13,6 +14,9 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
     logger.info(`Listening to port ${config.port}`);
   });
   Socket(server);
+  crons.start().then(() => {
+    logger.info("Crons started");
+  });
 });
 
 const exitHandler = () => {

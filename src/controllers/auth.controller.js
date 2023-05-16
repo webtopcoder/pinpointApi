@@ -2,7 +2,12 @@ const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const { events, EventEmitter } = require("@events");
 const ApiError = require("@utils/ApiError");
-const { authService, userService, tokenService, stripeService } = require("@services");
+const {
+  authService,
+  userService,
+  tokenService,
+  stripeService,
+} = require("@services");
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -24,18 +29,15 @@ const login = catchAsync(async (req, res, next) => {
       .json({ code: 400, message: "No User existing." });
   }
   user = user.toJSON();
-  let tokens;
-  if (user.status !== "active") tokens = "";
-  else {
-    if (role === "partner" && user.activePartnership !== null) {
-      const updatedSubscription = await stripeService.retrieveSubscription(user.activeSubscription.id);
-      const updatedUser = await userService.updateUserById(user._id, {
-        activeSubscription: updatedSubscription,
-      });
-      user = updatedUser
-    }
-    tokens = await tokenService.generateAuthTokens(user);
+
+  if (user.status !== "active") {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      code: 400,
+      message: "Your account is not active. Please contact admin.",
+    });
   }
+
+  const tokens = await tokenService.generateAuthTokens(user);
   res.send({
     user,
     tokens,

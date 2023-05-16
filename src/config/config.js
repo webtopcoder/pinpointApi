@@ -7,7 +7,7 @@ dotenv.config({
     __dirname,
     process.env.NODE_ENV === "production"
       ? "../../.env.production"
-      : "../../.env.development"
+      : "../../.env.development",
   ),
 });
 
@@ -31,9 +31,12 @@ const envVariableSchema = Joi.object()
     SMTP_USERNAME: Joi.string().description("username for email server"),
     SMTP_PASSWORD: Joi.string().description("password for email server"),
     EMAIL_FROM: Joi.string().description(
-      "the from field in the emails sent by the app"
+      "the from field in the emails sent by the app",
     ),
     STRIPE_SECRET_KEY: Joi.string().required().description("Stripe Secret Key"),
+    STRIPE_WEBHOOK_SECRET: Joi.string()
+      .required()
+      .description("Stripe Webhook Secret"),
     SWAGGER_URL: Joi.string()
       .description("Swagger URL")
       .default("http://localhost:8080"),
@@ -85,6 +88,7 @@ module.exports = {
   },
   stripe: {
     secretKey: envVars.STRIPE_SECRET_KEY,
+    webhookSecret: envVars.STRIPE_WEBHOOK_SECRET,
   },
   frontend_url: envVars.FRONTEND_URL,
 };

@@ -22,7 +22,7 @@ const createPartnership = catchAsync(async (req, res) => {
 const updatePartnership = catchAsync(async (req, res) => {
   const partnership = await partnershipService.updatePartnershipById(
     req.params.partnershipId,
-    req.body
+    req.body,
   );
   res.send(partnership);
 });
@@ -38,7 +38,7 @@ const getPartnerships = catchAsync(async (req, res) => {
   let options = pick(req.query, ["sort", "limit", "page"]);
   if (options.sort) {
     options.sort = Object.fromEntries(
-      options.sort.split(",").map((field) => field.split(":"))
+      options.sort.split(",").map((field) => field.split(":")),
     );
   } else {
     options.sort = "-createdAt";
@@ -46,22 +46,25 @@ const getPartnerships = catchAsync(async (req, res) => {
 
   const partnership = await partnershipService.queryPartnerships(
     filter,
-    options
+    options,
   );
 
   if (!partnership) {
     throw new ApiError(httpStatus.NOT_FOUND, "Partnership not found");
   }
+
   res.send(partnership);
 });
 
 const getPartnershipById = catchAsync(async (req, res) => {
   const partnership = await partnershipService.getPartnershipById(
-    req.params.partnershipId
+    req.params.partnershipId,
   );
+
   if (!partnership) {
     throw new ApiError(httpStatus.NOT_FOUND, "Partnership not found");
   }
+
   res.send(partnership);
 });
 
@@ -103,7 +106,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
   if (!partnership) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      "Invalid price id, no partnership found."
+      "Invalid price id, no partnership found.",
     );
   }
 
@@ -116,7 +119,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
     if (!stripeCustomerId) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
-        "No customer id found, please create a customer first."
+        "No customer id found, please create a customer first.",
       );
     }
 
@@ -132,7 +135,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
     if (partnership._id.toString() === req.user.activePartnership.toString()) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
-        "You already have this partnership"
+        "You already have this partnership",
       );
     }
 
@@ -140,19 +143,15 @@ const subscribePartnership = catchAsync(async (req, res) => {
       req.user.activeSubscription.id,
       {
         priceId,
-      }
+      },
     );
   }
-
-  await userService.updateUserById(req.user._id, {
-    activeSubscription: subscription,
-  });
 
   let clientSecret, cardPaymentStatus;
 
   if (!subscription.latest_invoice.payment_intent) {
     const setupIntent = await stripeInstance.setupIntents.retrieve(
-      subscription.pending_setup_intent
+      subscription.pending_setup_intent,
     );
     clientSecret = setupIntent.client_secret;
     cardPaymentStatus = "setupCard";
@@ -169,40 +168,13 @@ const subscribePartnership = catchAsync(async (req, res) => {
   });
 });
 
-const createTransaction = catchAsync(async (req, res) => {
-  const data = {
-    order: req.body.order,
-    amount: req.body.amount,
-    currency: req.body.currency,
-    trial: req.body.trial,
-    user: req.user,
-    status: "completed",
-  };
-
-  const updatedPartnership = await Partnership.findOne({
-    stripePriceId: req.body.priceId,
-  });
-
-  const updateUser = {
-    ...req.user,
-    activePartnership: updatedPartnership,
-  };
-
-  await userService.updateUserById(req.user._id, updateUser);
-
-  let userinfo = await userService.getUserById(req.user._id);
-
-  const transaction = await transactionService.createTransaction(data);
-  res.status(httpStatus.CREATED).send(userinfo);
-});
-
 const getUserTransactions = catchAsync(async (req, res) => {
   let filter = {};
   let options = pick(req.query, ["limit", "page", "sort"]);
   const userId = req.user._id;
   const result = await transactionService.queryTransactions(
     { ...filter, user: userId },
-    options
+    options,
   );
   res.send(result);
 });
@@ -216,19 +188,9 @@ const cancelSubscription = async (req, res) => {
 
     const deletedSubscription = await stripe.subscriptions.del(subscriptionId);
 
-    // const updateUser = {
-    //   ...req.user,
-    //   activePartnership: null,
-    //   activeSubscription: null,
-    // };
-
-    // await userService.updateUserById(req.user._id, updateUser);
-    let userinfo = await userService.getUserById(req.user._id);
-
     res.status(200).json({
       code: "subscription_deleted",
       deletedSubscription,
-      user: userinfo
     });
   } catch (e) {
     console.error(e);
@@ -239,28 +201,101 @@ const cancelSubscription = async (req, res) => {
   }
 };
 
-const removePartnership = async (req, res) => {
+const stripeWebhook = async (req, res) => {
+  let event;
   try {
-    const updateUser = {
-      ...req.user,
-      activePartnership: null,
-      activeSubscription: null,
-    };
-
-    await userService.updateUserById(req.user._id, updateUser);
-    let userinfo = await userService.getUserById(req.user._id);
-
-    res.status(200).json({
-      code: "subscription_deleted",
-      user: userinfo
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(400).json({
-      code: "subscription_deletion_failed",
-      error: e,
-    });
+    event = stripeService.constructEvent(req);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  let activePartnership, partnershipPriceRenewalDate;
+  switch (event.type) {
+    case "customer.subscription.created":
+      const subscription = event.data.object;
+      const user = await userService.getUserByStripeCustomerId(
+        subscription.customer,
+      );
+      activePartnership = await Partnership.findOne({
+        stripePriceId: subscription.items.data[0].price.id,
+      });
+      partnershipPriceRenewalDate = new Date(
+        subscription.current_period_end * 1000,
+      );
+      await userService.updateUserById(user._id, {
+        activeSubscription: subscription,
+        partnershipPriceRenewalDate,
+        activePartnership,
+      });
+      break;
+    case "customer.subscription.updated":
+      const updatedSubscription = event.data.object;
+      const updatedUser = await userService.getUserByStripeCustomerId(
+        updatedSubscription.customer,
+      );
+      activePartnership = await Partnership.findOne({
+        stripePriceId: updatedSubscription.items.data[0].price.id,
+      });
+      partnershipPriceRenewalDate = new Date(
+        updatedSubscription.current_period_end * 1000,
+      );
+      await userService.updateUserById(updatedUser._id, {
+        activeSubscription: updatedSubscription,
+        activePartnership,
+        partnershipPriceRenewalDate,
+      });
+      break;
+    case "customer.subscription.deleted":
+      const deletedSubscription = event.data.object;
+      const deletedUser = await userService.getUserByStripeCustomerId(
+        deletedSubscription.customer,
+      );
+      partnershipPriceRenewalDate = new Date(
+        deletedSubscription.current_period_end * 1000,
+      );
+
+      await userService.updateUserById(deletedUser._id, {
+        activeSubscription: null,
+        partnershipPriceRenewalDate,
+      });
+      break;
+    case "invoice.paid":
+      const invoice = event.data.object;
+      const invoiceUser = await userService.getUserByStripeCustomerId(
+        invoice.customer,
+      );
+      const partnership = await Partnership.findOne({
+        stripePriceId: invoice.lines.data[0].price.id,
+      });
+
+      const data = {
+        order: invoice.id,
+        amount: invoice.amount_paid / 100,
+        currency: invoice.currency,
+        trial: false,
+        user: invoiceUser._id,
+        status: "completed",
+      };
+
+      partnershipPriceRenewalDate = new Date(
+        invoice.lines.data[0].period.end * 1000,
+      );
+
+      await transactionService.createTransaction(data);
+      await userService.updateUserById(invoiceUser._id, {
+        activeSubscription: invoice.subscription,
+        partnershipPriceRenewalDate,
+        activePartnership: partnership,
+      });
+      break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  console.log({ event: event.type });
+  console.log({ partnershipPriceRenewalDate });
+
+  return res.json({ received: true });
 };
 
 module.exports = {
@@ -272,7 +307,6 @@ module.exports = {
   getPartnershipById,
   subscribePartnership,
   cancelSubscription,
-  createTransaction,
   getUserTransactions,
-  removePartnership
+  stripeWebhook,
 };

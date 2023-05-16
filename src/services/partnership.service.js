@@ -3,6 +3,7 @@ const httpStatus = require("http-status"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
+const { User } = require("@models");
 
 const createPartnership = async (partnershipBody) => {
   const partnership = new Partnership(partnershipBody);
@@ -54,6 +55,19 @@ const deletePartnershipById = async (partnershipId) => {
   return partnership;
 };
 
+const endPartnership = async () => {
+  const users = await User.updateMany(
+    {
+      role: "partner",
+      activeSubscription: null,
+      partnershipPriceRenewalDate: { $lte: new Date() },
+    },
+    { activePartnership: null, partnershipPriceRenewalDate: null },
+  );
+
+  console.log("Partnerships ended: ", users.length);
+};
+
 module.exports = {
   createPartnership,
   queryPartnerships,
@@ -61,4 +75,5 @@ module.exports = {
   updatePartnershipById,
   deletePartnershipById,
   getPartnerships,
+  endPartnership,
 };
