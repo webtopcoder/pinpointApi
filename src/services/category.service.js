@@ -61,7 +61,8 @@ const getCategoryById = async (id) => {
  * @throws {ApiError}
  */
 const getSubCategoryByCategoryId = async (id) => {
-  const subCategory = await SubCategory.find({
+
+  const subCategory = await SubCategory.find(id === "all" ? {} : {
     category: id,
   });
   if (!subCategory) {

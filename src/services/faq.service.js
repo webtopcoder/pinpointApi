@@ -6,7 +6,7 @@ const httpStatus = require("http-status"),
 const mongoose = require("mongoose-fill");
 
 const getFaqForFAQSection = async () => {
-  const faqs = await FAQ.find({ isArchived: false });
+  const faqs = await FAQ.find({ isArchived: true });
   return faqs;
 };
 

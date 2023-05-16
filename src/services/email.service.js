@@ -89,7 +89,7 @@ const sendVerificationEmail = async (userId) => {
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
   const link = `${config.frontend_url}/home`;
-  const defaultMessage = `"${message ? message : ''}"<br><p>Hi, You have been invited to join The Pinpoint Social by ${user.firstName + " " + user.lastName}.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>`;
+  const defaultMessage = `${message ? message : ''}<br><p>Hi, You have been invited to join The Pinpoint Social by ${user.firstName + " " + user.lastName}.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>`;
   const subject = "Invitation";
   const to = inviteTo;
   const html = defaultMessage;

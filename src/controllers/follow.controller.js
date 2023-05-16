@@ -6,14 +6,10 @@ const ApiError = require("../utils/ApiError");
 const { Follow } = require("../models");
 
 const getFollowers = catchAsync(async (req, res) => {
-  const { userId } = pick(req.params, ["userId"]);
-
+  const { userId } = req.params;
   let filter = pick(req.query, ["q"]);
-
   let options = pick(req.query, ["limit", "page", "sort"]);
-
   const followers = await followService.getFollowers(userId, filter, options);
-
   res.status(httpStatus.OK).send({ success: true, data: followers });
 });
 

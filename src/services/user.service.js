@@ -503,7 +503,8 @@ const getPostImages = async (userId, options) => {
         pipeline: [
           {
             $match: {
-              status: "active",
+              status: 'active',
+              mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
             },
           },
         ],
@@ -567,7 +568,8 @@ const getShoutImages = async (userId, options) => {
               pipeline: [
                 {
                   $match: {
-                    status: "active",
+                    status: 'active',
+                    mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
                   },
                 },
               ],
