@@ -30,6 +30,15 @@ const updateAdditionUser = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+
+const updateAdditionUserWithPassword = catchAsync(async (req, res) => {
+
+  const { token, password, email, owner } = req.body;
+
+  const result = await settingService.updateAdditionUserWithPassword(token, { email: email, owner: owner }, { password: password, status: 'active' });
+  res.send(result);
+});
+
 const getAdditionUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await settingService.getAdditionUser(id);
@@ -42,7 +51,7 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
     user: req.user._id,
   });
 
-  const additionalItem = await settingService.createAdditionalItem(req.user._id, req.body.value);
+  const additionalItem = await settingService.createAdditionalItem(req.user._id, { ...req.body.value, owner: req.user._id });
 
   if (result.length == 0) {
     const createBody = { ...req.body, extra: [additionalItem._id], user: req.user._id };
@@ -70,5 +79,6 @@ module.exports = {
   createOrUpdateSetting,
   deleteAdditionUser,
   updateAdditionUser,
-  getAdditionUser
+  getAdditionUser,
+  updateAdditionUserWithPassword
 };

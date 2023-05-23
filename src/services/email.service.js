@@ -98,16 +98,14 @@ const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
 };
 
 const sendAdditionUserEmail = async ({ owner_id, additional }) => {
-
   const user = await userService.getUserById(owner_id);
   const token = await tokenService.generateCreateAdditionToken(user);
-  const link = `${config.frontend_url}/authentication/additionuser/?token=${token}&&partner=${user.email}&&user=${additional.email}`;
+  const link = `${config.frontend_url}/authentication/additionuser/?token=${token}&&partner=${user.email}&&user=${additional.email}&&partnerID=${owner_id}`;
   const defaultMessage = `<p>Hi, ${user?.email} added you as ${additional?.role}.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>
   <br><p>If you did not request this, please ignore this email.</p>`;
   const subject = "Invitation";
   const to = additional?.email;
   const html = defaultMessage;
-
   await sendEmail(to, subject, html);
 };
 

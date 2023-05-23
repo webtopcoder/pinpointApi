@@ -6,6 +6,10 @@ const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Additionaluser = new Schema(
     {
+      owner: {
+        type: Types.ObjectId,
+        ref: "User",
+      },
       email: {
         type: String,
         lowercase: true,

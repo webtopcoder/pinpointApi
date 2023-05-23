@@ -2,8 +2,12 @@ const httpStatus = require("http-status"),
   { Setting, Additionaluser, User } = require("../models"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
-  ApiError = require("../utils/ApiError");
+  { Token } = require("@models"),
+  { tokenTypes } = require("@configs/tokens");
+ApiError = require("../utils/ApiError");
 const { events, EventEmitter } = require("@events");
+const jwt = require("jsonwebtoken");
+const config = require("../config/config");
 
 const createSetting = async (settingBody) => {
 
@@ -103,6 +107,49 @@ const updateAdditionUser = async (id, updateBody) => {
   return setting;
 };
 
+const updateAdditionUserWithPassword = async (token, query, updateBody) => {
+  try {
+    const payload = jwt.verify(token, config.jwt.secret);
+
+    const blacklisted = await Token.findOne({
+      token: token,
+      type: tokenTypes.CREATE_ADDITION,
+      blacklisted: true,
+    });
+
+    if (
+      !payload.sub ||
+      blacklisted ||
+      payload.type !== tokenTypes.CREATE_ADDITION
+    ) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token");
+    }
+
+    const user = await userService.getUserById(payload.sub);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    const setting = await Additionaluser.findOne(query);
+    if (!setting) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
+    }
+    Object.assign(setting, updateBody);
+    await setting.save();
+   
+    await tokenService.saveToken(
+      token,
+      user.id,
+      undefined,
+      tokenTypes.CREATE_ADDITION,
+      true
+    );
+  } catch (error) {
+    logger.error(error.stack);
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Update Additon User failed");
+  }
+};
+
 const getAdditionUser = async (id) => {
   const setting = await Additionaluser.findById(id);
   if (!setting) {
@@ -123,5 +170,6 @@ module.exports = {
   createAdditionalItem,
   deleteAdditionUser,
   updateAdditionUser,
+  updateAdditionUserWithPassword,
   getAdditionUser
 };
