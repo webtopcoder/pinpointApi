@@ -109,7 +109,7 @@ const updateAdditionUser = async (id, updateBody) => {
 };
 
 const updateAdditionUserWithPassword = async (token, query, updateBody) => {
-  try {
+  // try {
     const payload = jwt.verify(token, config.jwt.secret);
 
     const blacklisted = await Token.findOne({
@@ -145,10 +145,10 @@ const updateAdditionUserWithPassword = async (token, query, updateBody) => {
       tokenTypes.CREATE_ADDITION,
       true
     );
-  } catch (error) {
-    logger.error(error.stack);
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Update Additon User failed");
-  }
+  // } catch (error) {
+  //   logger.error(error.stack);
+  //   throw new ApiError(httpStatus.UNAUTHORIZED, "Update Additon User failed");
+  // }
 };
 
 const getAdditionUser = async (id) => {

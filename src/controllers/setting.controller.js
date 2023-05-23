@@ -52,7 +52,7 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
   });
 
   const additionalItem = await settingService.createAdditionalItem(req.user._id, { ...req.body.value, owner: req.user._id });
-
+  
   if (result.length == 0) {
     const createBody = { ...req.body, extra: [additionalItem._id], user: req.user._id };
     const setting = await settingService.createSetting(createBody);
