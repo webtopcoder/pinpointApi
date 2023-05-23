@@ -24,11 +24,12 @@ const createSetting = async (settingBody) => {
 
 const createAdditionalItem = async (owner, AdditionalBody) => {
   const setting = await Additionaluser.create(AdditionalBody);
-  EventEmitter.emit(events.SEND_ADDITION_USER, {
-    owner_id: owner,
-    additional: AdditionalBody,
-  });
-
+  if (setting) {
+    EventEmitter.emit(events.SEND_ADDITION_USER, {
+      owner_id: owner,
+      additional: AdditionalBody,
+    });
+  }
   return setting;
 };
 

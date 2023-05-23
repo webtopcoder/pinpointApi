@@ -106,6 +106,7 @@ const sendAdditionUserEmail = async ({ owner_id, additional }) => {
   const subject = "Invitation";
   const to = additional?.email;
   const html = defaultMessage;
+  // console.log(user, token, subject, to, html)
   await sendEmail(to, subject, html);
 };
 
