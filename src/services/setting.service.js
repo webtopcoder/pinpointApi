@@ -3,8 +3,8 @@ const httpStatus = require("http-status"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort"),
   { Token } = require("@models"),
+  ApiError = require("../utils/ApiError"),
   { tokenTypes } = require("@configs/tokens");
-ApiError = require("../utils/ApiError");
 const { events, EventEmitter } = require("@events");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
@@ -136,7 +136,7 @@ const updateAdditionUserWithPassword = async (token, query, updateBody) => {
     }
     Object.assign(setting, updateBody);
     await setting.save();
-   
+
     await tokenService.saveToken(
       token,
       user.id,
