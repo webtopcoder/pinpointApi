@@ -21,6 +21,7 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
           tokenTypes.REFRESH,
           tokenTypes.RESET_PASSWORD,
           tokenTypes.VERIFY_EMAIL,
+          tokenTypes.CREATE_ADDITION,
         ],
         required: true,
       },
