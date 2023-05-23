@@ -6,6 +6,7 @@ module.exports.Token = require("./token.model")(mongoose, mongoosePaginate);
 module.exports.Mail = require("./mail.model")(mongoose, mongoosePaginate);
 module.exports.MailReply = require("./mailreply.model")(mongoose, mongoosePaginate);
 module.exports.Like = require("./like.model")(mongoose, mongoosePaginate);
+module.exports.Additionaluser = require("./additionaluser.model")(mongoose, mongoosePaginate);
 module.exports.Contact = require("./contact.model")(mongoose, mongoosePaginate);
 module.exports.Category = require("./category.model")(
   mongoose,

@@ -6,5 +6,8 @@ const router = express.Router();
 
 router.route("/").post(auth(), settingController.createOrUpdateSetting);
 router.route("/").get(auth(), settingController.getUserSettings);
+router.route("/deleteUser/:id").post(auth(), settingController.deleteAdditionUser);
+router.route("/updateUser/:id").post(auth(), settingController.updateAdditionUser);
+router.route("/getUser/:id").post(auth(), settingController.getAdditionUser);
 
 module.exports = router;

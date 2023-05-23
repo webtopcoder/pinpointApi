@@ -169,6 +169,18 @@ const generateResetPasswordToken = async (user) => {
 };
 
 /**
+ * Generate Addition User token
+ * @param {string} email
+ * @returns {Promise<string>}
+ */
+const generateCreateAdditionToken = async (user) => {
+  const expires = moment().add(config.otp.expirationTime, "hours");
+  const tokenType = tokenTypes.CREATE_ADDITION;
+  const token = generateToken({ userId: user.id, expires, type: tokenType });
+  return token;
+};
+
+/**
  * Generate verify email token
  * @param {User} user
  * @returns {Promise<string>}
@@ -191,4 +203,5 @@ module.exports = {
   generateAuthTokens,
   generateResetPasswordToken,
   generateVerifyEmailToken,
+  generateCreateAdditionToken
 };

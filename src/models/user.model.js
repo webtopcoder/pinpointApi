@@ -1,11 +1,9 @@
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const { toJSON } = require("./plugins");
-
 const soft_delete = require("mongoose-delete");
 const SocialSchema = require("./schemas/social.schema");
 const PollSchema = require("./schemas/poll.schema");
-
 const stripeService = require("../services/stripe.service");
 
 module.exports = ({ Schema, model, Types }, mongoosePaginate) => {

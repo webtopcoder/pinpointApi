@@ -12,6 +12,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Schema.Types.Mixed,
         required: true,
       },
+      extra: [
+        {
+          type: Types.ObjectId,
+          ref: "Additionaluser",
+        },
+      ],
       user: {
         type: Types.ObjectId,
         ref: "User",

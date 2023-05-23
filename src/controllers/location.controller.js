@@ -206,7 +206,7 @@ const quickArrival = catchAsync(async (req, res) => {
       "You don't have permission to update this location"
     );
   }
-
+  
   if (!req.user.activeSubscription) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
