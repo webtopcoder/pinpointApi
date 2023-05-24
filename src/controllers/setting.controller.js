@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { settingService } = require("@services");
+const { settingService, tokenService } = require("@services");
 const pick = require("../utils/pick");
 
 const getUserSettings = catchAsync(async (req, res) => {
@@ -45,6 +45,12 @@ const getAdditionUser = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getPartners = catchAsync(async (req, res) => {
+  const { email } = req.params;
+  const result = await settingService.getPartners(email);
+  res.send(result);
+});
+
 const createOrUpdateSetting = catchAsync(async (req, res) => {
   const result = await settingService.getSettings({
     key: req.body.key,
@@ -52,7 +58,7 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
   });
 
   const additionalItem = await settingService.createAdditionalItem(req.user._id, { ...req.body.value, owner: req.user._id });
-  
+
   if (result.length == 0) {
     const createBody = { ...req.body, extra: [additionalItem._id], user: req.user._id };
     const setting = await settingService.createSetting(createBody);
@@ -74,11 +80,27 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
   }
 });
 
+const loginUser = catchAsync(async (req, res, next) => {
+  const { email, password, owner } = req.body;
+
+  let user = await settingService.loginUserWithEmailAndPassword(email, password, owner);
+
+  user = user.toJSON();
+
+  const tokens = await tokenService.generateAuthTokens(user.owner);
+  res.send({
+    user,
+    tokens,
+  });
+});
+
 module.exports = {
   getUserSettings,
   createOrUpdateSetting,
   deleteAdditionUser,
   updateAdditionUser,
   getAdditionUser,
-  updateAdditionUserWithPassword
+  updateAdditionUserWithPassword,
+  loginUser,
+  getPartners
 };

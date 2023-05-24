@@ -111,41 +111,41 @@ const updateAdditionUser = async (id, updateBody) => {
 
 const updateAdditionUserWithPassword = async (token, query, updateBody) => {
   // try {
-    const payload = jwt.verify(token, config.jwt.secret);
+  const payload = jwt.verify(token, config.jwt.secret);
 
-    const blacklisted = await Token.findOne({
-      token: token,
-      type: tokenTypes.CREATE_ADDITION,
-      blacklisted: true,
-    });
+  const blacklisted = await Token.findOne({
+    token: token,
+    type: tokenTypes.CREATE_ADDITION,
+    blacklisted: true,
+  });
 
-    if (
-      !payload.sub ||
-      blacklisted ||
-      payload.type !== tokenTypes.CREATE_ADDITION
-    ) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token");
-    }
+  if (
+    !payload.sub ||
+    blacklisted ||
+    payload.type !== tokenTypes.CREATE_ADDITION
+  ) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid token");
+  }
 
-    const user = await userService.getUserById(payload.sub);
-    if (!user) {
-      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-    }
+  const user = await userService.getUserById(payload.sub);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
 
-    const setting = await Additionaluser.findOne(query);
-    if (!setting) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
-    }
-    Object.assign(setting, updateBody);
-    await setting.save();
+  const setting = await Additionaluser.findOne(query);
+  if (!setting) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
+  }
+  Object.assign(setting, updateBody);
+  await setting.save();
 
-    await tokenService.saveToken(
-      token,
-      user.id,
-      undefined,
-      tokenTypes.CREATE_ADDITION,
-      true
-    );
+  await tokenService.saveToken(
+    token,
+    user.id,
+    undefined,
+    tokenTypes.CREATE_ADDITION,
+    true
+  );
   // } catch (error) {
   //   logger.error(error.stack);
   //   throw new ApiError(httpStatus.UNAUTHORIZED, "Update Additon User failed");
@@ -158,6 +158,58 @@ const getAdditionUser = async (id) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
   }
   return setting;
+};
+
+const getAdditionUserWithEmailAndOwner = async (data) => {
+  const setting = await Additionaluser.findOne(data).populate({
+    path: "owner",
+    populate: {
+      path: "profile",
+      populate: {
+        path: "avatar"
+      }
+    }
+  });
+
+  if (!setting) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
+  }
+  return setting;
+};
+
+const getPartners = async (email) => {
+  const partners = await Additionaluser.find({ email: email }).populate({
+    path: "owner",
+    populate: {
+      path: "profile",
+      populate: {
+        path: "avatar"
+      }
+    }
+  });
+  if (!partners) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Setting not found");
+  }
+  return partners;
+};
+
+const loginUserWithEmailAndPassword = async (email, password, owner) => {
+  const user = await getAdditionUserWithEmailAndOwner({ email: email, owner: owner });
+
+  if (!user || !(await user.isPasswordMatch(password))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect password");
+  }
+
+  if (user && ["pending", "suspended", "banned"].includes(user.status)) {
+    if (user.status === "inactive")
+      throw new ApiError(httpStatus.FORBIDDEN, "Account is inactive.");
+    if (user.status === "banned")
+      throw new ApiError(httpStatus.FORBIDDEN, "Account is banned.");
+    if (user.status === "pending") {
+      throw new ApiError(httpStatus.FORBIDDEN, "Account is not activated.");
+    }
+  }
+  return user;
 };
 
 module.exports = {
@@ -173,5 +225,8 @@ module.exports = {
   deleteAdditionUser,
   updateAdditionUser,
   updateAdditionUserWithPassword,
-  getAdditionUser
+  getAdditionUser,
+  loginUserWithEmailAndPassword,
+  getPartners,
+  getAdditionUserWithEmailAndOwner
 };

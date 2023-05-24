@@ -2,6 +2,7 @@ const { toJSON, diffHistory } = require("./plugins");
 const softDelete = require("mongoose-delete");
 const validator = require("validator");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
+const bcrypt = require("bcryptjs");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const Additionaluser = new Schema(
@@ -66,6 +67,19 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   Additionaluser.plugin(toJSON);
   Additionaluser.plugin(mongoosePaginate);
   Additionaluser.plugin(aggregatePaginate);
+
+  Additionaluser.methods.isPasswordMatch = async function (password) {
+    const user = this;
+    return bcrypt.compare(password, user.password);
+  };
+
+  Additionaluser.pre("save", async function (next) {
+    const user = this;
+    if (user.isModified("password")) {
+      user.password = await bcrypt.hash(user.password, 8);
+    }
+    next();
+  });
 
   /**
    * @typedef Additionaluser
