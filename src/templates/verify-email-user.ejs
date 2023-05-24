@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Verify Email</title>
+  </head>
+  <style>
+    *, *::after, *::before {
+      margin: 0;
+      padding: 0;
+    }
+
+
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      text-align: center;
+      height: 100vh;
+    }
+
+    .parent-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    .parent-container  p {
+      margin: 10px;
+    }
+
+    .image-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+      text-decoration-line: underline;
+    }
+
+    .token-section {
+      margin-bottom: 20px;
+      margin-top: 20px;
+    }
+
+    .description {
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
+    .token {
+      font-weight: 700;
+      font-size: 2.5rem;
+      letter-spacing: 16px;
+      line-height: 1.5em;
+      cursor: pointer;
+    }
+
+    .underscore {
+      color: white;
+    }
+
+    .note {
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.5em;
+    }
+
+    .thankyou {
+      font-style: italic;
+      line-height: 1.5em;
+      font-weight: 400;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .site-link-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .site-link {
+      color: #EA232C;
+      font-size: 15px;
+      line-height: 18px;
+      text-decoration: none;
+      width: 100%;
+    }
+
+
+    .info {
+      font-weight: 400;
+      line-height: 1.5em;
+      font-size: 1.5rem;
+    }
+
+  </style>
+  <body>
+    <div class="parent-container">
+      <div class="image-container">
+        <img src="https://api.thepinpointsocial.com/logo.png" alt="Pinpoint Logo" width="400" height="100" />
+      </div>
+      <div class="content-container">
+        <h1> Verify Email </h1>
+        <div class="token-section">
+          <p class="description">Your email verification code for Pinpoint is..</p>
+          <p class="token" onclick="navigator.clipboard.writeText(<%= token %>)"><%= token %></p>
+        </div>
+        <p class="info">Please capture the code above to verify the email you have used signed up with Pinpoint.</p>
+        <p class="note"> If you did not intend to receive this email, please ignore it. </p>
+        <p class="thankyou">
+        <span>Thanks!</span> <span>Pinpoint</span>
+        </p>
+        <div class="site-link-container">
+
+          <a href="https://www.thepinpointsocial.com" class="site-link">www.thepinpointsocial.com</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
