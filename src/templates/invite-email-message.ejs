@@ -18,6 +18,24 @@
       padding: 0;
     }
 
+    blockquote {
+      margin: 0;
+    }
+
+    blockquote p {
+      padding: 15px;
+      background: #f3fafa;
+      border-radius: 5px;
+    }
+
+    blockquote p::before {
+      content: '\201C';
+    }
+
+    blockquote p::after {
+      content: '\201D';
+    }
+
     a[x-apple-data-detectors] {
       color: inherit !important;
       text-decoration: inherit !important;
@@ -38,6 +56,10 @@
       display: none;
       max-height: 0px;
       overflow: hidden;
+    }
+
+    .visit-btn:hover{
+      opacity: 0.8;
     }
 
     .image_block img+div {
@@ -194,9 +216,7 @@
                                     style="font-size: 12px; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #555555; line-height: 1.2;">
                                     <p
                                       style="margin: 0; font-size: 16px; text-align: center; mso-line-height-alt: 19.2px;">
-                                      <span style="font-size:30px;color:#2b303a;"><strong>Activate
-                                          your account with the activation
-                                          code for Pinpoint
+                                      <span style="font-size:30px;color:#2b303a;"><strong>LUCKY YOU!!!
                                         </strong></span>
                                     </p>
                                   </div>
@@ -215,16 +235,70 @@
                                     style="font-size: 12px; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 18px; color: #555555; line-height: 1.5;">
                                     <p
                                       style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 22.5px;">
-                                      <span style="color:#1AA19C;font-size:15px;">Please
-                                        capture the code above to verify the
-                                        email<br> you have used signed up with
-                                        Pinpoint.
+                                      <span style="color:#1AA19C;font-size:15px;">You have been invited by <strong
+                                          style="font-size: 20px;">
+                                          <%= user %>
+                                        </strong>
+                                        to join Pinpoint!
                                       </span>
+                                    <blockquote cite="">
+                                      <p style="font-size: 17px;">
+                                        <%= message %>
+                                      </p>
+                                    </blockquote>
                                     </p>
                                   </div>
                                 </div>
                               </td>
                             </tr>
+                          </table>
+                          <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-6"
+                            role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+                            <tbody>
+                              <tr>
+                                <td>
+                                  <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                    class="row-content stack" role="presentation"
+                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #fff; color: #000000; width: 640px;"
+                                    width="640">
+                                    <tbody>
+                                      <tr>
+                                        <td class="column column-1"
+                                          style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                          width="100%">
+                                          <table border="0" cellpadding="0" cellspacing="0" class="button_block block-1"
+                                            role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                            width="100%">
+                                            <tr>
+                                              <td class="pad"
+                                                style="padding-left:10px;padding-right:10px;padding-top:10px;text-align:center;">
+                                                <div align="center" class="alignment">
+                                                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:62px;width:164px;v-text-anchor:middle;" arcsize="97%" stroke="false" fillcolor="#1aa19c"><w:anchorlock/><v:textbox inset="0px,0px,0px,0px"><center style="color:#ffffff; font-family:Tahoma, sans-serif; font-size:16px"><![endif]-->
+                                                  <a href="https://thepinpointsocial.com/home" target="_blank" >
+                                                    <div
+                                                    class="visit-btn"
+                                                      style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#1aa19c;border-radius:60px;width:auto;border-top:0px solid transparent;font-weight:undefined;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:15px;padding-bottom:15px;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;">
+                                                      <span
+                                                        style="padding-left:30px;padding-right:30px;font-size:16px;display:inline-block;letter-spacing:normal;"><span
+                                                          dir="ltr"
+                                                          style="margin: 0; word-break: break-word; line-height: 32px;">
+                                                          <strong>Visit Pinpoint
+                                                          </strong></span></span>
+                                                    </div>
+                                                  </a>
+                                                  <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          </table>
+
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </tr>
+                            </tbody>
                           </table>
                           <table border="0" cellpadding="0" cellspacing="0" class="text_block block-5"
                             role="presentation"
@@ -247,24 +321,6 @@
                               </td>
                             </tr>
                           </table>
-                          <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-6"
-                            role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                            <tr>
-                              <td class="pad" style="padding-top:50px;">
-                                <div align="center" class="alignment">
-                                  <table border="0" cellpadding="0" cellspacing="0" role="presentation"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                                    <tr>
-                                      <td class="divider_inner"
-                                        style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;">
-                                        <span> </span>
-                                      </td>
-                                    </tr>
-                                  </table>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
                         </td>
                       </tr>
                     </tbody>
@@ -273,105 +329,7 @@
               </tr>
             </tbody>
           </table>
-          <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-5" role="presentation"
-            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-            <tbody>
-              <tr>
-                <td>
-                  <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content stack"
-                    role="presentation"
-                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f3fafa; color: #000000; width: 640px;"
-                    width="640">
-                    <tbody>
-                      <tr>
-                        <td class="column column-1"
-                          style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; border-left: 30px solid #FFFFFF; border-right: 30px solid #FFFFFF; vertical-align: top; border-top: 0px; border-bottom: 0px;"
-                          width="100%">
-                          <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-1"
-                            role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                            <tr>
-                              <td class="pad">
-                                <div align="center" class="alignment">
-                                  <table border="0" cellpadding="0" cellspacing="0" role="presentation"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                                    <tr>
-                                      <td class="divider_inner"
-                                        style="font-size: 1px; line-height: 1px; border-top: 4px solid #1AA19C;">
-                                        <span> </span>
-                                      </td>
-                                    </tr>
-                                  </table>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-                          <table border="0" cellpadding="0" cellspacing="0" class="divider_block block-2"
-                            role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                            <tr>
-                              <td class="pad" style="padding-top:25px;">
-                                <div align="center" class="alignment">
-                                  <table border="0" cellpadding="0" cellspacing="0" role="presentation"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                                    <tr>
-                                      <td class="divider_inner"
-                                        style="font-size: 1px; line-height: 1px; border-top: 0px solid #BBBBBB;">
-                                        <span> </span>
-                                      </td>
-                                    </tr>
-                                  </table>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-                          <table border="0" cellpadding="0" cellspacing="0" class="text_block block-3"
-                            role="presentation"
-                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-                            <tr>
-                              <td class="pad"
-                                style="padding-bottom:5px;padding-left:10px;padding-right:10px;padding-top:10px;">
-                                <div style="font-family: sans-serif">
-                                  <div class=""
-                                    style="font-size: 12px; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #555555; line-height: 1.2;">
-                                    <p
-                                      style="margin: 0; font-size: 16px; text-align: center; mso-line-height-alt: 19.2px;">
-                                      <span style="color:#2b303a;font-size:18px;"><strong>Use
-                                          this Code</strong></span>
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
 
-                          <table border="0" cellpadding="0" cellspacing="0" class="text_block block-4"
-                            role="presentation"
-                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
-                            <tr>
-                              <td class="pad" style="padding-bottom:32px;">
-                                <div style="font-family: sans-serif">
-                                  <div class=""
-                                    style="font-size: 12px; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #555555; line-height: 1.2;">
-                                    <p
-                                      style="margin: 0; font-size: 16px; text-align: center; mso-line-height-alt: 19.2px;">
-                                      <span style="color:#1aa19c;font-size:38px;"><span
-                                          onclick="navigator.clipboard.writeText(<%= token %>)" style=""><strong>
-                                            <%= token %>
-                                          </strong></span></span>
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
           <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-6" role="presentation"
             style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
             <tbody>
@@ -471,25 +429,29 @@
                                 style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:28px;text-align:center;">
                                 <div align="center" class="alignment">
                                   <table border="0" cellpadding="0" cellspacing="0" class="social-table"
-                                    role="presentation"
-                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                    role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
                                     width="208px">
                                     <tr>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.facebook.com/profile.php?id=100090254892269"
                                           target="_blank">
-                                          <i style="font-size:30px; text-align:center;color: white" class="fa">&#xf09a;</i>
+                                          <i style="font-size:30px; text-align:center;color: white"
+                                            class="fa">&#xf09a;</i>
                                         </a></td>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.twitter.com/_PinpointSocial" target="_blank"><i
-                                            style="font-size:30px; text-align:center;color: white" class="fa">&#xf099;</i></a></td>
+                                            style="font-size:30px; text-align:center;color: white"
+                                            class="fa">&#xf099;</i></a></td>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.instagram.com/thepinpointsocial" target="_blank"> <i
-                                            style="font-size:30px; text-align:center; color: white;" class="fa">&#xf16d;</i>
+                                            style="font-size:30px; text-align:center; color: white;"
+                                            class="fa">&#xf16d;</i>
                                         </a></td>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.snapchat.com/add/pinpointsocial?share_id=lmgsWMD_i3s&locale=en-US"
-                                          target="_blank"><i class="fa fa-snapchat"  style="color: white;font-size:30px; text-align:center;" aria-hidden="true"></i>
+                                          target="_blank"><i class="fa fa-snapchat"
+                                            style="color: white;font-size:30px; text-align:center;"
+                                            aria-hidden="true"></i>
                                         </a></td>
                                     </tr>
                                   </table>
