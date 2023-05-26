@@ -41,6 +41,10 @@ router
   .delete(auth(false, true), adminController.deleteUserByID);
 
 router
+  .route("/users/updateStaus/:id")
+  .put(auth(false, true), adminController.updateUserStatus)
+
+router
   .route("/partners/:id/view")
   .get(auth(false, true), adminController.getUserByID);
 

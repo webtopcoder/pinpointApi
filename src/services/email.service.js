@@ -97,6 +97,21 @@ const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   await sendEmail(to, subject, html);
 };
 
+const sendPartnerStatus = async ({ id }) => {
+  const user = await userService.getUserById(id);
+  const link = `${config.frontend_url}/`;
+  const activeMessage = `<p>Your Approved!</p><p>You can now access The Pinpoint SOical. Thank you for your for your patience.</p><p><a href="${link}">Login</a></p>
+  <p>You must have a pinpoint Partnership to go live on our interactive map.</p>
+  <p>If you did not intend to receive this email, please ignore this email.</p>`;
+  const inactiveMessage = `<p>Access Denied</p><p>For one reason or another, Pinpoint has declined your request to access the platform.</p>
+  <p>If you belive this may have been a mistake, please reach out to us at.. pinpointfoodtruck@gmail.com</p>
+  <p>If you did not intend to receive this email, please ignore this email.</p>`;
+  const subject = "Partner Status";
+  const to = user.email;
+  const html = user.status === "active" ? activeMessage : inactiveMessage;
+  await sendEmail(to, subject, html);
+};
+
 const sendAdditionUserEmail = async ({ owner_id, additional }) => {
   const user = await userService.getUserById(owner_id);
   const token = await tokenService.generateCreateAdditionToken(user);
@@ -117,4 +132,5 @@ module.exports = {
   sendInviteEmail,
   sendMailFromAdmin,
   sendAdditionUserEmail,
+  sendPartnerStatus
 };

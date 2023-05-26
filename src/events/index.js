@@ -9,6 +9,7 @@ const userEvents = {
   SEND_NOTIFICATION: "user.sendNotification",
   ADMIN_SEND_MAIL: "admin.sendMail",
   SEND_ADDITION_USER: "user.sendAdditionUser",
+  PARTNER_STATUS: "user.sendStatus",
 };
 
 const authEvents = {
@@ -39,6 +40,9 @@ Object.keys(events).forEach((event) => {
           break;
         case events.SEND_INVITE:
           await emailService.sendInviteEmail(data);
+          break;
+        case events.PARTNER_STATUS:
+          await emailService.sendPartnerStatus(data);
           break;
         case events.SEND_NOTIFICATION:
           await notificationService.sendNotification(data);

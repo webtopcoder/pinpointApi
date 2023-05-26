@@ -31,14 +31,22 @@ const getSearchLocations = catchAsync(async (req, res) => {
   res.send({ data: locations });
 });
 
-
 const updateUserByID = catchAsync(async (req, res) => {
   const { id } = req.params;
-
   await adminService.userUpdate(id, req.body);
-
   const user = await userService.getUserById(id);
 
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
+  }
+  res.send({ data: user });
+});
+
+const updateUserStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  await adminService.userUpdate(id, req.body);
+  const user = await userService.getUserById(id);
+  EventEmitter.emit(events.PARTNER_STATUS, id);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
   }
@@ -325,6 +333,7 @@ module.exports = {
   getActivityImageRemoveByID,
   updateActivityByID,
   deleteImageByID,
-  bulkActions
+  bulkActions,
+  updateUserStatus
 };
 
