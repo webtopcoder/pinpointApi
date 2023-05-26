@@ -11,10 +11,40 @@ if (config.env !== "test") {
     .then(() => logger.info("Connected to email server"))
     .catch(() =>
       logger.warn(
-        "Unable to connect to email server. Make sure you have configured the SMTP options in .env"
-      )
+        "Unable to connect to email server. Make sure you have configured the SMTP options in .env",
+      ),
     );
 }
+
+const sendEmailWithEJS = async (to, subject, template, context) => {
+  const ejs = require("ejs");
+  const path = require("path");
+
+  const html = await ejs.renderFile(
+    path.join(__dirname, `../templates/${template}.ejs`),
+    context,
+    {
+      async: true,
+    },
+  );
+
+  const msg = {
+    from: config.email.from,
+    to,
+    subject,
+    html,
+  };
+
+  console.log({
+    html,
+  });
+
+  try {
+    await transport.sendMail(msg);
+  } catch (err) {
+    logger.error(err);
+  }
+};
 
 /**
  * Send an email
@@ -79,17 +109,23 @@ const sendVerificationEmail = async (userId) => {
     offer!</p><br>
     <p>If you did not request this, please ignore this email.</p><p><br><p>
     <p><p><br><p><p>`;
+    await sendEmail(to, subject, html);
   } else {
-    html = `<p>Hi, <br><p>Your OTP is ${token}</p><br><p>If you did not request this, please ignore this email.</p>`;
+    await sendEmailWithEJS(to, subject, "verify-email-user", {
+      title: "Email Verification",
+      token,
+    });
   }
-
-  await sendEmail(to, subject, html);
 };
 
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
   const link = `${config.frontend_url}/home`;
-  const defaultMessage = `${message ? message : ''}<br><p>Hi, You have been invited to join The Pinpoint Social by ${user.firstName + " " + user.lastName}.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>`;
+  const defaultMessage = `${
+    message ? message : ""
+  }<br><p>Hi, You have been invited to join The Pinpoint Social by ${
+    user.firstName + " " + user.lastName
+  }.</p><p>Please click on the following <a href="${link}">link</a> to verify your email.</p>`;
   const subject = "Invitation";
   const to = inviteTo;
   const html = defaultMessage;
@@ -100,7 +136,7 @@ const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
 const sendPartnerStatus = async ({ id }) => {
   const user = await userService.getUserById(id);
   const link = `${config.frontend_url}/`;
-  const activeMessage = `<p>Your Approved!</p><p>You can now access The Pinpoint SOical. Thank you for your for your patience.</p><p><a href="${link}">Login</a></p>
+  const activeMessage = `<p>Your Approved!</p><p>You can now access The Pinpoint Soical. Thank you for your for your patience.</p><p><a href="${link}">Login</a></p>
   <p>You must have a pinpoint Partnership to go live on our interactive map.</p>
   <p>If you did not intend to receive this email, please ignore this email.</p>`;
   const inactiveMessage = `<p>Access Denied</p><p>For one reason or another, Pinpoint has declined your request to access the platform.</p>
@@ -132,5 +168,6 @@ module.exports = {
   sendInviteEmail,
   sendMailFromAdmin,
   sendAdditionUserEmail,
+  sendEmailWithEJS,
   sendPartnerStatus
 };

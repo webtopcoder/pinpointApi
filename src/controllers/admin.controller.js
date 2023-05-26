@@ -46,7 +46,7 @@ const updateUserStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   await adminService.userUpdate(id, req.body);
   const user = await userService.getUserById(id);
-  EventEmitter.emit(events.PARTNER_STATUS, id);
+  EventEmitter.emit(events.PARTNER_STATUS, { id: id });
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "Users not found");
   }
