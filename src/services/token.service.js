@@ -176,7 +176,7 @@ const generateResetPasswordToken = async (user) => {
 const generateCreateAdditionToken = async (user) => {
   const expires = moment().add(config.otp.expirationTime, "hours");
   const tokenType = tokenTypes.CREATE_ADDITION;
-  const token = generateToken({ userId: user._id, expires, type: tokenType });
+  const token = generateToken({ userId: user.id, expires, type: tokenType });
   return token;
 };
 
