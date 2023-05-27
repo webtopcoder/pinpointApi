@@ -39,7 +39,9 @@
       max-height: 0px;
       overflow: hidden;
     }
-
+    .visit-btn:hover {
+      opacity: 0.8;
+    }
     .image_block img+div {
       display: none;
     }
@@ -220,11 +222,19 @@
                                         access this partners page.
                                       </span>
                                     </p>
-                                    <p
-                                      style="margin-top: 10px; font-size: 14px; text-align: center; mso-line-height-alt: 22.5px;">
-                                      <a style="color:#007c89;font-size:16px;" href="<%= link %>">
-                                        <%= link %><a>
-                                    </p>
+                                    <div align="center" class="alignment">
+                                      <a href="<%= link %>" target="_blank">
+                                        <div class="visit-btn"
+                                          style="margin-top: 20px;text-decoration:none;display:inline-block;color:#ffffff;background-color:#1aa19c;border-radius:60px;width:auto;border-top:0px solid transparent;font-weight:undefined;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:15px;padding-bottom:15px;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;">
+                                          <span
+                                            style="padding-left:30px;padding-right:30px;font-size:16px;display:inline-block;letter-spacing:normal;"><span
+                                              dir="ltr" style="margin: 0; word-break: break-word; line-height: 32px;">
+                                              <strong>Create Login
+                                              </strong></span></span>
+                                        </div>
+                                      </a>
+                                    </div>
+                                   
                                   </div>
                                 </div>
                               </td>
@@ -333,25 +343,29 @@
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.facebook.com/profile.php?id=100090254892269"
                                           target="_blank">
-                                          <img alt="Facebook" height="32" src="https://api.thepinpointsocial.com/email-template/facebook2x.png"
+                                          <img alt="Facebook" height="32"
+                                            src="https://api.thepinpointsocial.com/email-template/facebook2x.png"
                                             style="display: block; height: auto; border: 0;" title="Facebook"
                                             width="32" />
                                         </a></td>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.twitter.com/_PinpointSocial" target="_blank">
-                                          <img alt="Twitter" height="32" src="https://api.thepinpointsocial.com/email-template/twitter2x.png"
+                                          <img alt="Twitter" height="32"
+                                            src="https://api.thepinpointsocial.com/email-template/twitter2x.png"
                                             style="display: block; height: auto; border: 0;" title="Twitter"
                                             width="32" />
                                         </a></td>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.instagram.com/thepinpointsocial" target="_blank">
-                                          <img alt="Instagram" height="32" src="https://api.thepinpointsocial.com/email-template/instagram2x.png"
+                                          <img alt="Instagram" height="32"
+                                            src="https://api.thepinpointsocial.com/email-template/instagram2x.png"
                                             style="display: block; height: auto; border: 0;" title="Instagram"
                                             width="32" />
                                         </a></td>
                                       <td style="padding:0 10px 0 10px;"><a class="social-link"
                                           href="https://www.snapchat.com/add/pinpointsocial?share_id=lmgsWMD_i3s&locale=en-US"
-                                          target="_blank"><img alt="LinkedIn" height="32" src="https://api.thepinpointsocial.com/email-template/linkedin2x.png"
+                                          target="_blank"><img alt="LinkedIn" height="32"
+                                            src="https://api.thepinpointsocial.com/email-template/linkedin2x.png"
                                             style="display: block; height: auto; border: 0;" title="LinkedIn"
                                             width="32" />
                                         </a></td>

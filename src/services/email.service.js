@@ -98,6 +98,7 @@ const sendVerificationEmail = async (userId) => {
 
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
+  const subject = "Invitation";
   await sendEmailWithEJS(inviteTo, subject, message ? "invite-email-message" : 'invite-email', {
     title: "Invitation",
     message: message,

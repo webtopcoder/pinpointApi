@@ -27,6 +27,7 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
       firstName: { type: String, required: true, trim: true },
       lastName: { type: String, required: true, trim: true },
       username: { type: String, required: true },
+      businessname: { type: String },
       profile: ProfileSchema,
       email: {
         type: String,
