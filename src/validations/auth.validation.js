@@ -10,15 +10,15 @@ const register = {
     lastName: Joi.string().required(),
     status: Joi.string().allow(""),
     role: Joi.string().required().valid("user", "partner", "admin"),
-    username: Joi.string()
-      .required()
-      .min(3)
-      .custom((value, helpers) => {
-        if (!/^[a-zA-Z0-9_]*$/.test(value)) {
-          return helpers.error("any.invalid");
-        }
-        return value;
-      }),
+    username: Joi.string().required(),
+    // .required()
+    // .min(3)
+    // .custom((value, helpers) => {
+    //   if (!/^[a-zA-Z0-9_]*$/.test(value)) {
+    //     return helpers.error("any.invalid", { message: "Username can't be contain backspace" });
+    //   }
+    //   return value;
+    // }),
     address: Joi.object().keys({
       address: Joi.string(),
       state: Joi.string().required(),

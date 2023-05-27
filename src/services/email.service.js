@@ -111,7 +111,7 @@ const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
 const sendPartnerStatus = async ({ id }) => {
   const user = await userService.getUserById(id);
   const subject = "Partner Verification";
-  await sendEmailWithEJS(user.email, subject, user.status ? "partner-approve" : 'partner-decline', {
+  await sendEmailWithEJS(user.email, subject, user.status === "active" ? "partner-approve" : 'partner-decline', {
     title: "Partner Verication",
   });
 };
