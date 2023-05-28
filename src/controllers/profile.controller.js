@@ -125,7 +125,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
       followers: followerCount,
       location: locationCount,
       username: user?.username,
-      fullname: user?.name,
+      businessname: user?.businessname,
       usertype: user?.role,
       rating: Rating,
       is_follow: is_followed,
@@ -320,7 +320,7 @@ const getAllImages = catchAsync(async (req, res) => {
 });
 
 const getPartnerDashboard = catchAsync(async (req, res) => {
-  
+
   const userId = req.user._id;
   const partnerLocations = await Location.find({
     partner: userId,

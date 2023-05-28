@@ -44,6 +44,7 @@ const editProfileData = {
       firstName: Joi.string(),
       lastName: Joi.string(),
       username: Joi.string(),
+      businessname: Joi.string(),
       address: Joi.object().keys({
         address: Joi.string(),
         state: Joi.string(),
