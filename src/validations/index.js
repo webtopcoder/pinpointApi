@@ -7,4 +7,5 @@ module.exports.profileValidation = require("./profile.validation");
 module.exports.mailValidation = require("./mail.validation");
 module.exports.faqValidation = require("./faq.validation");
 module.exports.testimonialValidation = require("./testimonial.validation");
+module.exports.newpartnersValidation = require("./newpartners.validation");
 module.exports.adminValidation = require("./admin.validation");

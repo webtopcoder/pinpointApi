@@ -55,4 +55,5 @@ module.exports.Order = require("./order.model")(mongoose, mongoosePaginate);
 module.exports.Admin = require("./adminUser.model")(mongoose, mongoosePaginate);
 module.exports.FAQ = require("./faq.model")(mongoose, mongoosePaginate);
 module.exports.Testimonial = require("./testimonial.model")(mongoose, mongoosePaginate);
+module.exports.Newpartners = require("./newpartners.model")(mongoose, mongoosePaginate);
 

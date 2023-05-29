@@ -15,4 +15,5 @@ module.exports.postController = require("./post.controller");
 module.exports.statisticController = require("./statistic.controller");
 module.exports.adminController = require("./admin.controller");
 module.exports.testimonialController = require("./testimonial.controller");
+module.exports.newpartnersController = require("./newpartners.controller");
 module.exports.faqController = require("./faq.controller");

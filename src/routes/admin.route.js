@@ -1,6 +1,6 @@
 const express = require("express");
 const auth = require("@middlewares/auth");
-const { adminController, locationController } = require("@controllers");
+const { adminController } = require("@controllers");
 const uploadAdmin = require("../middlewares/upload");
 const validate = require("../middlewares/validate");
 const { adminValidation } = require("../validations");
@@ -77,6 +77,7 @@ router.use("/categories", require("./admin/category.route"));
 router.use("/transactions", require("./admin/transactions.route"));
 router.use("/faqs", require("./admin/faq.route"));
 router.use("/testimonial", require("./admin/testimonial.route"));
+router.use("/newpartners", require("./admin/newpartners.route"));
 router.use("/contact", require("./admin/contact.route"));
 router.use("/message", require("./admin/message.route"));
 router.use("/partnership", require("./admin/partnership.route"));
