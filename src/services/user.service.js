@@ -8,6 +8,7 @@ const httpStatus = require("http-status"),
     Shoutout,
     Location,
     Arrival,
+    Emailing
   } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
@@ -29,6 +30,12 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User Name already taken");
   }
   const user = await User.create(userBody);
+  await Emailing.updateOne({ email: user.email },
+    {
+      $set: {
+        status: true
+      }
+    })
   return user;
 };
 
