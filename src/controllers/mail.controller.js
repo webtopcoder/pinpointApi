@@ -9,7 +9,6 @@ const path = require("path");
 const { EventEmitter, events } = require("../events");
 const { ObjectID } = require("bson");
 
-
 const compose = catchAsync(async (req, res) => {
   const { to, subject, message, isNotice } = req.body;
   const from = req.user._id;
@@ -162,10 +161,20 @@ const composebyAdmin = catchAsync(async (req, res) => {
 });
 
 const composeEmail = catchAsync(async (req, res) => {
-
   const { to, template } = req.body;
+  let emails;
+
+  emails = to.map((item) => {
+    return {
+      email: item,
+      template: template,
+    };
+  });
+
+  await mailService.createEmailing(emails);
+
   to.map((item) => {
-    EventEmitter.emit(events.COMPOSE_EMAILING, item);
+    EventEmitter.emit(events.COMPOSE_EMAILING, { email: item, template: template });
   });
 
   return res.json({ success: true, msg: "Sent successfully!" });
@@ -276,6 +285,36 @@ const getInbox = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getEmailing = catchAsync(async (req, res) => {
+
+  let filter = pick(req.query, ["q", "status"]);
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  if (options.sort) {
+    options.sort = Object.fromEntries(
+      options.sort.split(",").map((field) => field.split(":"))
+    );
+  } else {
+    options.sort = "-updatedAt";
+  }
+
+  if (filter.q) {
+    const query = filter.q;
+    delete filter.q;
+    filter = {
+      ...filter,
+      $or: [
+        { email: { $regex: query, $options: "i" } },
+        {
+          template: { $regex: query, $options: "i" },
+        },
+      ],
+    };
+  }
+
+  const result = await mailService.queryEmailings(filter, options);
+  res.send(result);
+});
+
 const getSent = catchAsync(async (req, res) => {
   let filter = pick(req.query, [
     "q",
@@ -375,6 +414,16 @@ const deleteMail = catchAsync(async (req, res) => {
   // });
 
   res.send({ success: true, message: "Deleted successfully!" });
+});
+
+const deleteEmailing = catchAsync(async (req, res) => {
+  await mailService.deleteEmailingById(req.params.emailId);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const resentEmailing = catchAsync(async (req, res) => {
+  await mailService.resendEmailingById(req.params.emailId);
+  res.status(httpStatus.NO_CONTENT).send();
 });
 
 const readMail = catchAsync(async (req, res) => {
@@ -627,6 +676,14 @@ const bulkActions = catchAsync(async (req, res) => {
   return res.json({ success: true, message: "Action performed successfully!" });
 });
 
+const bulkActionsEmailing = catchAsync(async (req, res) => {
+
+  const { action, selectedIds } = req.body;
+  await mailService.bulkActionEmailing(selectedIds, action);
+  return res.json({ success: true, message: "Action performed successfully!" });
+
+});
+
 const sendMessageByAdmin = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const user = await userService.getUserById(userId);
@@ -714,5 +771,9 @@ module.exports = {
   sendMessageByAdmin,
   composeMessageByAdmin,
   getReplyById,
-  composeEmail
+  composeEmail,
+  getEmailing,
+  deleteEmailing,
+  resentEmailing,
+  bulkActionsEmailing
 };

@@ -48,6 +48,8 @@ router
 
 router.route("/inbox").get(auth(), mailController.getInbox);
 
+router.route("/emailing").get(auth(), mailController.getEmailing);
+
 router.route("/sent").get(auth(), mailController.getSent);
 
 router.route("/notices").get(auth(), mailController.getNotices);
@@ -74,6 +76,17 @@ router
     mailController.updateMail
   );
 
+router
+  .route("/emailing/:emailId")
+  .delete(auth(), mailController.deleteEmailing)
+  .post(auth(), mailController.resentEmailing);
+
+router
+  .route("/emailing/bulk-actions")
+  .post(
+    auth(),
+    mailController.bulkActionsEmailing
+  );
 router
   .route("/:mailId/resend-invite")
   .post(auth(), mailController.resendInvite);

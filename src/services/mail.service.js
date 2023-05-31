@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, Mail, MailReply, Media } = require("@models"),
+  { User, Mail, MailReply, Media, Emailing } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
@@ -31,19 +31,8 @@ const createMail = async (mailBody) => {
 };
 
 const createEmailing = async (mailBody) => {
-  mailBody.to.map((item) => {
-    EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: item.to,
-      actor: item.from,
-      type: "mail",
-      title: "New message",
-      description: `You have a new message from @${from_user.username}`,
-      url: `/${item.role}/message`,
-    });
-  });
+  const createdMails = await Emailing.create(mailBody);
 };
-
-
 
 const createReply = async (mailBody) => {
   const createdReply = await MailReply.create(mailBody);
@@ -300,6 +289,16 @@ const getPendingInvites = async (filter, options) => {
   return mails;
 };
 
+const queryEmailings = async (filter, options) => {
+  const emails = await Emailing.paginate(filter, {
+    ...options,
+    customLabels,
+  });
+
+  return emails;
+};
+
+
 const getIsReadEmails = async (userId) => {
   const mails = await queryMails({
     to: userId,
@@ -371,6 +370,47 @@ const bulkUpdate = async (mailIds, updateBody, userId) => {
   });
 };
 
+const getEmailById = async (emailId) => {
+  const result = await Emailing.findById(emailId);
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Email not found");
+  }
+
+  return result;
+};
+
+const deleteEmailingById = async (emailId) => {
+  const result = await getEmailById(emailId);
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "result not found");
+  }
+  await result.delete();
+  return result;
+};
+
+const resendEmailingById = async (emailId) => {
+  const result = await getEmailById(emailId);
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "result not found");
+  }
+  EventEmitter.emit(events.COMPOSE_EMAILING, { email: result.email, template: result.template });
+};
+
+const bulkActionEmailing = async (selectedIds, status) => {
+  const objectMailIds = selectedIds.map((id) => mongoose.Types.ObjectId(id));
+  if (status === "deleted") {
+    objectMailIds.map(async item => {
+      await deleteEmailingById(item)
+    });
+  }
+  else {
+    objectMailIds.map(async item => {
+      const result = await getEmailById(item);
+      EventEmitter.emit(events.COMPOSE_EMAILING, { email: result.email, template: result.template });
+    });
+  }
+};
+
 module.exports = {
   createMail,
   createReply,
@@ -385,5 +425,10 @@ module.exports = {
   bulkUpdate,
   queryReplyMails,
   queryreplyfromSent,
-  createEmailing
+  createEmailing,
+  queryEmailings,
+  deleteEmailingById,
+  getEmailById,
+  resendEmailingById,
+  bulkActionEmailing
 };

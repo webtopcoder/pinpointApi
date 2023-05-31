@@ -96,11 +96,10 @@ const sendVerificationEmail = async (userId) => {
   });
 };
 
-const sendComposeEmail = async (email) => {
+const sendComposeEmail = async ({ email, template }) => {
   const subject = "Welcome";
   const to = email;
-  console.log(subject, to)
-  await sendEmailWithEJS(to, subject, "welcome", {
+  await sendEmailWithEJS(to, subject, `welcome-${template}`, {
     title: "Welcome",
   });
 };
