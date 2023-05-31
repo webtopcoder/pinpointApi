@@ -23,6 +23,15 @@ const createMailbyAdmin = {
     .xor("isNotice", "to"),
 };
 
+const createEmailing = {
+  body: Joi.object()
+    .keys({
+      to: Joi.array(),
+      template: Joi.string().required(),
+    })
+};
+
+
 const createReply = {
   body: Joi.object()
     .keys({
@@ -75,5 +84,6 @@ module.exports = {
   updateMail,
   bulkActions,
   sendMessageByAdmin,
-  createMailbyAdmin
+  createMailbyAdmin,
+  createEmailing
 };

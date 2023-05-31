@@ -161,6 +161,16 @@ const composebyAdmin = catchAsync(async (req, res) => {
   return res.json({ success: true, msg: "Sent successfully!" });
 });
 
+const composeEmail = catchAsync(async (req, res) => {
+
+  const { to, template } = req.body;
+  to.map((item) => {
+    EventEmitter.emit(events.COMPOSE_EMAILING, item);
+  });
+
+  return res.json({ success: true, msg: "Sent successfully!" });
+});
+
 const reply = catchAsync(async (req, res) => {
 
   const files = await Promise.all(
@@ -513,7 +523,7 @@ const getNotices = catchAsync(async (req, res) => {
   } else {
     options.sort = "-createdAt";
   }
-  
+
   options.userID = req.user._id
   filter.from = new ObjectID(req.user._id);
   filter.from_is_deleted = false;
@@ -703,5 +713,6 @@ module.exports = {
   bulkActions,
   sendMessageByAdmin,
   composeMessageByAdmin,
-  getReplyById
+  getReplyById,
+  composeEmail
 };

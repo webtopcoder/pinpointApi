@@ -26,6 +26,14 @@ router
   );
 
 router
+  .route("/composeEmail")
+  .post(
+    auth(),
+    validate(mailValidation.createEmailing),
+    mailController.composeEmail
+  );
+
+router
   .route("/reply")
   .post(
     auth(),

@@ -96,6 +96,15 @@ const sendVerificationEmail = async (userId) => {
   });
 };
 
+const sendComposeEmail = async (email) => {
+  const subject = "Welcome";
+  const to = email;
+  console.log(subject, to)
+  await sendEmailWithEJS(to, subject, "welcome", {
+    title: "Welcome",
+  });
+};
+
 const sendInviteEmail = async ({ senderId, inviteTo, message }) => {
   const user = await userService.getUserById(senderId);
   const subject = "Invitation";
@@ -130,6 +139,7 @@ const sendAdditionUserEmail = async ({ owner_id, additional }) => {
 module.exports = {
   transport,
   sendEmail,
+  sendComposeEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
   sendInviteEmail,

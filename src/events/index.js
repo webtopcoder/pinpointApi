@@ -15,6 +15,7 @@ const userEvents = {
 const authEvents = {
   RESET_PASSWORD: "auth.resetPassword",
   VERIFY_EMAIL: "auth.verifyEmail",
+  COMPOSE_EMAILING: "auth.composeemailing",
 };
 
 const events = {
@@ -31,6 +32,9 @@ Object.keys(events).forEach((event) => {
           break;
         case events.VERIFY_EMAIL:
           await emailService.sendVerificationEmail(data);
+          break;
+        case events.COMPOSE_EMAILING:
+          await emailService.sendComposeEmail(data);
           break;
         case events.SEND_ADDITION_USER:
           await emailService.sendAdditionUserEmail(data);

@@ -30,9 +30,23 @@ const createMail = async (mailBody) => {
   }
 };
 
+const createEmailing = async (mailBody) => {
+  mailBody.to.map((item) => {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: item.to,
+      actor: item.from,
+      type: "mail",
+      title: "New message",
+      description: `You have a new message from @${from_user.username}`,
+      url: `/${item.role}/message`,
+    });
+  });
+};
+
+
+
 const createReply = async (mailBody) => {
   const createdReply = await MailReply.create(mailBody);
-
   const from_user = await userService.getUserById(mailBody.from);
   const to_user = await userService.getUserById(mailBody.to);
   EventEmitter.emit(events.SEND_NOTIFICATION, {
@@ -370,5 +384,6 @@ module.exports = {
   bulkDelete,
   bulkUpdate,
   queryReplyMails,
-  queryreplyfromSent
+  queryreplyfromSent,
+  createEmailing
 };
