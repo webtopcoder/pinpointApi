@@ -434,12 +434,6 @@ const getReviewImages = async (userId, options) => {
     {
       $sort: { createdAt: -1 },
     },
-    {
-      $skip: (parseInt(options.page) - 1) * options.limit,
-    },
-    {
-      $limit: parseInt(options.limit),
-    },
   ]);
 
   const images = imagesInReview.reduce((acc, image) => {

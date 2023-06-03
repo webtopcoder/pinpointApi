@@ -11,13 +11,6 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 
 const createSetting = async (settingBody) => {
-
-  if (settingBody.key == "user:additionalUser") {
-    EventEmitter.emit(events.SEND_ADDITION_USER, {
-      NewUser: settingBody.value[settingBody.value.length - 1],
-      user_id: settingBody.user
-    });
-  }
   const setting = await Setting.create(settingBody);
   return setting;
 
@@ -71,12 +64,12 @@ const updateSettingById = async (settingId, updateBody) => {
 };
 
 const updateSetting = async (setting, updateBody) => {
-  if (updateBody.key == "user:additionalUser") {
-    EventEmitter.emit(events.SEND_ADDITION_USER, {
-      NewUser: updateBody.value[updateBody.value.length - 1],
-      user_id: updateBody.user
-    });
-  }
+  // if (updateBody.key == "user:additionalUser") {
+  //   EventEmitter.emit(events.SEND_ADDITION_USER, {
+  //     NewUser: updateBody.value[updateBody.value.length - 1],
+  //     user_id: updateBody.user
+  //   });
+  // }
   Object.assign(setting, updateBody);
   await setting.save();
   return setting;

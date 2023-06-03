@@ -540,12 +540,6 @@ const getPostImages = async (userId, options) => {
     {
       $sort: { createdAt: -1 },
     },
-    {
-      $skip: (parseInt(options.page) - 1) * options.limit,
-    },
-    {
-      $limit: parseInt(options.limit),
-    },
   ]);
 
   const images = imagesInPost.reduce((acc, image) => {
@@ -626,12 +620,6 @@ const getShoutImages = async (userId, options) => {
     },
     {
       $sort: { createdAt: -1 },
-    },
-    {
-      $skip: (parseInt(options.page) - 1) * options.limit,
-    },
-    {
-      $limit: parseInt(options.limit),
     },
   ]);
 

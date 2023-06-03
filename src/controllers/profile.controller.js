@@ -299,24 +299,28 @@ const getAllImages = catchAsync(async (req, res) => {
   }
 
   const postImgs = await userService.getPostImages(user._id, {
-    page: page ?? 1,
-    limit: limit ?? 10,
+    page: page,
+    limit: limit
   });
 
   const shoutImgs = await userService.getShoutImages(user._id, {
-    page: page ?? 1,
-    limit: limit ?? 10,
+    page: page,
+    limit: limit
   });
 
   const locationReviewImgs = await locationService.getReviewImages(user._id, {
-    page: page ?? 1,
-    limit: limit ?? 10,
+    page: page,
+    limit: limit,
   });
 
-  const images = (postImgs.concat(locationReviewImgs)).concat(shoutImgs);
-  let sortedDates = images.sort((p1, p2) => (p1.createdAt < p2.createdAt) ? 1 : (p1.createdAt > p2.createdAt) ? -1 : 0);
+  const images = await (postImgs.concat(locationReviewImgs)).concat(shoutImgs);
+  let sortedDates = await images.sort((p1, p2) => (p1.createdAt < p2.createdAt) ? 1 : (p1.createdAt > p2.createdAt) ? -1 : 0);
 
-  return res.json({ success: true, image: sortedDates });
+  const startIndex = (parseInt(page) - 1) * parseInt(limit);
+  const endIndex = parseInt(startIndex) + parseInt(limit);
+  const paginatedData = await sortedDates.slice(startIndex, endIndex);
+
+  return res.json({ success: true, sidebarImage: sortedDates.slice(0, 8), image: page === "undefined" && limit === "undefined" ? sortedDates : paginatedData, total: sortedDates.length });
 });
 
 const getPartnerDashboard = catchAsync(async (req, res) => {

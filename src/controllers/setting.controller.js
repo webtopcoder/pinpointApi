@@ -52,15 +52,17 @@ const getPartners = catchAsync(async (req, res) => {
 });
 
 const createOrUpdateSetting = catchAsync(async (req, res) => {
+  let additionalItem;
   const result = await settingService.getSettings({
     key: req.body.key,
     user: req.user._id,
   });
 
-  const additionalItem = await settingService.createAdditionalItem(req.user._id, { ...req.body.value, owner: req.user._id });
+  req.body.key === "user:additionalUser" ? additionalItem = await settingService.createAdditionalItem(req.user._id, { ...req.body.value, owner: req.user._id }) : '';
 
   if (result.length == 0) {
-    const createBody = { ...req.body, extra: [additionalItem._id], user: req.user._id };
+    const createBody = "user:additionalUser" ?
+      { ...req.body, extra: [additionalItem?._id], user: req.user._id } : { ...req.body, user: req.user._id };
     const setting = await settingService.createSetting(createBody);
     res.status(httpStatus.CREATED).send({ success: true, setting });
   } else {
@@ -68,9 +70,12 @@ const createOrUpdateSetting = catchAsync(async (req, res) => {
     let updatedResult = await Promise.all(
       result.map(async (setting) => {
         let updatedSetting;
-        updatedSetting = await settingService.updateSetting(setting, {
+        updatedSetting = await settingService.updateSetting(setting, req.body.key === "user:additionalUser" ? {
           ...updateBody,
           extra: [...setting.extra, additionalItem._id],
+          user: req.user._id,
+        } : {
+          ...updateBody,
           user: req.user._id,
         });
         return updatedSetting;
