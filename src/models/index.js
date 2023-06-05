@@ -30,6 +30,7 @@ module.exports.Arrival = require("./arrival.model")(
 );
 
 module.exports.Review = require("./review.model")(mongoose, mongoosePaginate);
+module.exports.Comment = require("./comment.model")(mongoose, mongoosePaginate);
 module.exports.Notification = require("./notification.model")(
   mongoose,
   mongoosePaginate

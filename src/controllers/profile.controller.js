@@ -268,6 +268,26 @@ const createPost = catchAsync(async (req, res) => {
   return res.json({ success: true, msg: "Post successfully!" });
 });
 
+const createComment = catchAsync(async (req, res) => {
+
+  const comment = await userService.createComment({ userId: req.user._id, ...req.body });
+  res.send(comment);
+});
+
+const deleteComment = catchAsync(async (req, res) => {
+  await userService.deleteComment(req.body.id);
+  return res.json({ success: true, msg: "Post successfully!" });
+});
+
+
+const getAllComments = catchAsync(async (req, res) => {
+  const result = await userService.getAllComments(req.user._id);
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "result not found");
+  }
+  res.send(result);
+});
+
 const addProfilePicture = catchAsync(async (req, res) => {
   if (!req.file) {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
@@ -388,5 +408,8 @@ module.exports = {
   getPartnerDashboard,
   updateProfileView,
   getFavorited,
-  markAsRead
+  markAsRead,
+  getAllComments,
+  createComment,
+  deleteComment
 };

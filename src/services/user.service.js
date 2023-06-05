@@ -8,7 +8,8 @@ const httpStatus = require("http-status"),
     Shoutout,
     Location,
     Arrival,
-    Emailing
+    Emailing,
+    Comment
   } = require("../models"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
@@ -38,6 +39,25 @@ const createUser = async (userBody) => {
     })
   return user;
 };
+
+const createComment = async (commentBody) => {
+
+  const comment = await Comment.create(commentBody);
+
+  return comment;
+};
+
+const deleteComment = async (id) => {
+
+  const result = await Comment.findById(id);
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  await result.delete();
+  return result;
+};
+
+
 
 const getDefaultAvatar = async () => {
   const defaultAvatar = await Media.findOne({ mimetype: "default" });
@@ -132,6 +152,11 @@ const getActivePartners = async (status) => {
     ])
     .select("address category");
 
+  return result;
+};
+
+const getAllComments = async (user_id) => {
+  const result = await Comment.find();
   return result;
 };
 
@@ -759,4 +784,7 @@ module.exports = {
   getActivePartners,
   getDefaultAvatar,
   getUserByStripeCustomerId,
+  getAllComments,
+  createComment,
+  deleteComment
 };

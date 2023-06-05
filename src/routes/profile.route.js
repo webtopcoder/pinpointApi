@@ -79,4 +79,10 @@ router
   .route("/:userId/image/all")
   .get(auth(true), profileController.getAllImages);
 
+router
+  .route("/comment")
+  .get(auth(true), profileController.getAllComments)
+  .post(auth(), profileController.createComment)
+  .delete(auth(), profileController.deleteComment)
+
 module.exports = router;

@@ -7,7 +7,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     {
       template: {
         type: String,
-        enum: ["local", "global"],
+        enum: ["local", "global", "grandfather"],
       },
       email: {
         type: String,
