@@ -156,7 +156,7 @@ const getActivePartners = async (status) => {
 };
 
 const getAllComments = async (user_id) => {
-  const result = await Comment.find();
+  const result = await Comment.find().populate("userId");
   return result;
 };
 
