@@ -207,7 +207,7 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req?.user?.partnershipPriceRenewalDate && new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "You're not subscribed to this service"
@@ -271,7 +271,7 @@ const quickDeparture = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req?.user?.partnershipPriceRenewalDate && new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "You're not subscribed to this service"
