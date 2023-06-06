@@ -44,7 +44,12 @@ const createComment = async (commentBody) => {
 
   const comment = await Comment.create(commentBody);
 
-  return comment;
+  const result = await Comment.findById(comment.id).populate({
+    path: "userId",
+    populate: { path: "profile.avatar" },
+  })
+
+  return result;
 };
 
 const deleteComment = async (id) => {
@@ -155,8 +160,14 @@ const getActivePartners = async (status) => {
   return result;
 };
 
-const getAllComments = async (user_id) => {
-  const result = await Comment.find().populate("userId");
+const getAllComments = async (typeId) => {
+  const result = await Comment.find({ typeId: typeId }).sort({ ['createdAt']: 'desc' })
+    .populate({
+      path: "userId",
+      populate: { path: "profile.avatar" },
+    })
+    .populate("like")
+
   return result;
 };
 
@@ -241,6 +252,28 @@ const getUserActivity = async (userId, { page, search }) => {
           },
           {
             $lookup: {
+              from: Comment.collection.name,
+              let: { postId: "$_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$typeId", "$$postId"] },
+                  },
+                },
+                {
+                  $count: "commentCount",
+                },
+              ],
+              as: "commentCount",
+            },
+          },
+          {
+            $addFields: {
+              commentCount: { $arrayElemAt: ["$commentCount.commentCount", 0] },
+            },
+          },
+          {
+            $lookup: {
               from: Media.collection.name,
               localField: "images",
               foreignField: "_id",
@@ -305,6 +338,7 @@ const getUserActivity = async (userId, { page, search }) => {
                 lastname: "$from.lastName",
                 _id: "$from._id",
               },
+              comment: "$commentCount",
               to_user: {
                 username: "$to.username",
                 businessname: "$from.businessname",

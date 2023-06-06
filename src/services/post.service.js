@@ -1,5 +1,5 @@
 const httpStatus = require("http-status");
-const { Post, Shoutout, Like } = require("../models"),
+const { Post, Shoutout, Like, Comment } = require("../models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("../utils/customLabels"),
   defaultSort = require("../utils/defaultSort");
@@ -33,6 +33,22 @@ const getPosts = async (filter, options) => {
 const getPostById = async (postId, populate) => {
   return Post.findById(postId).populate(populate);
 };
+
+const getCommentById = async (commentId, populate) => {
+  return Comment.findById(commentId).populate(populate);
+};
+
+const updateCommentById = async (commentId, updateBody) => {
+  const comment = await getCommentById(commentId, "");
+  if (!comment) {
+    throw new ApiError(httpStatus.NOT_FOUND, "comment not found");
+  }
+
+  Object.assign(comment, updateBody);
+  await comment.save();
+  return comment;
+};
+
 
 const updatePostById = async (userId, updateBody) => {
   const post = await getPostById(userId);
@@ -133,5 +149,7 @@ module.exports = {
   getPosts,
   getPostById,
   updatePostById,
-  getlikePostCount
+  getlikePostCount,
+  getCommentById,
+  updateCommentById
 };

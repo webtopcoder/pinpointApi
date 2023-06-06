@@ -8,12 +8,22 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Types.ObjectId,
         ref: "User",
       },
+      type: {
+        type: String,
+      },
+      typeId: {
+        type: Types.ObjectId,
+      },
       parentId: {
         type: Types.ObjectId,
         default: null
       },
       body: {
         type: String,
+      },
+      like: {
+        type: Types.ObjectId,
+        ref: "Like",
       },
       images: {
         type: [

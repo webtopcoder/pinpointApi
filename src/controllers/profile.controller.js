@@ -280,8 +280,48 @@ const deleteComment = catchAsync(async (req, res) => {
 });
 
 
+const updateComment = catchAsync(async (req, res) => {
+  const comment = await postService.getCommentById(req.body.id);
+  const result = await postService.updateCommentById(req.body.id, {
+    ...comment,
+    body: req.body.body,
+  });
+  res.send(result);
+});
+
+const recommendComment = catchAsync(async (req, res) => {
+
+  const { commentId } = req.params;
+  const comment = await postService.getCommentById(commentId, "like");
+  if (!comment) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Comment not found");
+  }
+
+  if (!comment.like) {
+    comment.like = await likeService.createLike({
+      users: [],
+      count: 0,
+    });
+  }
+
+  const liked = comment.like.users.includes(req.user.id);
+
+  if (liked) {
+    comment.like.users = comment.like.users.filter((user) => user != req.user._id);
+    comment.like.count -= 1;
+  } else {
+    comment.like.users.push(req.user._id);
+    comment.like.count += 1;
+  }
+
+  await likeService.updateLikeById(comment.like._id, comment.like);
+  await comment.save();
+
+  res.send({ liked: !liked });
+});
+
 const getAllComments = catchAsync(async (req, res) => {
-  const result = await userService.getAllComments(req.user._id);
+  const result = await userService.getAllComments(req.params.typeId);
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, "result not found");
   }
@@ -411,5 +451,7 @@ module.exports = {
   markAsRead,
   getAllComments,
   createComment,
-  deleteComment
+  deleteComment,
+  updateComment,
+  recommendComment
 };

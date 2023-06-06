@@ -81,8 +81,16 @@ router
 
 router
   .route("/comment")
-  .get(auth(true), profileController.getAllComments)
   .post(auth(), profileController.createComment)
+  .patch(auth(), profileController.updateComment)
   .delete(auth(), profileController.deleteComment)
+
+router
+  .route("/comment/:typeId")
+  .get(auth(true), profileController.getAllComments)
+
+router
+  .route("/comment/:commentId/like")
+  .post(auth(), profileController.recommendComment)
 
 module.exports = router;
