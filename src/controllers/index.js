@@ -4,6 +4,7 @@ module.exports.contactController = require("./contact.controller");
 module.exports.followController = require("./follow.controller");
 module.exports.locationController = require("./location.controller");
 module.exports.profileController = require("./profile.controller");
+module.exports.commentController = require("./comment.controller");
 module.exports.mailController = require("./mail.controller");
 module.exports.mediaController = require("./media.controller");
 module.exports.notificationController = require("./notification.controller");

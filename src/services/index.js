@@ -4,6 +4,7 @@ module.exports.emailService = require("./email.service");
 module.exports.authService = require("./auth.service");
 module.exports.categoryService = require("./category.service");
 module.exports.followService = require("./follow.service");
+module.exports.commentService = require("./comment.service");
 module.exports.contactService = require("./contact.service");
 module.exports.mediaService = require("./media.service");
 module.exports.reviewService = require("./review.service");

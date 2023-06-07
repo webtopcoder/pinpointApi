@@ -32,6 +32,10 @@ const defaultRoutes = [
     route: require("./profile.route"),
   },
   {
+    path: "/comment",
+    route: require("./comment.route"),
+  },
+  {
     path: "/mail",
     route: require("./mail.route"),
   },
