@@ -39,9 +39,6 @@ const getPostById = async (postId, populate) => {
   return Post.findById(postId).populate(populate);
 };
 
-
-
-
 const updatePostById = async (userId, updateBody) => {
   const post = await getPostById(userId);
   if (!post) {
@@ -142,5 +139,4 @@ module.exports = {
   getPostById,
   updatePostById,
   getlikePostCount,
-
 };

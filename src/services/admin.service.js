@@ -455,6 +455,15 @@ const deleteActivitiesById = async (query, updateBody) => {
   return activities;
 };
 
+const removeActivitiesById = async (query) => {
+  const activities = await getActivitiesById(query);
+  if (!activities) {
+    throw new ApiError(httpStatus.NOT_FOUND, "activities not found");
+  }
+  await activities.delete();
+  return activities;
+};
+
 const userUpdate = async (id, payload) => {
   const user = await User.findById(id);
 
@@ -805,6 +814,15 @@ const deleteUserByID = async (user_id) => {
   return user;
 };
 
+const deletePermantlyActivitiesById = async (id) => {
+  const acitvity = await Post.findById(id);
+  if (!acitvity) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  await acitvity.delete();
+  return acitvity;
+};
+
 const bulkDelete = async (selectedIds, flag, status) => {
   const objectMailIds = selectedIds.map((id) => mongoose.Types.ObjectId(id));
   const data = {
@@ -834,6 +852,35 @@ const bulkDelete = async (selectedIds, flag, status) => {
   }
 };
 
+const bulkRemove = async (selectedIds, flag, status) => {
+  const objectMailIds = selectedIds.map((id) => mongoose.Types.ObjectId(id));
+  const data = {
+    status: status,
+  };
+  switch (flag) {
+    case "Post":
+      objectMailIds.map(async activitiID => {
+        await removeActivitiesById({ id: activitiID, type: flag })
+      });
+      break;
+    case "Review":
+      objectMailIds.map(async activitiID => {
+        await removeActivitiesById({ id: activitiID, type: flag })
+      });
+      break;
+    case "Shoutout":
+      objectMailIds.map(async activitiID => {
+        await removeActivitiesById({ id: activitiID, type: flag })
+      });
+      break;
+    case "Media":
+      objectMailIds.map(async activitiID => {
+        await mediaService.deleteMediaById(activitiID)
+      });
+      break;
+  }
+};
+
 module.exports = {
   getAllUsers,
   getAdminById,
@@ -843,6 +890,7 @@ module.exports = {
   searchActivities,
   getActivitiesById,
   deleteActivitiesById,
+  removeActivitiesById,
   searchPartner,
   searchRevenue,
   getMonthlyRevenue,
@@ -852,5 +900,7 @@ module.exports = {
   deleteUserByID,
   getUpdateActivityById,
   ActivityUpdate,
-  bulkDelete
+  bulkDelete,
+  bulkRemove,
+  deletePermantlyActivitiesById
 };

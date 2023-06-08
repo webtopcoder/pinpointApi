@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { User, FAQ, Media, Like, Order, Category, Location, Transaction, SubCategory, Contact, Testimonial } = require("../models"),
+  { User, FAQ, Media, Like, Order, Post, Category, Location, Transaction, SubCategory, Contact, Testimonial, Shoutout, Review } = require("../models"),
   { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING, ROLE_USER, ROLE_PARTNER, ISFALSE, ISTRUE } = require("../config/constants"),
   ApiError = require("../utils/ApiError"),
   customLabels = require("../utils/customLabels"),
@@ -26,7 +26,7 @@ const stats = async () => {
   const totalLocations = await Location.countDocuments();
   const totalGrossRevenue = await Order.countDocuments();
   const totaltransactions = await Transaction.countDocuments({});
-  const totalactivities = await Like.countDocuments({});
+  const totalactivities = await Post.countDocuments({}) + await Shoutout.countDocuments({}) + await Review.countDocuments({});
 
   return {
     totalUsers,

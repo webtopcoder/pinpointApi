@@ -76,16 +76,21 @@ const getSearchActivities = catchAsync(async (req, res) => {
 });
 
 const deleteActivitesByID = catchAsync(async (req, res) => {
-  let data;
-  if (req.body.status === 'deleted')
-    data = {
-      status: "active",
+  let data, activities;
+  if (req.body.deleteType !== "permant") {
+    if (req.body.status === 'deleted')
+      data = {
+        status: "active",
+      };
+    else data = {
+      status: "deleted",
     };
-  else data = {
-    status: "deleted",
-  };
+    activities = await adminService.deleteActivitiesById(req.body, data);
+  }
+  else {
+    activities = await adminService.removeActivitiesById(req.body);
+  }
 
-  const activities = await adminService.deleteActivitiesById(req.body, data);
   res.send(activities);
 });
 
@@ -306,8 +311,12 @@ const deleteImageByID = catchAsync(async (req, res) => {
 
 const bulkActions = catchAsync(async (req, res) => {
   const { action, flag, selectedIds } = req.body;
-  await adminService.bulkDelete(selectedIds, flag, action);
 
+  if (action !== "removed")
+    await adminService.bulkDelete(selectedIds, flag, action);
+  else {
+    await adminService.bulkRemove(selectedIds, flag, action);
+  }
   return res.json({ success: true, message: "Action performed successfully!" });
 });
 
