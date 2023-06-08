@@ -8,6 +8,7 @@ const {
   locationService,
   notificationService,
   postService,
+  settingService
 } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
@@ -255,77 +256,22 @@ const createPost = catchAsync(async (req, res) => {
   }
 
   else if (to_user._id.toString() !== req.user.id.toString()) {
-    EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: to_user._id.toString(),
-      actor: req.user._id.toString(),
-      title: "post",
-      description: `${from_user.username} has posted on your activity page`,
-      url: `/profile/${to_user._id.toString()}/activity/`,
-      type: "post",
+    const status = await settingService.getSettingStatus({
+      key: "user:likeCommentRating",
+      user: to_user._id,
     });
+    if (status)
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: to_user._id.toString(),
+        actor: req.user._id.toString(),
+        title: "post",
+        description: `You have a new activity from ${from_user.businessname}`,
+        url: `/profile/${to_user._id.toString()}/activity/`,
+        type: "post",
+      });
   }
 
   return res.json({ success: true, msg: "Post successfully!" });
-});
-
-const createComment = catchAsync(async (req, res) => {
-
-  const comment = await userService.createComment({ userId: req.user._id, ...req.body });
-  res.send(comment);
-});
-
-const deleteComment = catchAsync(async (req, res) => {
-  await userService.deleteComment(req.body.id);
-  return res.json({ success: true, msg: "Post successfully!" });
-});
-
-
-const updateComment = catchAsync(async (req, res) => {
-  const comment = await postService.getCommentById(req.body.id);
-  const result = await postService.updateCommentById(req.body.id, {
-    ...comment,
-    body: req.body.body,
-  });
-  res.send(result);
-});
-
-const recommendComment = catchAsync(async (req, res) => {
-
-  const { commentId } = req.params;
-  const comment = await postService.getCommentById(commentId, "like");
-  if (!comment) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Comment not found");
-  }
-
-  if (!comment.like) {
-    comment.like = await likeService.createLike({
-      users: [],
-      count: 0,
-    });
-  }
-
-  const liked = comment.like.users.includes(req.user.id);
-
-  if (liked) {
-    comment.like.users = comment.like.users.filter((user) => user != req.user._id);
-    comment.like.count -= 1;
-  } else {
-    comment.like.users.push(req.user._id);
-    comment.like.count += 1;
-  }
-
-  await likeService.updateLikeById(comment.like._id, comment.like);
-  await comment.save();
-
-  res.send({ liked: !liked });
-});
-
-const getAllComments = catchAsync(async (req, res) => {
-  const result = await userService.getAllComments(req.params.typeId);
-  if (!result) {
-    throw new ApiError(httpStatus.NOT_FOUND, "result not found");
-  }
-  res.send(result);
 });
 
 const addProfilePicture = catchAsync(async (req, res) => {
@@ -449,9 +395,4 @@ module.exports = {
   updateProfileView,
   getFavorited,
   markAsRead,
-  getAllComments,
-  createComment,
-  deleteComment,
-  updateComment,
-  recommendComment
 };

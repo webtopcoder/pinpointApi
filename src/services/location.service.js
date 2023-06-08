@@ -67,6 +67,7 @@ const getIsArrival = async (id) => {
 const getArrivalById = async (id) => {
   const arrival = await Arrival.findById(id)
     .populate("like")
+    .populate("location");
   return arrival;
 };
 

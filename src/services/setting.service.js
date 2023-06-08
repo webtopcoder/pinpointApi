@@ -31,6 +31,14 @@ const getSettingByKey = async ({ key }) => {
   const setting = await Setting.findOne({ key });
   return setting;
 };
+
+const getSettingStatus = async (filter) => {
+  const status = await Setting.findOne(filter);
+  if (status && status.value !== "false")
+    return true;
+  else return false
+};
+
 const getSettings = async (filter) => {
   const settings = await Setting.find(filter).populate('extra');
   return settings;
@@ -221,5 +229,6 @@ module.exports = {
   getAdditionUser,
   loginUserWithEmailAndPassword,
   getPartners,
-  getAdditionUserWithEmailAndOwner
+  getAdditionUserWithEmailAndOwner,
+  getSettingStatus
 };

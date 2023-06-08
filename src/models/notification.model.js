@@ -40,7 +40,12 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           "shoutout",
           "review",
           "post",
-          "reply"
+          "reply",
+          "notice",
+          "comment",
+          "LocationActive",
+          "checkIn",
+          "location"
         ],
         required: true,
       },
@@ -66,6 +71,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         break;
       case "mail":
         await Action.mail(actor, recipient, notification);
+        break;
+      case "notice":
+        await Action.notice(actor, recipient, notification);
         break;
       case "addLocation":
         await Action.addLocation(actor, recipient, notification);

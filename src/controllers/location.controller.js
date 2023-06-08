@@ -207,12 +207,12 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You're not subscribed to this service"
-    );
-  }
+  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "You're not subscribed to this service"
+  //   );
+  // }
 
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {
@@ -238,20 +238,29 @@ const quickArrival = catchAsync(async (req, res) => {
   });
 
   location.favoriteUsers.map(async item => {
-    // const result = await settingService.getSettings({
-    //   key: "user:location",
-    //   user: item,
-    // });
-    // if (result.length !== 0 && result[0].value !== "false") {
-    EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: item,
-      actor: location.partner._id,
-      type: "addLocation",
-      title: "New message",
-      description: `@${location.partner.username} Your favorite location is active.`,
-      url: `/profile/${item}/favorites/`,
+    const status = await settingService.getSettingStatus({
+      key: "user:location",
+      user: item,
     });
-    // }
+    if (status) {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: item,
+        actor: location.partner._id,
+        type: "addLocation",
+        title: "Location Favorite",
+        description: `Your favorite location(${location.title}) is now inactive.`,
+        url: `/profile/${item}/favorites/`,
+      });
+    }
+  });
+
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: location.partner._id,
+    actor: location.partner._id,
+    type: "LocationActive",
+    title: "Location Active",
+    description: `Your location(${location.title}) is now active.`,
+    url: `/profile/${req.user._id}/locations/`,
   });
 
   res.send(updatedLocation);
@@ -271,12 +280,38 @@ const quickDeparture = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You're not subscribed to this service"
-    );
-  }
+  location.favoriteUsers.map(async item => {
+    const status = await settingService.getSettingStatus({
+      key: "user:location",
+      user: item,
+    });
+    if (status) {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: item,
+        actor: location.partner._id,
+        type: "addLocation",
+        title: "Location Favorite",
+        description: `Your favorite location(${location.title}) is now inactive.`,
+        url: `/profile/${item}/favorites/`,
+      });
+    }
+  });
+
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: location.partner._id,
+    actor: location.partner._id,
+    type: "LocationActive",
+    title: "Location Active",
+    description: `Your location(${location.title}) is now inactive.`,
+    url: `/profile/${req.user._id}/locations/`,
+  });
+
+  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "You're not subscribed to this service"
+  //   );
+  // }
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     isActive: false,
@@ -336,6 +371,21 @@ const checkIn = catchAsync(async (req, res) => {
     const result = await locationService.updateArrivalById(arrivalID, {
       checkIn: [...arrival.checkIn, req.user._id],
     });
+
+    const status = await settingService.getSettingStatus({
+      key: "user:location",
+      user: arrival.location.partner,
+    });
+    if (status) {
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: arrival.location.partner,
+        actor: req.user._id,
+        type: "checkIn",
+        title: "Checked In",
+        description: `${req.user.businessname} has checked into your location(${arrival.location.title})}`,
+        url: `/profile/${arrival.location.partner}/locations/${arrival.location.id}`,
+      });
+    }
     res.send({
       count: result.checkIn.length,
       type: "success",
@@ -397,7 +447,22 @@ const favoriteLocation = catchAsync(async (req, res) => {
       : [...req.user.favoriteLocations, locationId],
   });
 
-  res.status(httpStatus.NO_CONTENT).send(); ``
+  const status = await settingService.getSettingStatus({
+    key: "user:location",
+    user: location.partner._id,
+  });
+  if (status) {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: location.partner._id,
+      actor: req.user._id,
+      type: "location",
+      title: "Location Favorite",
+      description: `${req.user.businessname} has favorited into your location(${location.title})}`,
+      url: `/profile/${location.partner._id}/locations/${location.id}`,
+    });
+  }
+
+  res.status(httpStatus.NO_CONTENT).send();
 });
 
 const unfavoriteLocation = catchAsync(async (req, res) => {
@@ -414,12 +479,26 @@ const unfavoriteLocation = catchAsync(async (req, res) => {
     ),
   });
 
-
   await userService.updateUserById(req.user._id, {
     favoriteLocations: req.user.favoriteLocations.filter(
       (location) => location != locationId
     ),
   });
+
+  const status = await settingService.getSettingStatus({
+    key: "user:location",
+    user: location.partner._id,
+  });
+  if (status) {
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: location.partner._id,
+      actor: req.user._id,
+      type: "location",
+      title: "Location Favorite",
+      description: `${req.user.businessname} has unfavorited into your location(${location.title})}`,
+      url: `/profile/${location.partner._id}/locations/${location.id}`,
+    });
+  }
 
   res.status(httpStatus.NO_CONTENT).send();
 });

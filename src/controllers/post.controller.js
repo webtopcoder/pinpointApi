@@ -1,7 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
-const { likeService, postService } = require("@services");
+const { likeService, postService, settingService } = require("@services");
 const { EventEmitter, events } = require("../events");
 
 const likePost = catchAsync(async (req, res) => {
@@ -28,30 +28,36 @@ const likePost = catchAsync(async (req, res) => {
     post.like.count += 1;
 
     if (post.to.toString() !== req.user.id.toString()) {
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: post.to.toString(),
-        actor: req.user.id.toString(),
-        title: "New post like",
-        description: `${req.user.username} has liked ${
-          post.content.slice(0, 20) + post.content.length > 20 ? "..." : ""
-        }`,
-        url: `/profile/${post.to.toString()}/activity/`,
-        type: "like",
+      const status = await settingService.getSettingStatus({
+        key: "user:likeCommentRating",
+        user: post.to,
       });
+      if (status)
+        EventEmitter.emit(events.SEND_NOTIFICATION, {
+          recipient: post.to.toString(),
+          actor: req.user.id.toString(),
+          title: "New post like",
+          description: `You have a new like from ${req.user.businessname}`,
+          url: `/profile/${post.to.toString()}/activity/`,
+          type: "like",
+        });
     }
 
     if (post.from.toString() != req.user.id.toString()) {
       if (post.to.toString() != post.from.toString()) {
-        EventEmitter.emit(events.SEND_NOTIFICATION, {
-          recipient: post.from.toString(),
-          actor: req.user.id.toString(),
-          title: "New post like",
-          description: `${req.user.username} has liked ${
-            post.content.slice(0, 20) + post.content.length > 20 ? "..." : ""
-          }`,
-          url: `/profile/${post.to.toString()}/activity/`,
-          type: "like",
+        const status = await settingService.getSettingStatus({
+          key: "user:likeCommentRating",
+          user: post.from,
         });
+        if (status)
+          EventEmitter.emit(events.SEND_NOTIFICATION, {
+            recipient: post.from.toString(),
+            actor: req.user.id.toString(),
+            title: "likes",
+            description: `You have a new like from ${req.user.businessname}`,
+            url: `/profile/${post.to.toString()}/activity/`,
+            type: "like",
+          });
       }
     }
   }

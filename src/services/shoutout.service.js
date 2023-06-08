@@ -4,21 +4,25 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   ApiError = require("../utils/ApiError");
 const userService = require("./user.service");
+const settingService = require("./setting.service");
 const { EventEmitter, events } = require("../events");
 
 const createShoutout = async (shoutoutBody) => {
   const shoutout = await Shoutout.create(shoutoutBody);
-
   const shoutoutUser = await userService.getUserById(shoutoutBody.from);
-
-  EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: shoutout.to.toString(),
-    actor: shoutout.from.toString(),
-    title: "Shoutout",
-    description: `${shoutoutUser.username} has sent you a shoutout`,
-    url: `/profile/${shoutout.to.toString()}/shout-outs/`,
-    type: "shoutout",
+  const status = await settingService.getSettingStatus({
+    key: "user:mention",
+    user: shoutout.to,
   });
+  if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: shoutout.to.toString(),
+      actor: shoutout.from.toString(),
+      title: "Shoutout",
+      description: `You have been shouted out by ${shoutoutUser.businessname}`,
+      url: `/profile/${shoutout.to.toString()}/shout-outs/`,
+      type: "shoutout",
+    });
 
   return shoutout;
 };

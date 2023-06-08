@@ -8,7 +8,7 @@ const userService = require("./user.service");
 const mongoose = require("mongoose-fill");
 const { ObjectID } = require("bson");
 
-const createMail = async (mailBody) => {
+const createMail = async (notice = false, mailBody) => {
   const createdMails = await Mail.create(mailBody);
 
   const sendingUser = Array.isArray(mailBody)
@@ -21,9 +21,9 @@ const createMail = async (mailBody) => {
       EventEmitter.emit(events.SEND_NOTIFICATION, {
         recipient: item.to,
         actor: item.from,
-        type: "mail",
-        title: "New message",
-        description: `You have a new message from @${from_user.username}`,
+        type: !notice ? "mail" : 'notice',
+        title: !notice ? "New Message" : "New Notice",
+        description: !notice ? `You have received a new message from @${from_user.businessname}` : `You have received a new notice from @${from_user.businessname}`,
         url: `/${item.role}/message`,
       });
     });
@@ -31,7 +31,7 @@ const createMail = async (mailBody) => {
 };
 
 const createEmailing = async (mailBody) => {
-  const createdMails = await Emailing.create(mailBody);
+  await Emailing.create(mailBody);
 };
 
 const createReply = async (mailBody) => {
@@ -42,8 +42,8 @@ const createReply = async (mailBody) => {
     recipient: mailBody.to,
     actor: mailBody.from,
     type: "reply",
-    title: "New message",
-    description: `You have a new message from @${from_user.username}`,
+    title: "New Reply Message",
+    description: `You have received a new reply message from ${from_user.businessname}`,
     url: `/${to_user.role}/message`,
   });
 
@@ -300,12 +300,11 @@ const queryEmailings = async (filter, options) => {
 
 
 const getIsReadEmails = async (userId) => {
-  const mails = await queryMails({
+
+  const mails = await Mail.find({
     to: userId,
     is_read: false,
     from_is_deleted: false,
-  }, {
-    userID: userId
   });
 
   return mails;

@@ -7,9 +7,12 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(auth(), commentController.createComment)
   .patch(auth(), commentController.updateComment)
   .delete(auth(), commentController.deleteComment)
+
+router
+  .route("/:oriuserId")
+  .post(auth(), commentController.createComment)
 
 router
   .route("/:typeId")

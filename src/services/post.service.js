@@ -5,19 +5,24 @@ const { Post, Shoutout, Like } = require("../models"),
   defaultSort = require("../utils/defaultSort");
 const { EventEmitter, events } = require("../events");
 const { ObjectID } = require("bson");
+const settingService = require("./setting.service");
 
 const createPost = async (postBody) => {
   const createdPost = await Post.create(postBody);
   const post = await getPostById(createdPost._id, "from to");
-
-  EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: post.to._id.toString(),
-    actor: post.from._id.toString(),
-    title: "New post",
-    description: `You have a new post from @${post.from.username}`,
-    url: `/profile/${post.to._id.toString()}/activity`,
-    type: "post",
+  const status = await settingService.getSettingStatus({
+    key: "user:likeCommentRating",
+    user: post.to._id,
   });
+  if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: post.to._id.toString(),
+      actor: post.from._id.toString(),
+      title: "New post",
+      description: `You have a new activity from ${post.from.businessname}`,
+      url: `/profile/${post.to._id.toString()}/activity`,
+      type: "post",
+    });
   return post;
 };
 

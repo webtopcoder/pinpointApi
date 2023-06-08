@@ -75,7 +75,7 @@ const compose = catchAsync(async (req, res) => {
         });
       });
   }
-  await mailService.createMail(mailsToSend);
+  await mailService.createMail(isNotice, mailsToSend);
 
   return res.json({ success: true, msg: "Sent successfully!" });
 });

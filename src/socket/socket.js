@@ -17,28 +17,28 @@ const Action = {
       case "removing":
         socketHandle.broadcast.emit(`notification-${to}`, {
           type: "follow",
-          message: from_user.username + " removed you!",
+          message: from_user.businessname + " removed you!",
           to,
         });
         break;
       case "accepting":
         socketHandle.broadcast.emit(`notification-${to}`, {
           type: "follow",
-          message: from_user.username + " accepted you!",
+          message: from_user.businessname + " accepted you!",
           to,
         });
         break;
       case "declining":
         socketHandle.broadcast.emit(`notification-${to}`, {
           type: "follow",
-          message: from_user.username + " declined you!",
+          message: from_user.businessname + " declined you!",
           to,
         });
         break;
       default:
         socketHandle.broadcast.emit(`notification-${to}`, {
           type: "follow",
-          message: from_user.username + " following you!",
+          message: from_user.businessname + "has started following you!",
           to,
         });
         break;
@@ -54,21 +54,34 @@ const Action = {
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "mail",
-      message: from_user.username + " has sent you a message!",
+      message: `You have received a new message from ${from_user?.businessname}`,
       to,
     });
   },
-  addLocation: async (from, to) => {
+
+  notice: async (from, to) => {
     const from_user = await User.findById(from);
     const room = _.find(UserList, { userid: from });
     if (!room) {
       throw new Error("Room not found");
     }
+    socketHandle.id = room.roomId;
+    socketHandle.broadcast.emit(`notification-${to}`, {
+      type: "notice",
+      message: `You have received a new notice from ${from_user?.businessname}`,
+      to,
+    });
+  },
 
+  addLocation: async (from, to, notification) => {
+    const room = _.find(UserList, { userid: from });
+    if (!room) {
+      throw new Error("Room not found");
+    }
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "addlocation",
-      message: `@${from_user.username} Your favorite location is active.`,
+      message: notification.description,
       to,
     });
   },
@@ -82,7 +95,7 @@ const Action = {
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "shoutout",
-      message: from_user.username + " has given you a shoutout!",
+      message: `You have been shouted out by ${from_user.businessname}`,
       to,
     });
   },
@@ -97,7 +110,7 @@ const Action = {
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "post",
-      message: from_user.username + " has posted on your activity page",
+      message: `You have a new activity from ${from_user.businessname}`,
       to,
     });
   },
@@ -106,7 +119,6 @@ const Action = {
     if (!room) {
       throw new Error("Room not found");
     }
-
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "default",

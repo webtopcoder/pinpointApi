@@ -256,6 +256,7 @@ const stripeWebhook = async (req, res) => {
 
       await userService.updateUserById(deletedUser._id, {
         activeSubscription: null,
+        activePartnership: null,
         partnershipPriceRenewalDate,
       });
       break;
