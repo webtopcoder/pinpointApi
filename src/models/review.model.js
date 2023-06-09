@@ -50,11 +50,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Review.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Review.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Review.plugin(toJSON);
   Review.plugin(mongoosePaginate);
 

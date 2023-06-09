@@ -23,11 +23,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     foreignField: "category",
   });
 
-  Category.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Category.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Category.plugin(toJSON);
   Category.plugin(mongoosePaginate);
 

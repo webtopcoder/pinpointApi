@@ -59,11 +59,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Additionaluser.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Additionaluser.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Additionaluser.plugin(toJSON);
   Additionaluser.plugin(mongoosePaginate);
   Additionaluser.plugin(aggregatePaginate);

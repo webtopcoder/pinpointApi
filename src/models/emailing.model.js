@@ -21,11 +21,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Emailing.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Emailing.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Emailing.plugin(toJSON);
   Emailing.plugin(mongoosePaginate);
   Emailing.plugin(aggregatePaginate);

@@ -48,11 +48,11 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
   );
 
   AdminSchema.index({ email: 1, deletedAt: 1 }, { unique: true });
-  AdminSchema.plugin(soft_delete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // AdminSchema.plugin(soft_delete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   AdminSchema.plugin(toJSON);
   AdminSchema.plugin(mongoosePaginate);
 

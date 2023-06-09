@@ -48,11 +48,11 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
     }
   );
 
-  Partnership.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Partnership.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Partnership.plugin(toJSON);
   Partnership.plugin(mongoosePaginate);
 

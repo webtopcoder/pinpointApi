@@ -119,6 +119,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
   const likesLocationCount = await locationService.getlikeLocationCount(userId);
   const Rating = await locationService.getRating(userId);
 
+  console.log(likesPostCount, likesLocationCount);
   return res.json({
     profile: {
       avatar: user?.profile?.avatar,

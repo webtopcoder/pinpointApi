@@ -24,11 +24,11 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
     }
   );
 
-  FAQ.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // FAQ.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   FAQ.plugin(toJSON);
   FAQ.plugin(mongoosePaginate);
 

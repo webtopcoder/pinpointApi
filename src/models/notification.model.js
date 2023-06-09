@@ -90,11 +90,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   });
 
-  Notification.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Notification.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Notification.plugin(toJSON);
   Notification.plugin(mongoosePaginate);
 
