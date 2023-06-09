@@ -38,7 +38,7 @@ const Action = {
       default:
         socketHandle.broadcast.emit(`notification-${to}`, {
           type: "follow",
-          message: from_user.businessname + "has started following you!",
+          message: from_user.businessname + " has started following you!",
           to,
         });
         break;
@@ -110,7 +110,7 @@ const Action = {
     socketHandle.id = room.roomId;
     socketHandle.broadcast.emit(`notification-${to}`, {
       type: "post",
-      message: `You have a new activity from ${from_user.businessname}`,
+      message: `You have new activity from ${from_user.businessname}`,
       to,
     });
   },

@@ -256,19 +256,19 @@ const createPost = catchAsync(async (req, res) => {
   }
 
   else if (to_user._id.toString() !== req.user.id.toString()) {
-    const status = await settingService.getSettingStatus({
-      key: "user:likeCommentRating",
-      user: to_user._id,
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:likeCommentRating",
+    //   user: to_user._id,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: to_user._id.toString(),
+      actor: req.user._id.toString(),
+      title: "post",
+      description: `You have new activity from ${from_user.businessname}`,
+      url: `/profile/${to_user._id.toString()}/activity/`,
+      type: "post",
     });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: to_user._id.toString(),
-        actor: req.user._id.toString(),
-        title: "post",
-        description: `You have a new activity from ${from_user.businessname}`,
-        url: `/profile/${to_user._id.toString()}/activity/`,
-        type: "post",
-      });
   }
 
   return res.json({ success: true, msg: "Post successfully!" });

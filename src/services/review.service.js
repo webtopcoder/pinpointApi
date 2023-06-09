@@ -25,20 +25,20 @@ const createReview = async (reviewBody) => {
   const review = await getReviewById(createdReview._id, "user");
 
   if (reviewBody.user.toString() !== review.location.partner.toString()) {
-    const status = await settingService.getSettingStatus({
-      key: "user:likeCommentRating",
-      user: review.location.partner,
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:likeCommentRating",
+    //   user: review.location.partner,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: review.location.partner.toString(),
+      actor: review.user._id.toString(),
+      title: "New Review",
+      description: `Your location has a new review from ${review.user.businessname}`,
+      url: `/profile/${review.location.partner.toString()}/locations/${review.location._id
+        }`,
+      type: "review",
     });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: review.location.partner.toString(),
-        actor: review.user._id.toString(),
-        title: "New Review",
-        description: `Your location has a new review from ${review.user.businessname}`,
-        url: `/profile/${review.location.partner.toString()}/locations/${review.location._id
-          }`,
-        type: "review",
-      });
   }
 
   return review;

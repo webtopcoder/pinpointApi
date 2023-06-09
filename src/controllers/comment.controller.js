@@ -14,19 +14,19 @@ const createComment = catchAsync(async (req, res) => {
 
   const comment = await commentService.createComment({ userId: req.user._id, ...req.body });
   if (oriuserId.toString() !== req.user.id.toString()) {
-    const status = await settingService.getSettingStatus({
-      key: "user:likeCommentRating",
-      user: oriuserId,
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:likeCommentRating",
+    //   user: oriuserId,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: oriuserId.toString(),
+      actor: req.user._id.toString(),
+      title: "comment",
+      description: `You have a new comment from ${req.user.businessname}`,
+      url: req.body.path,
+      type: "comment",
     });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: oriuserId.toString(),
-        actor: req.user._id.toString(),
-        title: "comment",
-        description: `You have a new comment from ${req.user.businessname}`,
-        url: req.body.path,
-        type: "comment",
-      });
   }
 
   res.send(comment);

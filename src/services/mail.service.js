@@ -23,7 +23,7 @@ const createMail = async (notice = false, mailBody) => {
         actor: item.from,
         type: !notice ? "mail" : 'notice',
         title: !notice ? "New Message" : "New Notice",
-        description: !notice ? `You have received a new message from @${from_user.businessname}` : `You have received a new notice from @${from_user.businessname}`,
+        description: !notice ? `You have received a new message from ${from_user.businessname}` : `You have received a new notice from ${from_user.businessname}`,
         url: `/${item.role}/message`,
       });
     });

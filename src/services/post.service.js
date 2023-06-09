@@ -10,19 +10,19 @@ const settingService = require("./setting.service");
 const createPost = async (postBody) => {
   const createdPost = await Post.create(postBody);
   const post = await getPostById(createdPost._id, "from to");
-  const status = await settingService.getSettingStatus({
-    key: "user:likeCommentRating",
-    user: post.to._id,
+  // const status = await settingService.getSettingStatus({
+  //   key: "user:likeCommentRating",
+  //   user: post.to._id,
+  // });
+  // if (status)
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: post.to._id.toString(),
+    actor: post.from._id.toString(),
+    title: "New post",
+    description: `You have new activity from ${post.from.businessname}`,
+    url: `/profile/${post.to._id.toString()}/activity`,
+    type: "post",
   });
-  if (status)
-    EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: post.to._id.toString(),
-      actor: post.from._id.toString(),
-      title: "New post",
-      description: `You have a new activity from ${post.from.businessname}`,
-      url: `/profile/${post.to._id.toString()}/activity`,
-      type: "post",
-    });
   return post;
 };
 

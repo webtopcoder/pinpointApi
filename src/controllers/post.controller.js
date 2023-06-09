@@ -28,36 +28,36 @@ const likePost = catchAsync(async (req, res) => {
     post.like.count += 1;
 
     if (post.to.toString() !== req.user.id.toString()) {
-      const status = await settingService.getSettingStatus({
-        key: "user:likeCommentRating",
-        user: post.to,
+      // const status = await settingService.getSettingStatus({
+      //   key: "user:likeCommentRating",
+      //   user: post.to,
+      // });
+      // if (status)
+      EventEmitter.emit(events.SEND_NOTIFICATION, {
+        recipient: post.to.toString(),
+        actor: req.user.id.toString(),
+        title: "New post like",
+        description: `You have a new like from ${req.user.businessname}`,
+        url: `/profile/${post.to.toString()}/activity/`,
+        type: "like",
       });
-      if (status)
-        EventEmitter.emit(events.SEND_NOTIFICATION, {
-          recipient: post.to.toString(),
-          actor: req.user.id.toString(),
-          title: "New post like",
-          description: `You have a new like from ${req.user.businessname}`,
-          url: `/profile/${post.to.toString()}/activity/`,
-          type: "like",
-        });
     }
 
     if (post.from.toString() != req.user.id.toString()) {
       if (post.to.toString() != post.from.toString()) {
-        const status = await settingService.getSettingStatus({
-          key: "user:likeCommentRating",
-          user: post.from,
+        // const status = await settingService.getSettingStatus({
+        //   key: "user:likeCommentRating",
+        //   user: post.from,
+        // });
+        // if (status)
+        EventEmitter.emit(events.SEND_NOTIFICATION, {
+          recipient: post.from.toString(),
+          actor: req.user.id.toString(),
+          title: "likes",
+          description: `You have a new like from ${req.user.businessname}`,
+          url: `/profile/${post.to.toString()}/activity/`,
+          type: "like",
         });
-        if (status)
-          EventEmitter.emit(events.SEND_NOTIFICATION, {
-            recipient: post.from.toString(),
-            actor: req.user.id.toString(),
-            title: "likes",
-            description: `You have a new like from ${req.user.businessname}`,
-            url: `/profile/${post.to.toString()}/activity/`,
-            type: "like",
-          });
       }
     }
   }

@@ -169,36 +169,36 @@ const followOrUnfollow = async (userId, followingUser) => {
   });
 
   if (notifyFlag) {
-    const status = await settingService.getSettingStatus({
-      key: "user:followRequest",
-      user: followingUser,
-    });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: followingUser,
-        actor: userId,
-        title: "New Follower",
-        description: `${followerUserValid.businessname} removed your following.`,
-        url: `/profile/${followingUser}/followers`,
-        type: "follow",
-        flag: "removing"
-      })
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:followRequest",
+    //   user: followingUser,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: followingUser,
+      actor: userId,
+      title: "New Follower",
+      description: `${followerUserValid.businessname} removed your following.`,
+      url: `/profile/${followingUser}/followers`,
+      type: "follow",
+      flag: "removing"
+    })
   }
   else {
-    const status = await settingService.getSettingStatus({
-      key: "user:followRequest",
-      user: followingUser,
-    });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: followingUser,
-        actor: userId,
-        title: "New Follower",
-        description: `${followerUserValid.businessname} has started following you`,
-        url: `/profile/${followingUser}/followers`,
-        type: "follow",
-        flag: "creating"
-      })
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:followRequest",
+    //   user: followingUser,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: followingUser,
+      actor: userId,
+      title: "New Follower",
+      description: `${followerUserValid.businessname} has started following you`,
+      url: `/profile/${followingUser}/followers`,
+      type: "follow",
+      flag: "creating"
+    })
   }
 
   if (!followingUserValid || !followerUserValid) {
@@ -261,39 +261,39 @@ const acceptFollowing = async (id, type, updateBody) => {
 
   const followingUserValid = await userService.getUserById(follow.following);
   if (type === "active") {
-    const status = await settingService.getSettingStatus({
-      key: "user:followRequest",
-      user: follow.follower,
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:followRequest",
+    //   user: follow.follower,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: follow.follower,
+      actor: follow.following,
+      title: "New Follower",
+      description: `${followingUserValid.businessname} accepted your following request`,
+      url: `/profile/${follow.follower}/followers`,
+      type: "follow",
+      flag: "accepting"
     });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: follow.follower,
-        actor: follow.following,
-        title: "New Follower",
-        description: `${followingUserValid.businessname} accepted your following request`,
-        url: `/profile/${follow.follower}/followers`,
-        type: "follow",
-        flag: "accepting"
-      });
 
     await Follow.update({ follower: follow.following, following: follow.follower }, { status: "active" });
   }
   else {
     await Follow.remove({ follower: follow.following, following: follow.follower });
-    const status = await settingService.getSettingStatus({
-      key: "user:followRequest",
-      user: follow.follower,
+    // const status = await settingService.getSettingStatus({
+    //   key: "user:followRequest",
+    //   user: follow.follower,
+    // });
+    // if (status)
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: follow.follower,
+      actor: follow.following,
+      title: "New Follower",
+      description: `${followingUserValid.businessname} declined your following request`,
+      url: `/profile/${follow.follower}/followers`,
+      type: "follow",
+      flag: "declining"
     });
-    if (status)
-      EventEmitter.emit(events.SEND_NOTIFICATION, {
-        recipient: follow.follower,
-        actor: follow.following,
-        title: "New Follower",
-        description: `${followingUserValid.businessname} declined your following request`,
-        url: `/profile/${follow.follower}/followers`,
-        type: "follow",
-        flag: "declining"
-      });
   }
 
   return follow;
