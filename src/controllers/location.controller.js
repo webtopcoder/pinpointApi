@@ -259,7 +259,7 @@ const quickArrival = catchAsync(async (req, res) => {
     actor: location.partner._id,
     type: "LocationActive",
     title: "Location Active",
-    description: `Your location(${location.title}) is now active.`,
+    description: `Your location ${location.title} is now active.`,
     url: `/profile/${req.user._id}/locations/`,
   });
 
@@ -302,7 +302,7 @@ const quickDeparture = catchAsync(async (req, res) => {
     actor: location.partner._id,
     type: "LocationActive",
     title: "Location Active",
-    description: `Your location(${location.title}) is now inactive.`,
+    description: `Your location ${location.title} is now inactive.`,
     url: `/profile/${req.user._id}/locations/`,
   });
 
@@ -382,7 +382,7 @@ const checkIn = catchAsync(async (req, res) => {
       actor: req.user._id,
       type: "checkIn",
       title: "Checked In",
-      description: `${req.user.businessname} has checked into your location ${arrival.location.title}}`,
+      description: `${req.user.businessname} has checked into your location ${arrival.location.title}`,
       url: `/profile/${arrival.location.partner}/locations/${arrival.location.id}`,
     });
     // }
@@ -457,7 +457,7 @@ const favoriteLocation = catchAsync(async (req, res) => {
     actor: req.user._id,
     type: "location",
     title: "Location Favorite",
-    description: `${req.user.businessname} has favorited into your location ${location.title}}`,
+    description: `${req.user.businessname} has favorited into your location ${location.title}`,
     url: `/profile/${location.partner._id}/locations/${location.id}`,
   });
   // }
@@ -495,7 +495,7 @@ const unfavoriteLocation = catchAsync(async (req, res) => {
     actor: req.user._id,
     type: "location",
     title: "Location Favorite",
-    description: `${req.user.businessname} has unfavorited into your location ${location.title}}`,
+    description: `${req.user.businessname} has unfavorited into your location ${location.title}`,
     url: `/profile/${location.partner._id}/locations/${location.id}`,
   });
   // }
