@@ -207,12 +207,12 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-  //   throw new ApiError(
-  //     httpStatus.FORBIDDEN,
-  //     "You're not subscribed to this service"
-  //   );
-  // }
+  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You're not subscribed to this service"
+    );
+  }
 
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {
@@ -306,12 +306,12 @@ const quickDeparture = catchAsync(async (req, res) => {
     url: `/profile/${req.user._id}/locations/`,
   });
 
-  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-  //   throw new ApiError(
-  //     httpStatus.FORBIDDEN,
-  //     "You're not subscribed to this service"
-  //   );
-  // }
+  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You're not subscribed to this service"
+    );
+  }
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     isActive: false,
