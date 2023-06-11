@@ -25,7 +25,6 @@ router
   .route("/subcategories")
   .get(
     auth(false, true),
-    validate(categoryValidation.getAdminSubCategories),
     categoryController.getSubCategories
   )
   .post(

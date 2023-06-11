@@ -28,7 +28,7 @@ const getAllCategories = async (query) => {
 };
 
 const getSubCategories = async (query) => {
-  const subCategories = await SubCategory.find({ category: query.categoryId ? query.categoryId : { $exists: true } })
+  const subCategories = await SubCategory.find({ category: query.categoryId && query.categoryId !== "all" ? query.categoryId : { $exists: true } })
     .sort(query.sort ?? defaultSort)
     .skip(((query.page ?? 1) - 1) * (query.limit ?? 10))
     .limit(query.limit ?? 10)
