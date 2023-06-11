@@ -28,7 +28,7 @@ const getAllCategories = async (query) => {
 };
 
 const getSubCategories = async (query) => {
-  const subCategories = await SubCategory.find()
+  const subCategories = await SubCategory.find({ category: query.categoryId ? query.categoryId : { $exists: true } })
     .sort(query.sort ?? defaultSort)
     .skip(((query.page ?? 1) - 1) * (query.limit ?? 10))
     .limit(query.limit ?? 10)
@@ -62,7 +62,7 @@ const getCategoryById = async (id) => {
  */
 const getSubCategoryByCategoryId = async (id) => {
 
-  const subCategory = await SubCategory.find(id === "all" ? {} : {
+  const subCategory = await SubCategory.find(id === "all" || "" ? {} : {
     category: id,
   });
   if (!subCategory) {

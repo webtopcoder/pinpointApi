@@ -127,7 +127,7 @@ const sendPartnerStatus = async ({ id }) => {
 const sendAdditionUserEmail = async ({ owner_id, additional }) => {
   const user = await userService.getUserById(owner_id);
   const token = await tokenService.generateCreateAdditionToken(user);
-  const link = `https://testing.thepinpointsocial.com/authentication/additionuser/register/?token=${token}&&partner=${user.email}&&user=${additional.email}&&partnerID=${owner_id}`;
+  const link = `${config.frontend_url}/authentication/additionuser/register/?token=${token}&&partner=${user.email}&&user=${additional.email}&&partnerID=${owner_id}`;
   const subject = "Invitation As additional user";
   await sendEmailWithEJS(additional.email, subject, "additional-user-invite", {
     title: "Additional User Invitation",

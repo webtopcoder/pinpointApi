@@ -63,11 +63,14 @@ const getSubCategories = catchAsync(async (req, res) => {
       req.query.sort.split(",").map((field) => field.split(":"))
     );
   }
+
   const subCategories = await categoryService.getSubCategories(req.query);
+  const total = (await categoryService.getSubCategoryByCategoryId(req.query.categoryId === undefined ? "all" : req.query.categoryId)).length
+
   res.status(httpStatus.OK).send({
     success: true,
     subCategories,
-    total: await SubCategory.countDocuments(),
+    total: total,
   });
 });
 
