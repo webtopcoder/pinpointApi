@@ -32,7 +32,6 @@ const createUser = async (userBody) => {
   }
   const user = await User.create(userBody);
 
-
   await Emailing.updateOne({ email: user.email },
     {
       $set: {

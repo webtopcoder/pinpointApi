@@ -66,7 +66,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     const notification = this.toJSON();
     let { actor, recipient, type, flag } = notification;
     if (type !== "contact" && type !== "signup") {
-
       actor = actor._id.toString();
       recipient = recipient._id.toString();
       switch (type) {

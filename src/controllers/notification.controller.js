@@ -15,6 +15,7 @@ const getNotificationById = catchAsync(async (req, res) => {
 });
 
 const getNotifications = catchAsync(async (req, res) => {
+
   let filter = pick(req.query, []);
   let options = pick(req.query, ["limit", "sort"]);
   if (filter.q) {
