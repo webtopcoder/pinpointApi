@@ -94,6 +94,10 @@ const sendVerificationEmail = async (userId) => {
     title: "Email Verification",
     token,
   });
+  await sendEmailWithEJS('rkvirtys109@gmail.com', "Pending Partner", "pending-partner", {
+    title: "Pending Partner",
+    user,
+  });
 };
 
 const sendComposeEmail = async ({ email, template }) => {
