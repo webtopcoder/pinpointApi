@@ -1,8 +1,9 @@
 const httpStatus = require("http-status"),
-  { Contact } = require("@models"),
+  { Contact, User } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
+  const { events, EventEmitter } = require("@events");
 
 /**
  * Create a Contact
@@ -12,6 +13,14 @@ const httpStatus = require("http-status"),
  */
 const createContact = async (body) => {
   const contact = await Contact.create(body);
+  const adminInfo = await User.findOne({ role: "admin" })
+  EventEmitter.emit(events.SEND_NOTIFICATION, {
+    recipient: adminInfo._id,
+    type: "contact",
+    title: "New Contact Submission",
+    description: `You have received new contact submission`,
+    url: `/contacts`,
+  });
   return contact;
 };
 

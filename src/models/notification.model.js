@@ -45,7 +45,9 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           "comment",
           "LocationActive",
           "checkIn",
-          "location"
+          "location",
+          "signup",
+          "contact"
         ],
         required: true,
       },
@@ -63,31 +65,35 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   Notification.post("save", async function () {
     const notification = this.toJSON();
     let { actor, recipient, type, flag } = notification;
-    actor = actor._id.toString();
-    recipient = recipient._id.toString();
-    switch (type) {
-      case "follow":
-        await Action.follow(actor, recipient, flag, notification);
-        break;
-      case "mail":
-        await Action.mail(actor, recipient, notification);
-        break;
-      case "notice":
-        await Action.notice(actor, recipient, notification);
-        break;
-      case "addLocation":
-        await Action.addLocation(actor, recipient, notification);
-        break;
-      case "shoutout":
-        await Action.shoutout(actor, recipient, notification);
-        break;
-      case "post":
-        await Action.post(actor, recipient, notification);
-        break;
-      default:
-        await Action.defaultNotification(actor, recipient, notification);
-        break;
+    if (type !== "contact" && type !== "signup") {
+
+      actor = actor._id.toString();
+      recipient = recipient._id.toString();
+      switch (type) {
+        case "follow":
+          await Action.follow(actor, recipient, flag, notification);
+          break;
+        case "mail":
+          await Action.mail(actor, recipient, notification);
+          break;
+        case "notice":
+          await Action.notice(actor, recipient, notification);
+          break;
+        case "addLocation":
+          await Action.addLocation(actor, recipient, notification);
+          break;
+        case "shoutout":
+          await Action.shoutout(actor, recipient, notification);
+          break;
+        case "post":
+          await Action.post(actor, recipient, notification);
+          break;
+        default:
+          await Action.defaultNotification(actor, recipient, notification);
+          break;
+      }
     }
+
   });
 
   // Notification.plugin(softDelete, {

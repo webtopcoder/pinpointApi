@@ -16,7 +16,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   mediaService = require("./media.service");
 const { ObjectId } = require("bson");
-
+// const { events, EventEmitter } = require("@events");
 /**
  * Create a user
  * @param {Object} userBody
@@ -31,6 +31,8 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User Name already taken");
   }
   const user = await User.create(userBody);
+
+
   await Emailing.updateOne({ email: user.email },
     {
       $set: {
@@ -140,6 +142,10 @@ const getAdminByID = (id) => {
 
 const getUserByUsername = (username) => {
   return User.findOne({ username }).populate("profile.avatar");
+};
+
+const getadmin = () => {
+  return User.findOne({ role: "admin" });
 };
 
 const getActivePartners = async (status) => {
@@ -806,6 +812,7 @@ module.exports = {
   getUserById,
   getUserByEmail,
   getAdminByID,
+  getadmin,
   getAdminByEmail,
   updateUserById,
   deleteUserById,

@@ -12,6 +12,15 @@ const {
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   EventEmitter.emit(events.VERIFY_EMAIL, user.id);
+  const adminInfo = await userService.getadmin();
+  if (user.role === "partner")
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: adminInfo._id,
+      type: "signup",
+      title: "New Pending Partner",
+      description: `You have new pending partner`,
+      url: `/partner`,
+    });
   res.send({
     code: httpStatus.CREATED,
     success: true,
