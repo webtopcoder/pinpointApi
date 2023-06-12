@@ -16,6 +16,7 @@ const httpStatus = require("http-status"),
   defaultSort = require("../utils/defaultSort"),
   mediaService = require("./media.service");
 const { ObjectId } = require("bson");
+const { EventEmitter, events } = require("../events");
 
 /**
  * Create a user
@@ -31,6 +32,17 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "User Name already taken");
   }
   const user = await User.create(userBody);
+  const adminInfo = await User.findOne({ role: "admin" })
+  console.log(user)
+  if (userBody.role === "partner")
+    EventEmitter.emit(events.SEND_NOTIFICATION, {
+      recipient: adminInfo._id,
+      type: "signup",
+      title: "New Pending Partner",
+      description: `You have new pending partner`,
+      url: `/partner`,
+    });
+
   await Emailing.updateOne({ email: user.email },
     {
       $set: {
