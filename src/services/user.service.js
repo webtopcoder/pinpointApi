@@ -587,33 +587,23 @@ const getPostImages = async (userId, options) => {
     },
     {
       $project: {
-        image: "$images",
+        content: 1,
+        createdAt: 1,
+        status: 1,
+        filepath: "$images.filepath",
       },
     },
     {
-      $group: {
-        _id: "",
-        image: {
-          $push: "$image",
-        },
-      },
-    },
-    {
-      $unwind: "$image",
+      $unwind: "$filepath",
     },
     {
       $sort: { createdAt: -1 },
     },
   ]);
-
-  const images = imagesInPost.reduce((acc, image) => {
-    image.image.forEach((img) => {
-      acc.push(img);
-    });
-    return acc;
-  }, []);
-
-  return images;
+  const newArray = imagesInPost.map(item => {
+    return { ...item, type: "Post" };
+  });
+  return newArray;
 };
 
 const getShoutImages = async (userId, options) => {
@@ -646,19 +636,14 @@ const getShoutImages = async (userId, options) => {
           },
           {
             $project: {
-              image: "$images",
+              content: 1,
+              createdAt: 1,
+              status: 1,
+              filepath: "$images.filepath",
             },
           },
           {
-            $group: {
-              _id: "",
-              image: {
-                $push: "$image",
-              },
-            },
-          },
-          {
-            $unwind: "$image",
+            $unwind: "$filepath",
           },
           {
             $sort: { updatedAt: -1 },
@@ -668,35 +653,32 @@ const getShoutImages = async (userId, options) => {
     },
     {
       $project: {
-        shout: "$shout",
+        content: "$shout.content",
+        createdAt: "$shout.createdAt",
+        filepath: "$shout.filepath",
+        status: "$shout.status",
       },
     },
     {
-      $group: {
-        _id: "",
-        shout: {
-          $push: "$shout",
-        },
-      },
+      $unwind: "$content",
     },
     {
-      $unwind: "$shout",
+      $unwind: "$createdAt",
+    },
+    {
+      $unwind: "$filepath",
+    },
+    {
+      $unwind: "$status",
     },
     {
       $sort: { createdAt: -1 },
     },
   ]);
-
-  const shoutImages = imagesInShout.reduce((acc, image) => {
-    image.shout.forEach((img1) => {
-      img1.image.forEach((img) => {
-        acc.push(img);
-      });
-    });
-    return acc;
-  }, []);
-
-  return shoutImages;
+  const newArray = imagesInShout.map(item => {
+    return { ...item, type: "Shout out" };
+  });
+  return newArray;
 };
 
 const getFavoriteLocations = async (userId) => {

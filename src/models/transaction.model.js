@@ -32,11 +32,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Transaction.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Transaction.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Transaction.plugin(toJSON);
   Transaction.plugin(mongoosePaginate);
 

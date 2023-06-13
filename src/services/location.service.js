@@ -418,33 +418,34 @@ const getReviewImages = async (userId, options) => {
     },
     {
       $project: {
-        image: "$images",
+        text: 1,
+        createdAt: 1,
+        status: 1,
+        filepath: "$images.filepath",
       },
     },
     {
-      $group: {
-        _id: "",
-        image: {
-          $push: "$image",
-        },
+      $addFields: {
+        content: "$text",
       },
     },
     {
-      $unwind: "$image",
+      $project: {
+        text: 0,
+      },
+    },
+    {
+      $unwind: "$filepath",
     },
     {
       $sort: { createdAt: -1 },
     },
   ]);
 
-  const images = imagesInReview.reduce((acc, image) => {
-    image.image.forEach((img) => {
-      acc.push(img);
-    });
-    return acc;
-  }, []);
-
-  return images;
+  const newArray = imagesInReview.map(item => {
+    return { ...item, type: "Review" };
+  });
+  return newArray;
 };
 
 const getRating = async (userId) => {
