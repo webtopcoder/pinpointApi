@@ -104,7 +104,7 @@ const queryUsers = async (filter, options) => {
 };
 
 const getUserById = async (userId) => {
-  const user = await User.findById(userId).populate("profile.avatar");
+  const user = await User.findById(userId).populate("profile.avatar").populate("category");
   return user;
 };
 

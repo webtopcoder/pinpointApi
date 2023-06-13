@@ -205,7 +205,7 @@
                                     <p
                                       style="margin: 0; font-size: 16px; text-align: center; mso-line-height-alt: 19.2px;">
                                       <span style="font-size:30px;color:#2b303a;"><strong>
-                                          New Pending Partner
+                                          New User
                                         </strong></span>
                                     </p>
                                   </div>
@@ -215,40 +215,29 @@
                           </table>
                           <table border="0" cellpadding="0" cellspacing="0" class="text_block block-5"
                             role="presentation"
-                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;" width="100%">
+                            style=" mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
+                            width="100%">
                             <tr>
                               <td class="pad"
-                                style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:10px;">
-                                <table
+                              style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                              <table
                                   style="background:aliceblue;margin: auto; font-family: Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; ">
                                   <tr>
-                                    <td class="user-info">Business Legal Name</td>
+                                    <td class="user-info">First Name</td>
                                     <td class="user-info">
-                                      <%= user.businessname %>
+                                      <%= user.firstName %>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="user-info">Last Name</td>
+                                    <td class="user-info">
+                                      <%= user.lastName %>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="user-info">Username: </td>
                                     <td class="user-info">
                                       <%= user.username %>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="user-info">Owner First Name</td>
-                                    <td class="user-info">
-                                      <%= user.firstName %>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="user-info">Owner Last Name</td>
-                                    <td class="user-info">
-                                      <%= user.lastName %>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="user-info">Business Physical Address</td>
-                                    <td class="user-info">
-                                      <%= user.address.address %>
                                     </td>
                                   </tr>
                                   <tr>
@@ -261,12 +250,6 @@
                                     <td class="user-info">City</td>
                                     <td class="user-info">
                                       <%= user.address.city %>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="user-info">Category</td>
-                                    <td class="user-info">
-                                      <%= user.category.name %>
                                     </td>
                                   </tr>
                                   <tr>

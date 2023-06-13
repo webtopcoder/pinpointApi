@@ -95,8 +95,8 @@ const sendVerificationEmail = async (userId) => {
     token,
   });
 
-  await sendEmailWithEJS('rkvirtys109@gmail.com', "Pending Partner", user.role === "partner" ? "pending-partner" : 'pending-user', {
-    title: "Pending Partner",
+  await sendEmailWithEJS('pinpointfoodtruck@gmail.com', user.role === "partner" ? "Pending Partner" : "Pending User", user.role === "partner" ? "pending-partner" : 'pending-user', {
+    title: user.role === "partner" ? "Pending Partner" : 'Pending User',
     user,
   });
 };
