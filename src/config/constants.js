@@ -1,6 +1,7 @@
 export const ROLE_ADMIN = 'admin';
 export const ROLE_USER = 'user';
 export const ROLE_PARTNER = 'partner';
+export const ROLE_EVENTHOST = 'eventhost';
 
 export const USER_ROLES = {
   ADMIN: ROLE_ADMIN,

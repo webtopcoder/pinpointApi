@@ -449,18 +449,23 @@ const getReviewImages = async (userId, options) => {
 };
 
 const getRating = async (userId) => {
-
   const locations = await Location.find({
     partner: new ObjectID(userId),
   }).populate("reviews");
 
+  let count = 0;
+  for (const obj of locations) {
+    if ('rating' in obj && obj.rating !== 0) {
+      count++;
+    }
+  }
+
   const businessRating = (
     locations?.reduce((acc, location) => {
       return acc + (location.rating ?? 0);
-    }, 0) / locations.length
+    }, 0) / count
   ).toFixed(1);
 
-  console.log(businessRating)
   return businessRating;
 };
 

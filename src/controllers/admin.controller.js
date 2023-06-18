@@ -103,6 +103,16 @@ const getSearchPartners = catchAsync(async (req, res) => {
   res.send({ data: partners });
 });
 
+const getSearchEventhosts = catchAsync(async (req, res) => {
+  const eventhosts = await adminService.searchEventhost(req.query);
+  if (!eventhosts) {
+    throw new ApiError(httpStatus.NOT_FOUND, "eventhosts not found");
+  }
+  res.send({ data: eventhosts });
+});
+
+
+
 const getUsersForCSV = catchAsync(async (req, res) => {
   const fileName = "partners_export.csv";
   const fields = [
@@ -343,6 +353,7 @@ module.exports = {
   updateActivityByID,
   deleteImageByID,
   bulkActions,
-  updateUserStatus
+  updateUserStatus,
+  getSearchEventhosts
 };
 

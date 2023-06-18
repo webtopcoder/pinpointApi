@@ -28,6 +28,10 @@ const defaultRoutes = [
     route: require("./location.route"),
   },
   {
+    path: "/event",
+    route: require("./event.route"),
+  },
+  {
     path: "/profile",
     route: require("./profile.route"),
   },

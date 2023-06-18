@@ -30,6 +30,11 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
           },
         ],
       },
+      kind: {
+        type: String,
+        enum: ["partner", "event"],
+        required: true,
+      },
       stripePriceId: {
         type: String,
       },
@@ -100,9 +105,9 @@ module.exports = ({ Schema, model }, mongoosePaginate) => {
   Partnership.pre("delete", async function () {
     const partnership = this;
 
-    // if (partnership.stripeProductId) {
-    //   await stripeService.deleteProduct(partnership.stripeProductId);
-    // }
+    if (partnership.stripeProductId) {
+      await stripeService.deleteProduct(partnership.stripeProductId);
+    }
   });
 
   Partnership.methods.getStripeData = async function () {

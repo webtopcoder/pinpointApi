@@ -90,13 +90,17 @@ const sendVerificationEmail = async (userId) => {
   const token = await tokenService.generateVerifyEmailToken(user);
   const subject = "Email Verification";
   const to = user.email;
-  await sendEmailWithEJS(to, subject, user.role === "partner" ? "verify-email-partner" : "verify-email-user", {
+  await sendEmailWithEJS(to, subject, user.role === "partner" && user.role === "eventhost" ? "verify-email-partner" : "verify-email-user", {
     title: "Email Verification",
     token,
   });
 
-  await sendEmailWithEJS('pinpointfoodtruck@gmail.com', user.role === "partner" ? "Pending Partner" : "Pending User", user.role === "partner" ? "pending-partner" : 'pending-user', {
-    title: user.role === "partner" ? "Pending Partner" : 'Pending User',
+  await sendEmailWithEJS('pinpointfoodtruck@gmail.com',
+    user.role === "partner" ? "Pending Partner" : user.role === "eventhost" ?
+      "Pending EventHost" : "Pending User", user.role === "partner" ?
+    "pending-partner" : user.role === "eventhost" ?
+      "pending-eventhost" : 'pending-user', {
+    title: user.role === "partner" ? "Pending Partner" : user.role === "eventhost" ? 'Pending EventHost' : 'Pending User',
     user,
   });
 };

@@ -9,6 +9,7 @@ module.exports.contactService = require("./contact.service");
 module.exports.mediaService = require("./media.service");
 module.exports.reviewService = require("./review.service");
 module.exports.locationService = require("./location.service");
+module.exports.eventService = require("./event.service");
 module.exports.mailService = require("./mail.service");
 module.exports.notificationService = require("./notification.service");
 module.exports.settingService = require("./setting.service");

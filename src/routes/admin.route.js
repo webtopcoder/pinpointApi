@@ -20,6 +20,10 @@ router
   .get(auth(false, true), adminController.getSearchPartners);
 
 router
+  .route("/eventhosts/search")
+  .get(auth(false, true), adminController.getSearchEventhosts);
+
+router
   .route("/locations/search")
   .get(auth(false, true), adminController.getSearchLocations);
 

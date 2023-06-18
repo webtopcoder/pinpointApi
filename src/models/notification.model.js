@@ -37,6 +37,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           "mention",
           "mail",
           "addLocation",
+          "addEvent",
           "shoutout",
           "review",
           "post",

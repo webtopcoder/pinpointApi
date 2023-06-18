@@ -65,7 +65,7 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
       },
       role: {
         type: String,
-        enum: ["user", "partner", "admin"],
+        enum: ["user", "partner", "admin", "eventhost"],
         required: true,
       },
       dob: {

@@ -9,7 +9,7 @@ const register = {
     businessname: Joi.string().allow(""),
     lastName: Joi.string().required(),
     status: Joi.string().allow(""),
-    role: Joi.string().required().valid("user", "partner", "admin"),
+    role: Joi.string().required().valid("user", "partner", "admin", "eventhost"),
     username: Joi.string().required(),
     // .required()
     // .min(3)
@@ -42,7 +42,7 @@ const login = {
   body: Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
-    role: Joi.string().required().valid("user", "partner", "admin"),
+    role: Joi.string().required().valid("user", "partner", "admin", "eventhost"),
   }),
 };
 

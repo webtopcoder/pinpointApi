@@ -72,7 +72,6 @@ const createCustomer = async (req, res) => {
   try {
     const user = await userService.getUserById(req.user._id);
     const stripeCustomerId = await user.getStripeCustomerId();
-
     const customer = await stripeService
       .retrieveCustomer(stripeCustomerId)
       .catch(async () => {
@@ -115,7 +114,7 @@ const subscribePartnership = catchAsync(async (req, res) => {
   if (!req.user.activePartnership) {
     const user = await userService.getUserById(req.user._id);
     const stripeCustomerId = await user.getStripeCustomerId();
-
+    console.log(stripeCustomerId);
     if (!stripeCustomerId) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,

@@ -16,7 +16,7 @@ const httpStatus = require("http-status"),
     STATUS_DECLINED,
     ROLE_USER,
     ROLE_PARTNER,
-    ISFALSE,
+    ROLE_EVENTHOST,
     ISTRUE,
   } = require("../config/constants"),
   moment = require("moment"),
@@ -672,6 +672,140 @@ const searchPartner = async (reqQuery) => {
   };
 };
 
+
+const searchEventhost = async (reqQuery) => {
+  reqQuery?.status ? reqQuery.status : (reqQuery.status = "all");
+
+  const pipeline = [];
+  let query = {};
+
+  if (reqQuery.q) {
+    // const regexp = new RegExp(
+    //   reqQuery.q.toLowerCase().replace(/[^a-zA-Z0-9]/g, ""),
+    //   "i"
+    // );
+
+    query.$or = [
+      {
+        username: { $regex: reqQuery.q },
+      },
+      {
+        firstName: { $regex: reqQuery.q },
+      },
+      {
+        lastName: { $regex: reqQuery.q },
+      },
+      {
+        email: { $regex: reqQuery.q },
+      },
+      {
+        "address.city": { $regex: reqQuery.q, $options: "i" },
+      },
+      {
+        "address.state": { $regex: reqQuery.q, $options: "i" },
+      },
+    ];
+  }
+
+  query.role = ROLE_EVENTHOST;
+  query.status =
+    reqQuery.status === "all" || undefined || null || ""
+      ? {
+        $in: [
+          STATUS_ACTIVE,
+          STATUS_INACTIVE,
+          STATUS_DECLINED,
+          STATUS_PENDING,
+          STATUS_DELETED,
+        ],
+      }
+      : reqQuery.status;
+
+  pipeline.push({
+    $match: query,
+  });
+
+  if (reqQuery.sort && reqQuery.sortBy) {
+    pipeline.push({
+      $sort: {
+        [reqQuery.sortBy]: reqQuery.sort === "desc" ? -1 : 1,
+      },
+    });
+  }
+
+  const [data, total] = await Promise.all([
+    User.aggregate([
+      ...pipeline,
+      {
+        $lookup: {
+          from: "locations",
+          localField: "_id",
+          foreignField: "partner",
+          as: "locations",
+        },
+      },
+      {
+        $lookup: {
+          from: "settings",
+          localField: "_id",
+          foreignField: "user",
+          as: "externalUsers",
+          pipeline: [
+            {
+              $match: {
+                key: "user:additionalUser",
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$externalUsers",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          locationCount: {
+            $size: "$locations",
+          },
+        },
+      },
+      {
+        $project: {
+          locations: 0,
+          userSettings: 0,
+        },
+      },
+      {
+        $skip: parseInt(reqQuery.offset, 10),
+      },
+      {
+        $limit: parseInt(reqQuery.limit, 10),
+      },
+    ]),
+    User.countDocuments(query),
+  ]);
+
+  const topCities = await getTopCities({
+    role: ROLE_PARTNER,
+  });
+  const userStats = await getUserStats(ROLE_PARTNER, {
+    yearBack: reqQuery.yearBack ?? 5,
+    monthBack: reqQuery.monthBack ?? 5,
+    weekBack: reqQuery.weekBack ?? 5,
+    address: reqQuery.address ?? "",
+  });
+
+  return {
+    data,
+    total,
+    topCities,
+    userStats,
+  };
+};
+
 const getMonthlyRevenue = ({
   start = new Date(new Date().getFullYear(), 0, 1),
   end = new Date(new Date().getFullYear(), 11, 31),
@@ -902,5 +1036,6 @@ module.exports = {
   ActivityUpdate,
   bulkDelete,
   bulkRemove,
-  deletePermantlyActivitiesById
+  deletePermantlyActivitiesById,
+  searchEventhost
 };
