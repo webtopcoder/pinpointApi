@@ -215,12 +215,27 @@ const stripeWebhook = async (req, res) => {
       const user = await userService.getUserByStripeCustomerId(
         subscription.customer,
       );
+      if (!user) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No user found, please create a user first.",
+        );
+      }
       activePartnership = await Partnership.findOne({
         stripePriceId: subscription.items.data[0].price.id,
       });
+
+      if (!activePartnership) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No activePartnership found, please create a activePartnership first.",
+        );
+      }
+
       partnershipPriceRenewalDate = new Date(
         subscription.current_period_end * 1000,
       );
+
       await userService.updateUserById(user._id, {
         activeSubscription: subscription,
         partnershipPriceRenewalDate,
@@ -232,9 +247,25 @@ const stripeWebhook = async (req, res) => {
       const updatedUser = await userService.getUserByStripeCustomerId(
         updatedSubscription.customer,
       );
+
+      if (!updatedUser) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No updatedUser found, please create a updatedUser first.",
+        );
+      }
+
       activePartnership = await Partnership.findOne({
         stripePriceId: updatedSubscription.items.data[0].price.id,
       });
+
+      if (!activePartnership) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No activePartnership found, please create a activePartnership first.",
+        );
+      }
+
       partnershipPriceRenewalDate = new Date(
         updatedSubscription.current_period_end * 1000,
       );
@@ -249,6 +280,14 @@ const stripeWebhook = async (req, res) => {
       const deletedUser = await userService.getUserByStripeCustomerId(
         deletedSubscription.customer,
       );
+
+      if (!deletedUser) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No deletedUser found, please create a deletedUser first.",
+        );
+      }
+
       partnershipPriceRenewalDate = new Date(
         deletedSubscription.current_period_end * 1000,
       );
@@ -264,9 +303,24 @@ const stripeWebhook = async (req, res) => {
       const invoiceUser = await userService.getUserByStripeCustomerId(
         invoice.customer,
       );
+
+      if (!invoiceUser) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No invoiceUser found, please create a invoiceUser first.",
+        );
+      }
+
       const partnership = await Partnership.findOne({
         stripePriceId: invoice.lines.data[0].price.id,
       });
+
+      if (!partnership) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "No partnership found, please create a partnership first.",
+        );
+      }
 
       const data = {
         order: invoice.id,

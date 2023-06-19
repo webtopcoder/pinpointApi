@@ -12,6 +12,10 @@ const defaultRoutes = [
     route: require("./base.route"),
   },
   {
+    path: "/share",
+    route: require("./share.route"),
+  },
+  {
     path: "/categories",
     route: require("./category.route"),
   },
