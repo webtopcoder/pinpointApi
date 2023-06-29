@@ -215,21 +215,31 @@ const stripeWebhook = async (req, res) => {
       const user = await userService.getUserByStripeCustomerId(
         subscription.customer,
       );
+      // if (!user) {
+      //   throw new ApiError(
+      //     httpStatus.BAD_REQUEST,
+      //     "No user found, please create a user first.",
+      //   );
+      // }
+
       if (!user) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No user found, please create a user first.",
-        );
+        console.log("No user found, please create a user first.");
+        break;
       }
       activePartnership = await Partnership.findOne({
         stripePriceId: subscription.items.data[0].price.id,
       });
 
+      // if (!activePartnership) {
+      //   throw new ApiError(
+      //     httpStatus.BAD_REQUEST,
+      //     "No activePartnership found, please create a activePartnership first.",
+      //   );
+      // }
+
       if (!activePartnership) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No activePartnership found, please create a activePartnership first.",
-        );
+        console.log("No activePartnership found, please create a activePartnership first.");
+        break;
       }
 
       partnershipPriceRenewalDate = new Date(
@@ -248,23 +258,34 @@ const stripeWebhook = async (req, res) => {
         updatedSubscription.customer,
       );
 
+      // if (!updatedUser) {
+      //   throw new ApiError(
+      //     httpStatus.BAD_REQUEST,
+      //     "No updatedUser found, please create a updatedUser first.",
+      //   );
+      // }
+
       if (!updatedUser) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No updatedUser found, please create a updatedUser first.",
-        );
+        console.log("No updatedUser found, please create a updatedUser first.");
+        break;
       }
 
       activePartnership = await Partnership.findOne({
         stripePriceId: updatedSubscription.items.data[0].price.id,
       });
 
+      // if (!activePartnership) {
+      //   throw new ApiError(
+      //     httpStatus.BAD_REQUEST,
+      //     "No activePartnership found, please create a activePartnership first.",
+      //   );
+      // }
+
       if (!activePartnership) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No activePartnership found, please create a activePartnership first.",
-        );
+        console.log("No activePartnership found, please create a activePartnership first.");
+        break;
       }
+
 
       partnershipPriceRenewalDate = new Date(
         updatedSubscription.current_period_end * 1000,
@@ -277,15 +298,18 @@ const stripeWebhook = async (req, res) => {
       break;
     case "customer.subscription.deleted":
       const deletedSubscription = event.data.object;
+
       const deletedUser = await userService.getUserByStripeCustomerId(
         deletedSubscription.customer,
       );
 
       if (!deletedUser) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No deletedUser found, please create a deletedUser first.",
-        );
+        console.log("No deletedUser found, please create a deletedUser first.");
+        break;
+        // throw new ApiError(
+        //   httpStatus.BAD_REQUEST,
+        //   "No deletedUser found, please create a deletedUser first.",
+        // );
       }
 
       partnershipPriceRenewalDate = new Date(
@@ -304,23 +328,35 @@ const stripeWebhook = async (req, res) => {
         invoice.customer,
       );
 
+      // if (!invoiceUser) {
+      //   throw new ApiError(
+      //     httpStatus.BAD_REQUEST,
+      //     "No invoiceUser found, please create a invoiceUser first.",
+      //   );
+      // }
+
       if (!invoiceUser) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No invoiceUser found, please create a invoiceUser first.",
-        );
+        console.log("No invoiceUser found, please create a invoiceUser first.");
+        break;
       }
 
       const partnership = await Partnership.findOne({
         stripePriceId: invoice.lines.data[0].price.id,
       });
 
+      // if (!partnership) {
+      //   throw new ApiError(
+      //     httpStatus.BAD_REQUEST,
+      //     "No partnership found, please create a partnership first.",
+      //   );
+      // }
+
+      
       if (!partnership) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "No partnership found, please create a partnership first.",
-        );
+        console.log("No partnership found, please create a partnership first.");
+        break;
       }
+
 
       const data = {
         order: invoice.id,

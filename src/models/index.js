@@ -12,6 +12,10 @@ module.exports.Category = require("./category.model")(
   mongoose,
   mongoosePaginate
 );
+module.exports.Schedule = require("./schedule.model")(
+  mongoose,
+  mongoosePaginate
+);
 module.exports.Post = require("./post.model")(mongoose, mongoosePaginate);
 module.exports.SubCategory = require("./subCategory.model")(
   mongoose,

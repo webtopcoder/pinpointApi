@@ -9,6 +9,7 @@ const mongoose = require("mongoose-fill");
 const { ObjectID } = require("bson");
 
 const createMail = async (notice = false, mailBody) => {
+
   const createdMails = await Mail.create(mailBody);
 
   const sendingUser = Array.isArray(mailBody)
@@ -24,7 +25,7 @@ const createMail = async (notice = false, mailBody) => {
         type: !notice ? "mail" : 'notice',
         title: !notice ? "New Message" : "New Notice",
         description: !notice ? `You have received a new message from ${from_user.businessname}` : `You have received a new notice from ${from_user.businessname}`,
-        url: `/${item.role}/message`,
+        url: item.role === "admin" ? "/message/inbox" : `/${item.role}/message`,
       });
     });
   }
@@ -244,7 +245,7 @@ const invite = async (mailBody) => {
     throw new ApiError(httpStatus.CONFLICT, "User with this email exists");
   }
 
-  const mail = await createMail({ ...mailBody, type: "invite" });
+  const mail = await createMail(false, { ...mailBody, type: "invite" });
 
   EventEmitter.emit(events.SEND_INVITE, {
     senderId: mailBody.from,

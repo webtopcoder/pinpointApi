@@ -21,6 +21,15 @@ const validateObjectIdArrayInFormData = (value, helpers) => {
   return helpers.message("{{#label}} must be a string seperated by commas");
 };
 
+const validateObjectArray = (value, helpers) => {
+  if (value) {
+    const arr = JSON.parse(value)
+    return arr;
+  }
+
+  return helpers.message("{{#label}} must be a string seperated by commas");
+};
+
 const password = (value, helpers) => {
   if (value.length < 8) {
     return helpers.message("password must be at least 8 characters");
@@ -36,5 +45,6 @@ const password = (value, helpers) => {
 module.exports = {
   objectId,
   password,
+  validateObjectArray,
   validateObjectIdArrayInFormData,
 };

@@ -21,6 +21,13 @@ router
     eventController.getEvents
   );
 
+router
+  .route("/event-schedule")
+  .post(
+    auth(true),
+    eventController.getEventSchedule
+  );
+
 // router.route("/interactive-map").get(eventController.getInteractiveMap);
 
 // router
@@ -36,6 +43,27 @@ router
     upload.array("images", 5),
     validate(eventValidation.reviewEvent),
     eventController.reviewEvent
+  );
+
+router
+  .route("/:scheduleId/request-access")
+  .post(
+    auth(),
+    eventController.requestAccess
+  );
+
+router
+  .route("/:scheduleId/request-access-manually")
+  .post(
+    auth(),
+    eventController.requestAccessManually
+  );
+
+router
+  .route("/:scheduleId/event-scheduleById")
+  .post(
+    auth(),
+    eventController.getScheduleById
   );
 
 router
@@ -55,14 +83,20 @@ router
     eventController.quickDeparture
   );
 
-// router.route("/:arrivalID/like").post(auth(), eventController.likeArrival);
+router
+  .route("/addeventschedule")
+  .post(
+    auth(),
+    upload.array("images", 5),
+    validate(eventValidation.addEventSchedule),
+    eventController.addEventSchedule
+  );
 
 router.route("/:arrivalID/check-in").post(auth(), eventController.checkIn);
 
-// router
-//   .route("/:locationId/favorite")
-//   .post(auth(), eventController.favoriteLocation)
-//   .delete(auth(), eventController.unfavoriteLocation);
+router
+  .route("/:scheduleId/markStatus")
+  .post(auth(), eventController.markStatus)
 
 router
   .route("/:eventId/:expand")
@@ -71,6 +105,14 @@ router
     validate(eventValidation.getEvent),
     eventController.getEvent
   )
+
+router
+  .route("/:scheduleId/uploadExcel")
+  .post(auth(), upload.single("xisx"), eventController.uploadExcel);
+
+router
+  .route("/:scheduleId/eventschedule")
+  .delete(auth(), eventController.deleteEventSchedule);
 
 router
   .route("/:eventId")
@@ -82,12 +124,5 @@ router
   )
   .delete(auth(), eventController.deleteEvent);
 
-// router
-//   .route("/arrival/:locationId")
-//   .get(
-//     auth(true),
-//     validate(eventValidation.getLocation),
-//     eventController.getExpiredArrivals
-//   )
 
 module.exports = router;

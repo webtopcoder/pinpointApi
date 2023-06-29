@@ -1,5 +1,5 @@
 const httpStatus = require("http-status"),
-  { Location, Like, Review, Media, Arrival } = require("@models"),
+  { Location, Like, Schedule, Media, Arrival } = require("@models"),
   ApiError = require("@utils/ApiError"),
   customLabels = require("@utils/customLabels"),
   defaultSort = require("@utils/defaultSort");
@@ -55,6 +55,26 @@ const getEventById = async (id) => {
   return originalEvent;
 };
 
+const getScheduleById = async (id) => {
+
+  const schedule = await Schedule.findById(id);
+  return schedule;
+};
+
+const getIndividualSchedule = async (id) => {
+
+  const schedule = await Schedule.findById(id)
+    .populate({
+      path: "eventhost",
+      populate: { path: "profile.avatar" },
+    })
+    .populate("event")
+    .populate("images")
+    .populate("categories")
+
+  return schedule;
+};
+
 const getIsArrival = async (id) => {
   const ArrivalInfo = await Location.findById(id).select('isArrival')
     .populate({
@@ -102,6 +122,16 @@ const deleteEventByID = async (id, updateBody) => {
   return event;
 };
 
+const requestAccess = async (id, updateBody) => {
+  const schedule = await getScheduleById(id);
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "event not found");
+  }
+  Object.assign(schedule, updateBody);
+  await schedule.save();
+  return schedule;
+};
+
 // const getLocationsByPartnerId = async (partnerId, filter) => {
 
 //   await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
@@ -130,6 +160,11 @@ const createEvent = async (eventBody) => {
     });
   }
 
+  return event;
+};
+
+const createEventSchedule = async (eventBody) => {
+  const event = await Schedule.create(eventBody);
   return event;
 };
 
@@ -255,6 +290,18 @@ const queryEvents = async (filter, options) => {
   };
   return events;
 };
+
+
+const queryEventSchedule = async (filter, options) => {
+  var eventSchedule = await Schedule.paginate(filter, {
+    customLabels,
+    sort: defaultSort,
+    ...options,
+  });
+
+  return eventSchedule;
+};
+
 
 // const getlikeLocationCount = async (userId) => {
 
@@ -477,6 +524,11 @@ module.exports = {
   // updateArrivalById,
   getIsArrival,
   getExpiredArrivals,
+  createEventSchedule,
+  queryEventSchedule,
+  getScheduleById,
+  requestAccess,
+  getIndividualSchedule
   // getlikeLocationCount,
   // getRating,
   // getAllCheckInCount

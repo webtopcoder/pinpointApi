@@ -2,12 +2,26 @@ const Joi = require("joi");
 const {
   objectId,
   validateObjectIdArrayInFormData,
+  validateObjectArray
 } = require("./custom.validation");
 
 const createEvent = {
   body: Joi.object().keys({
     title: Joi.string().required(),
     description: Joi.string().allow(""),
+  }),
+};
+
+const addEventSchedule = {
+  body: Joi.object().keys({
+    type: Joi.string().allow(""),
+    startDate: Joi.date(),
+    centerAddress: Joi.string().custom(validateObjectArray),
+    title: Joi.string(),
+    endDate: Joi.date(),
+    event: Joi.string().custom(objectId),
+    categories: Joi.string().custom(validateObjectIdArrayInFormData),
+    area: Joi.string().custom(validateObjectArray),
   }),
 };
 
@@ -19,7 +33,6 @@ const getEvents = {
     page: Joi.number().integer(),
     sort: Joi.string(),
     pagination: Joi.boolean(),
-    partner: Joi.string().custom(objectId),
   }),
 };
 
@@ -69,6 +82,7 @@ const reviewEvent = {
 };
 
 module.exports = {
+  addEventSchedule,
   createEvent,
   getEvents,
   getEvent,

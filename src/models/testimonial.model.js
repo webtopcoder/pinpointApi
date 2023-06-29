@@ -33,11 +33,11 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
     }
   );
 
-  Testimonial.plugin(softDelete, {
-    deletedBy: true,
-    deletedAt: true,
-    overrideMethods: "all",
-  });
+  // Testimonial.plugin(softDelete, {
+  //   deletedBy: true,
+  //   deletedAt: true,
+  //   overrideMethods: "all",
+  // });
   Testimonial.plugin(toJSON);
   Testimonial.plugin(mongoosePaginate);
 

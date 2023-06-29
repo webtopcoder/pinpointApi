@@ -67,7 +67,6 @@ router
 router
   .route("/:locationId/:expand")
   .get(
-    auth(true),
     validate(locationValidation.getLocation),
     locationController.getLocation
   )

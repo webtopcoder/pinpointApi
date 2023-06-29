@@ -166,7 +166,7 @@ const queryLocations = async (filter, options) => {
 
   await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
 
-  var locations = await Location.paginate(filter, {
+  let locations = await Location.paginate(filter, {
     customLabels,
     sort: defaultSort,
     ...options,

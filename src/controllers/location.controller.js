@@ -22,6 +22,7 @@ const createLocation = catchAsync(async (req, res) => {
     })
   );
 
+  console.log(req.body.subCategories)
   const location = await locationService.createLocation({
     partner: req.user._id,
     images,
@@ -73,15 +74,10 @@ const getLocations = catchAsync(async (req, res) => {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;
   }
-  let locationCategory;
   if (filter.category) {
-    locationCategory = await categoryService.getCategoryById(filter.category);
-    if (!locationCategory) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
-    }
-
+    
     const subcategoriesID = await categoryService.getSubCategoryByCategoryId(
-      locationCategory._id
+      filter.category
     );
     var subCategoriesString = [];
     subcategoriesID.map(async (item) => {
@@ -133,13 +129,15 @@ const getLocation = catchAsync(async (req, res) => {
   const location = await locationService.getLocationById(req.params.locationId);
   const IsArrival = await locationService.getIsArrival(req.params.locationId);
   const ExpiredArrivals = await locationService.getExpiredArrivals(req.params.locationId, req.params.expand, IsArrival);
-  const userinfo = await userService.getUserById(req.user._id);
+  let favorited = false;
 
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
-
-  const favorited = userinfo.favoriteLocations.includes(req.params.locationId) ? true : false;
+  if (req.user) {
+    const userinfo = await userService.getUserById(req.user._id);
+    favorited = userinfo.favoriteLocations.includes(req.params.locationId) ? true : false;
+  }
 
   const data = {
     lastSeen: new Date(),

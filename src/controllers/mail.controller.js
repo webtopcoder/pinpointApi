@@ -155,7 +155,8 @@ const composebyAdmin = catchAsync(async (req, res) => {
     });
   }
 
-  await mailService.createMail(mailsToSend);
+  console.log(mailsToSend)
+  await mailService.createMail(isNotice, mailsToSend);
 
   return res.json({ success: true, msg: "Sent successfully!" });
 });
@@ -744,6 +745,8 @@ const composeMessageByAdmin = catchAsync(async (req, res) => {
     subject,
     message,
   }];
+
+  console.log(mailsToSend)
 
   await mailService.createMail(mailsToSend);
 

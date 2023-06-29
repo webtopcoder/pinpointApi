@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("@utils/catchAsync");
 const ApiError = require("@utils/ApiError");
+const { ObjectId } = require("bson");
 const {
   eventService,
   likeService,
@@ -9,6 +10,7 @@ const {
   userService,
   settingService
 } = require("@services");
+const XLSX = require('xlsx');
 const { uploadMedia } = require("../services/media.service");
 const pick = require("../utils/pick");
 const { Review, Like } = require("../models");
@@ -49,12 +51,41 @@ const deleteEvent = catchAsync(async (req, res) => {
   res.send(event);
 });
 
+const markStatus = catchAsync(async (req, res) => {
+
+  const { scheduleId } = req.params;
+  const schedule = await eventService.getScheduleById(scheduleId);
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+
+  const updatedSchedule = schedule.request.map(item => {
+    if (item?.id) {
+      const objectIdString = item.id.toString();
+      if (objectIdString === req.body.id) {
+        return {
+          ...item,
+          isActive: req.body.isActive
+        };
+      }
+    }
+    return item;
+  });
+
+  console.log(updatedSchedule)
+  const result = await eventService.requestAccess(scheduleId, {
+    request: updatedSchedule,
+  });
+  res.status(httpStatus.CREATED).send(result);
+});
+
+
 const getEvents = catchAsync(async (req, res) => {
   let filter = pick(req.query, [
     "isActive",
-    "partner",
   ]);
 
+  filter.partner = req.user._id;
   let options = pick(req.query, ["limit", "page", "sort", "pagination"]);
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
@@ -74,6 +105,187 @@ const getEvents = catchAsync(async (req, res) => {
 
   res.send(result);
 });
+
+const uploadExcel = catchAsync(async (req, res) => {
+  try {
+
+    const { scheduleId } = req.params;
+    let path = req.file.path;
+    console.log(path);
+    var workbook = XLSX.readFile(path);
+    var sheet_name_list = workbook.SheetNames;
+    let jsonData = XLSX.utils.sheet_to_json(
+      workbook.Sheets[sheet_name_list[0]]
+    );
+    if (jsonData.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "xml sheet has no data",
+      });
+    }
+
+    const schedule = await eventService.getScheduleById(scheduleId);
+    if (!schedule) {
+      throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+    }
+
+    const updatedjsonData = jsonData.map(item => {
+      return {
+        ...item,
+        isActive: 'approve'
+      };
+    });
+
+    const updatedRequest = schedule.request.concat(updatedjsonData);
+    const result = await eventService.requestAccess(scheduleId, {
+      request: [...updatedRequest],
+    });
+
+    res.status(httpStatus.CREATED).send(result);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+const requestAccess = catchAsync(async (req, res) => {
+
+  const { scheduleId } = req.params;
+  const schedule = await eventService.getScheduleById(scheduleId);
+
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+
+  const result = await eventService.requestAccess(scheduleId, {
+    request: [...schedule.request, {
+      id: req.user._id,
+      firstname: req.user.firstName,
+      lastname: req.user.lastName,
+      businessname: req.user.businessname,
+      category: req.user.category.name,
+      email: req.user.email,
+      isActive: 'pending'
+    }],
+  });
+  res.status(httpStatus.CREATED).send(result);
+});
+
+const requestAccessManually = catchAsync(async (req, res) => {
+
+  const { scheduleId } = req.params;
+  const schedule = await eventService.getScheduleById(scheduleId);
+
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+
+  const result = await eventService.requestAccess(scheduleId, {
+    request: [...schedule.request, {
+      ...req.body,
+      isActive: 'approve'
+    }],
+  });
+  res.status(httpStatus.CREATED).send(result);
+});
+
+
+const getScheduleById = catchAsync(async (req, res) => {
+
+  const { scheduleId } = req.params;
+  const schedule = await eventService.getIndividualSchedule(scheduleId);
+
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+  res.send(schedule);
+});
+
+const getEventSchedule = catchAsync(async (req, res) => {
+
+  let filter = pick(req.body, [
+    "isActive",
+    "flag",
+    "time",
+    "position",
+    "range"
+  ]);
+
+  if (filter.position.lat) {
+    filter.area = {
+      $geoWithin: {
+        $centerSphere: [[filter.position.lng, filter.position.lat], filter.range / 3963.2]
+      }
+    }
+  }
+
+  if (!filter.flag)
+    filter.eventhost = req.user._id;
+  let options = pick(req.query, ["limit", "page", "sort", "pagination"]);
+  if (filter.q) {
+    filter.title = { $regex: filter.q, $options: "i" };
+    delete filter.q;
+  }
+
+  const currentDate = new Date();  // Assuming the current date is 2023-06-22T01:25:48.560+00:00
+
+  switch (filter.time) {
+    case "this":
+      const startOfWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay());
+      const endOfWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay() + 7);
+      filter.startDate = {
+        $gte: startOfWeek,
+        $lt: endOfWeek
+      }
+      break;
+    case "next":
+      const startOfNextWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay() + 7);
+      const endOfNextWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay() + 14);
+      console.log(startOfNextWeek, endOfNextWeek);
+      filter.startDate = {
+        $gte: startOfNextWeek,
+        $lt: endOfNextWeek
+      }
+      break;
+    case "future":
+      const startOfFutureWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay() + 14);
+      filter.startDate = {
+        $gte: startOfFutureWeek,
+      }
+      break;
+    default:
+      break
+  }
+
+  delete filter.time;
+  delete filter.flag;
+  delete filter.range;
+  delete filter.position;
+
+  options.populate = [
+    "eventhost",
+    { path: "eventhost", populate: "profile.avatar" },
+    "event",
+    "images",
+    "categories",
+  ];
+
+  const result = await eventService.queryEventSchedule(filter, options);
+
+  res.send(result);
+});
+
+const deleteEventSchedule = catchAsync(async (req, res) => {
+  const { scheduleId } = req.params;
+
+  const schedule = await eventService.getScheduleById(scheduleId);
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+
+  await schedule.delete();
+  res.send(schedule);
+});
+
 
 const getEvent = catchAsync(async (req, res) => {
   const event = await eventService.getEventById(req.params.eventId);
@@ -257,6 +469,23 @@ const quickDeparture = catchAsync(async (req, res) => {
   res.send(updatedEvent);
 });
 
+const addEventSchedule = catchAsync(async (req, res) => {
+  const images = await Promise.all(
+    req.files.map(async (file) => {
+      const media = await uploadMedia(file, req.user._id);
+      return media._id;
+    })
+  );
+  
+  console.log(req.body)
+  const event = await eventService.createEventSchedule({
+    ...req.body,
+    eventhost: req.user._id,
+    images,
+  });
+  res.status(httpStatus.CREATED).send(event);
+});
+
 const reviewEvent = catchAsync(async (req, res) => {
   const { eventId } = req.params;
   const event = await eventService.getEventById(eventId);
@@ -331,169 +560,6 @@ const checkIn = catchAsync(async (req, res) => {
   }
 });
 
-// const likeArrival = catchAsync(async (req, res) => {
-//   const { arrivalID } = req.params;
-//   const arrival = await locationService.getArrivalById(arrivalID);
-//   if (!arrival) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "arrival not found");
-//   }
-
-//   if (!arrival.like) {
-//     arrival.like = await likeService.createLike({
-//       users: [],
-//       count: 0,
-//     });
-
-//     await arrival.save();
-//   }
-
-//   const liked = arrival.like.users.includes(req.user.id);
-
-//   if (liked) {
-//     arrival.like.users = arrival.like.users.filter(
-//       (user) => user != req.user._id
-//     );
-//     arrival.like.count -= 1;
-//   } else {
-//     arrival.like.users.push(req.user._id);
-//     arrival.like.count += 1;
-//   }
-
-//   await likeService.updateLikeById(arrival.like._id, arrival.like);
-
-//   res.send({ liked: !liked });
-// });
-
-// const favoriteLocation = catchAsync(async (req, res) => {
-//   const { locationId } = req.params;
-//   const location = await locationService.getLocationById(locationId);
-
-//   if (!location) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-//   }
-
-//   await locationService.updateLocationById(locationId, {
-//     favoriteUsers: location.favoriteUsers?.includes(req.user._id)
-//       ? location.favoriteUsers
-//       : [...location.favoriteUsers, req.user._id],
-//   });
-
-//   await userService.updateUserById(req.user._id, {
-//     favoriteLocations: req.user.favoriteLocations?.includes(location._id)
-//       ? req.user.favoriteLocations
-//       : [...req.user.favoriteLocations, locationId],
-//   });
-
-//   // const status = await settingService.getSettingStatus({
-//   //   key: "user:location",
-//   //   user: location.partner._id,
-//   // });
-//   // if (status) {
-//   EventEmitter.emit(events.SEND_NOTIFICATION, {
-//     recipient: location.partner._id,
-//     actor: req.user._id,
-//     type: "location",
-//     title: "Location Favorite",
-//     description: `${req.user.businessname} has favorited into your location ${location.title}`,
-//     url: `/profile/${location.partner._id}/locations/${location.id}`,
-//   });
-//   // }
-
-//   res.status(httpStatus.NO_CONTENT).send();
-// });
-
-// const unfavoriteLocation = catchAsync(async (req, res) => {
-//   const { locationId } = req.params;
-//   const location = await locationService.getLocationById(locationId);
-
-//   if (!location) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
-//   }
-
-//   await locationService.updateLocationById(locationId, {
-//     favoriteUsers: location.favoriteUsers.filter(
-//       (user) => user != req.user._id
-//     ),
-//   });
-
-//   await userService.updateUserById(req.user._id, {
-//     favoriteLocations: req.user.favoriteLocations.filter(
-//       (location) => location != locationId
-//     ),
-//   });
-
-//   // const status = await settingService.getSettingStatus({
-//   //   key: "user:location",
-//   //   user: location.partner._id,
-//   // });
-//   // if (status) {
-//   EventEmitter.emit(events.SEND_NOTIFICATION, {
-//     recipient: location.partner._id,
-//     actor: req.user._id,
-//     type: "location",
-//     title: "Location Favorite",
-//     description: `${req.user.businessname} has unfavorited into your location ${location.title}`,
-//     url: `/profile/${location.partner._id}/locations/${location.id}`,
-//   });
-//   // }
-
-//   res.status(httpStatus.NO_CONTENT).send();
-// });
-
-// const getFavoriteLocations = catchAsync(async (req, res) => {
-//   const { userId } = req.params;
-
-//   const locations = await userService.getFavoriteLocations(userId);
-//   res.send(locations);
-// });
-
-// const likeReview = catchAsync(async (req, res) => {
-//   const { reviewId } = req.params;
-//   const review = await reviewService.getReviewById(reviewId, "user");
-//   if (!review) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Review not found");
-//   }
-
-//   if (!review.like) {
-//     review.like = await likeService.createLike({
-//       users: [],
-//       count: 0,
-//     });
-
-//     await review.save();
-//   }
-
-//   const liked = review.like.users.includes(req.user.id);
-
-//   if (liked) {
-//     review.like.users = review.like.users.filter(
-//       (user) => user != req.user._id
-//     );
-//     review.like.count -= 1;
-//   } else {
-//     review.like.users.push(req.user._id);
-//     review.like.count += 1;
-
-//     if (review.user._id.toString() !== req.user.id.toString()) {
-//       EventEmitter.emit(events.SEND_NOTIFICATION, {
-//         recipient: review.user._id.toString(),
-//         actor: req.user.id.toString(),
-//         title: "New review like",
-//         description: `${req.user.username} has liked review ${review.text
-//           ? review.text.slice(0, 20) + (review.text.length > 20 ? "..." : "")
-//           : review._id
-//           } `,
-//         url: `/profile/${review.location.partner.toString()}/locations/${review.location._id.toString()}/`,
-//         type: "like",
-//       });
-//     }
-//   }
-
-//   await likeService.updateLikeById(review.like._id, review.like);
-
-//   res.send({ liked: !liked });
-// });
-
 module.exports = {
   createEvent,
   getEvents,
@@ -503,11 +569,15 @@ module.exports = {
   quickDeparture,
   reviewEvent,
   deleteEvent,
-  // likeReview,
-  // likeArrival,
-  // favoriteLocation,
+  addEventSchedule,
+  getEventSchedule,
+  requestAccessManually,
+  uploadExcel,
+  deleteEventSchedule,
   // unfavoriteLocation,
   // getFavoriteLocations,
   checkIn,
-  // getExpiredArrivals
+  requestAccess,
+  getScheduleById,
+  markStatus
 };
