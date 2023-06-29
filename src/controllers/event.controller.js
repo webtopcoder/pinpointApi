@@ -477,7 +477,6 @@ const addEventSchedule = catchAsync(async (req, res) => {
     })
   );
   
-  console.log(req.body)
   const event = await eventService.createEventSchedule({
     ...req.body,
     eventhost: req.user._id,
