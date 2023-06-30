@@ -131,6 +131,14 @@ const sendPartnerStatus = async ({ id }) => {
   });
 };
 
+const sendEventhostStatus = async ({ id }) => {
+  const user = await userService.getUserById(id);
+  const subject = "Event host Verification";
+  await sendEmailWithEJS(user.email, subject, user.status === "active" ? "eventhost-approve" : 'eventhost-decline', {
+    title: "Event host Verication",
+  });
+};
+
 const sendAdditionUserEmail = async ({ owner_id, additional }) => {
   const user = await userService.getUserById(owner_id);
   const token = await tokenService.generateCreateAdditionToken(user);
@@ -152,5 +160,6 @@ module.exports = {
   sendMailFromAdmin,
   sendAdditionUserEmail,
   sendEmailWithEJS,
-  sendPartnerStatus
+  sendPartnerStatus,
+  sendEventhostStatus
 };
