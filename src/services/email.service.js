@@ -86,6 +86,8 @@ const sendResetPasswordEmail = async (userId) => {
 };
 
 const sendVerificationEmail = async (userId) => {
+
+  console.log(userId)
   const user = await userService.getUserById(userId);
   const token = await tokenService.generateVerifyEmailToken(user);
   const subject = "Email Verification";

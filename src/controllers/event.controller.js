@@ -82,10 +82,9 @@ const markStatus = catchAsync(async (req, res) => {
 
 const getEvents = catchAsync(async (req, res) => {
   let filter = pick(req.query, [
-    "isActive",
+    "isActive", "partner"
   ]);
 
-  filter.partner = req.user._id;
   let options = pick(req.query, ["limit", "page", "sort", "pagination"]);
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
@@ -476,7 +475,7 @@ const addEventSchedule = catchAsync(async (req, res) => {
       return media._id;
     })
   );
-  
+
   const event = await eventService.createEventSchedule({
     ...req.body,
     eventhost: req.user._id,

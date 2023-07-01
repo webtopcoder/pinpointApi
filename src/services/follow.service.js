@@ -228,19 +228,12 @@ const followOrUnfollow = async (userId, followingUser) => {
       return res;
     }
 
-    let follow = await Follow.findOneDeleted(item);
-
-    if (follow) {
-      follow.restore();
-    } else {
-      const newItem = {
-        ...item,
-        status: index === 0 ? "pending" : "requesting",
-      };
-      follow = await Follow.create(newItem);
-    }
+    const newItem = {
+      ...item,
+      status: index === 0 ? "pending" : "requesting",
+    };
+    await Follow.create(newItem);
   })
-
 
   res = {
     type: "success",

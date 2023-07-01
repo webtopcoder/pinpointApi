@@ -33,6 +33,7 @@ const getEvents = {
     page: Joi.number().integer(),
     sort: Joi.string(),
     pagination: Joi.boolean(),
+    partner: Joi.string().custom(objectId),
   }),
 };
 

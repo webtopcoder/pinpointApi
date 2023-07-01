@@ -75,7 +75,7 @@ const getLocations = catchAsync(async (req, res) => {
     delete filter.q;
   }
   if (filter.category) {
-    
+
     const subcategoriesID = await categoryService.getSubCategoryByCategoryId(
       filter.category
     );
@@ -205,12 +205,12 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-  //   throw new ApiError(
-  //     httpStatus.FORBIDDEN,
-  //     "You're not subscribed to this service"
-  //   );
-  // }
+  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      "You're not subscribed to this service"
+    );
+  }
 
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {
