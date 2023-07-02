@@ -17,6 +17,7 @@ const addEventSchedule = {
     type: Joi.string().allow(""),
     startDate: Joi.date(),
     centerAddress: Joi.string().custom(validateObjectArray),
+    coordinates: Joi.string().custom(validateObjectArray),
     title: Joi.string(),
     endDate: Joi.date(),
     event: Joi.string().custom(objectId),

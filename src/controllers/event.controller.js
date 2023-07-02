@@ -209,8 +209,9 @@ const getEventSchedule = catchAsync(async (req, res) => {
     "range"
   ]);
 
+
   if (filter.position.lat) {
-    filter.area = {
+    filter.coordinates = {
       $geoWithin: {
         $centerSphere: [[filter.position.lng, filter.position.lat], filter.range / 3963.2]
       }
