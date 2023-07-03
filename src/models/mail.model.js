@@ -19,7 +19,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
       },
       role: {
         type: String,
-        enum: ["user", "partner", "admin"],
+        enum: ["user", "partner", "admin", "eventhost"],
       },
       to_invite_email: {
         type: String,

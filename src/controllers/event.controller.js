@@ -206,14 +206,15 @@ const getEventSchedule = catchAsync(async (req, res) => {
     "flag",
     "time",
     "position",
-    "range"
+    "range",
+    "map"
   ]);
 
 
   if (filter.position.lat) {
     filter.coordinates = {
       $geoWithin: {
-        $centerSphere: [[filter.position.lng, filter.position.lat], filter.range / 3963.2]
+        $centerSphere: [[filter.position.lng, filter.position.lat], filter.range / 3980.2]
       }
     }
   }
@@ -228,6 +229,14 @@ const getEventSchedule = catchAsync(async (req, res) => {
 
   const currentDate = new Date();  // Assuming the current date is 2023-06-22T01:25:48.560+00:00
 
+  if (filter.map) {
+    filter.$expr = {
+      $and: [
+        { $gt: [new Date(), "$startDate"] },
+        { $lt: [new Date(), "$endDate"] }
+      ]
+    }
+  }
   switch (filter.time) {
     case "this":
       const startOfWeek = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - currentDate.getDay());
@@ -260,6 +269,7 @@ const getEventSchedule = catchAsync(async (req, res) => {
   delete filter.flag;
   delete filter.range;
   delete filter.position;
+  delete filter.map;
 
   options.populate = [
     "eventhost",
@@ -477,6 +487,7 @@ const addEventSchedule = catchAsync(async (req, res) => {
     })
   );
 
+  console.log(req.body)
   const event = await eventService.createEventSchedule({
     ...req.body,
     eventhost: req.user._id,
