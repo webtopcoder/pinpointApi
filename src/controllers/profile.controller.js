@@ -12,10 +12,11 @@ const {
 } = require("@services");
 const pick = require("../utils/pick");
 const followService = require("../services/follow.service");
-const { Post, Location, Follow } = require("../models");
+const { Post, Location, Follow, Schedule } = require("../models");
 const { uploadMedia } = require("../services/media.service");
 const { EventEmitter, events } = require("../events");
 const { use } = require("passport");
+const { schedule } = require("node-cron");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -118,7 +119,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
   const likesPostCount = await postService.getlikePostCount(userId);
   const likesLocationCount = await locationService.getlikeLocationCount(userId);
   const Rating = await locationService.getRating(userId);
-  
+
   return res.json({
     profile: {
       avatar: user?.profile?.avatar,
@@ -370,6 +371,65 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
   });
 });
 
+
+const getEventhostDashboard = catchAsync(async (req, res) => {
+
+  const userId = req.user._id;
+  const partnerLocations = await Location.find({
+    partner: userId,
+  }).countDocuments();
+
+  const activeLocations = await Location.find({
+    partner: userId,
+    isActive: true,
+  }).countDocuments();
+
+  const followers = await Follow.find({
+    following: userId,
+  }).countDocuments();
+
+  const events = await Location.find({
+    partner: userId,
+  }).populate("reviews");
+
+  const schedules = await Schedule.find({
+    eventhost: userId,
+  });
+
+  let scheduleEvents = new Array();
+  let requestsCount = 0;
+  schedules.map((item) => {
+    scheduleEvents.push(item.event.toString());
+    item.request.map((item) => {
+      if (item.isActive === "pending") requestsCount = requestsCount + 1;
+    })
+  })
+
+  const uniqueValues = [...new Set(scheduleEvents)];
+  const scheduleEvnets = uniqueValues.length;
+  const businessRating = (
+    events?.reduce((acc, event) => {
+      return acc + (event.rating ?? 0);
+    }, 0) / events.length
+  ).toFixed(1);
+
+  const profileViews =
+    (await userService.getUserById(userId)).profileViews ?? 0;
+
+  const checkIns = await locationService.getAllCheckInCount(userId)
+
+  return res.send({
+    partnerLocations,
+    activeLocations,
+    followers,
+    profileViews,
+    businessRating,
+    checkIns,
+    scheduleEvnets,
+    requestsCount
+  });
+});
+
 const markAsRead = catchAsync(async (req, res) => {
 
   await notificationService.updateNotificationById(req.params.id, {
@@ -395,4 +455,5 @@ module.exports = {
   updateProfileView,
   getFavorited,
   markAsRead,
+  getEventhostDashboard
 };

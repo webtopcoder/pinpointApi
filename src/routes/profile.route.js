@@ -18,6 +18,10 @@ router
   );
 
 router
+  .route("/eventhost/dashboard")
+  .get(auth(), profileController.getEventhostDashboard);
+
+router
   .route("/partner/dashboard")
   .get(auth(), profileController.getPartnerDashboard);
 
