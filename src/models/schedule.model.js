@@ -10,6 +10,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         enum: ["private", "public"],
         required: true,
       },
+      isActive: {
+        type: Boolean,
+        default: true
+      },
       centerAddress: {
         latitude: {
           type: Number,
@@ -17,7 +21,6 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         longitude: {
           type: Number,
         },
-
         address: { type: String, default: "" },
         city: { type: String },
         state: { type: String },

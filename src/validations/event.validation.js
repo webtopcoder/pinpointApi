@@ -15,6 +15,21 @@ const createEvent = {
 const addEventSchedule = {
   body: Joi.object().keys({
     type: Joi.string().allow(""),
+    centerAddress: Joi.string().custom(validateObjectArray),
+    coordinates: Joi.string().custom(validateObjectArray),
+    title: Joi.string(),
+    startDate: Joi.date().allow(""),
+    endDate: Joi.date().allow(""),
+    event: Joi.string().custom(objectId),
+    categories: Joi.string().custom(validateObjectIdArrayInFormData),
+    area: Joi.string().custom(validateObjectArray),
+  }),
+};
+
+const updateEventSchedule = {
+  body: Joi.object().keys({
+    type: Joi.string().allow(""),
+    isActive: Joi.boolean().allow(""),
     startDate: Joi.date(),
     centerAddress: Joi.string().custom(validateObjectArray),
     coordinates: Joi.string().custom(validateObjectArray),
@@ -84,6 +99,7 @@ const reviewEvent = {
 };
 
 module.exports = {
+  updateEventSchedule,
   addEventSchedule,
   createEvent,
   getEvents,

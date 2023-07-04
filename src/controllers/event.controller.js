@@ -487,7 +487,6 @@ const addEventSchedule = catchAsync(async (req, res) => {
     })
   );
 
-  console.log(req.body)
   const event = await eventService.createEventSchedule({
     ...req.body,
     eventhost: req.user._id,
@@ -495,6 +494,23 @@ const addEventSchedule = catchAsync(async (req, res) => {
   });
   res.status(httpStatus.CREATED).send(event);
 });
+
+const updateEventSchedule = catchAsync(async (req, res) => {
+  const images = await Promise.all(
+    req.files.map(file => uploadMedia(file, req.user._id).then(media => media._id))
+  );
+
+  const { scheduleId } = req.params;
+  const schedule = await eventService.getScheduleById(scheduleId);
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+  const data = req.files.length > 0 ? { ...req.body, images } : { ...schedule, ...req.body };
+
+  const result = await eventService.updateScheduleById(scheduleId, data);
+  res.status(httpStatus.CREATED).send(result);
+});
+
 
 const reviewEvent = catchAsync(async (req, res) => {
   const { eventId } = req.params;
@@ -584,7 +600,7 @@ module.exports = {
   requestAccessManually,
   uploadExcel,
   deleteEventSchedule,
-  // unfavoriteLocation,
+  updateEventSchedule,
   // getFavoriteLocations,
   checkIn,
   requestAccess,

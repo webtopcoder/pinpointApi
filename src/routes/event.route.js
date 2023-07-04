@@ -28,14 +28,6 @@ router
     eventController.getEventSchedule
   );
 
-// router.route("/interactive-map").get(eventController.getInteractiveMap);
-
-// router
-//   .route("/review/:reviewId/like")
-//   .post(auth(), eventController.likeReview);
-
-// router.route("/favorite/:userId").get(eventController.getFavoriteLocations);
-
 router
   .route("/:eventId/review")
   .post(
@@ -112,7 +104,13 @@ router
 
 router
   .route("/:scheduleId/eventschedule")
-  .delete(auth(), eventController.deleteEventSchedule);
+  .delete(auth(), eventController.deleteEventSchedule)
+  .patch(
+    auth(),
+    upload.array("images", 5),
+    validate(eventValidation.updateEventSchedule),
+    eventController.updateEventSchedule
+  )
 
 router
   .route("/:eventId")

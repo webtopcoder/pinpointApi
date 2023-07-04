@@ -56,7 +56,6 @@ const getEventById = async (id) => {
 };
 
 const getScheduleById = async (id) => {
-
   const schedule = await Schedule.findById(id);
   return schedule;
 };
@@ -132,15 +131,6 @@ const requestAccess = async (id, updateBody) => {
   return schedule;
 };
 
-// const getLocationsByPartnerId = async (partnerId, filter) => {
-
-//   await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
-
-//   return Location.find({ ...filter, partner: partnerId })
-//     .populate("images")
-//     .populate("subCategories");
-// };
-
 const createEvent = async (eventBody) => {
   const like = await Like.create({ count: 0 });
   const event = await Location.create({ ...eventBody, like: like._id });
@@ -166,6 +156,16 @@ const createEvent = async (eventBody) => {
 const createEventSchedule = async (eventBody) => {
   const event = await Schedule.create(eventBody);
   return event;
+};
+
+const updateScheduleById = async (scheduleId, updateBody) => {
+  const schedule = await getScheduleById(scheduleId);
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+  Object.assign(schedule, updateBody);
+  await schedule.save();
+  return schedule;
 };
 
 const createArrivalById = async (arriveBody) => {
@@ -513,7 +513,7 @@ const queryEventSchedule = async (filter, options) => {
 
 module.exports = {
   getEventById,
-  // getLocationsByPartnerId,
+  updateScheduleById,
   createEvent,
   updateEventById,
   queryEvents,
