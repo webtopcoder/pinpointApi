@@ -396,17 +396,14 @@ const getEventhostDashboard = catchAsync(async (req, res) => {
     eventhost: userId,
   });
 
-  let scheduleEvents = new Array();
   let requestsCount = 0;
   schedules.map((item) => {
-    scheduleEvents.push(item.event.toString());
     item.request.map((item) => {
       if (item.isActive === "pending") requestsCount = requestsCount + 1;
     })
   })
 
-  const uniqueValues = [...new Set(scheduleEvents)];
-  const scheduleEvnets = uniqueValues.length;
+  const scheduleEvnets = schedules.length;
   const businessRating = (
     events?.reduce((acc, event) => {
       return acc + (event.rating ?? 0);

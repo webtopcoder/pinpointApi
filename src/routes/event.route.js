@@ -98,6 +98,13 @@ router
     eventController.getEvent
   )
 
+  router
+  .route("/delete-manual-request/:scheduleId/:requestId")
+  .get(
+    auth(true),
+    eventController.deleteManualRequest
+  )
+
 router
   .route("/:scheduleId/uploadExcel")
   .post(auth(), upload.single("xisx"), eventController.uploadExcel);

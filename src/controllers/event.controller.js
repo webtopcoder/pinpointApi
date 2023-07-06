@@ -169,6 +169,22 @@ const requestAccess = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(result);
 });
 
+const deleteManualRequest = catchAsync(async (req, res) => {
+
+  const { scheduleId, requestId } = req.params;
+  const schedule = await eventService.getScheduleById(scheduleId);
+
+  if (!schedule) {
+    throw new ApiError(httpStatus.NOT_FOUND, "schedule not found");
+  }
+  schedule.request = schedule.request.filter((item) => item?._id != requestId);
+
+  const result = await eventService.requestAccess(scheduleId, {
+    request: schedule.request,
+  });
+  res.status(httpStatus.CREATED).send(result);
+});
+
 const requestAccessManually = catchAsync(async (req, res) => {
 
   const { scheduleId } = req.params;
@@ -601,7 +617,7 @@ module.exports = {
   uploadExcel,
   deleteEventSchedule,
   updateEventSchedule,
-  // getFavoriteLocations,
+  deleteManualRequest,
   checkIn,
   requestAccess,
   getScheduleById,
