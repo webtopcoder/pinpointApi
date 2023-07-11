@@ -2,17 +2,13 @@ const Joi = require("joi");
 const {
   objectId,
   validateObjectIdArrayInFormData,
+  validateObjectArray
 } = require("./custom.validation");
 
 const createLocation = {
   body: Joi.object().keys({
     title: Joi.string().required(),
     description: Joi.string().allow(""),
-    address: Joi.string().allow(""),
-    city: Joi.string().allow(""),
-    state: Joi.string().allow(""),
-    lat: Joi.string().allow(""),
-    lng: Joi.string().allow(""),
     subCategories: Joi.string().custom(validateObjectIdArrayInFormData),
   }),
 };
@@ -63,6 +59,8 @@ const quickArrival = {
   body: Joi.object().keys({
     departureAt: Joi.date(),
     arrivalText: Joi.string().allow("").optional().default(""),
+    addressType: Joi.string().allow(""),
+    history: Joi.string().custom(validateObjectArray),
   }),
 };
 

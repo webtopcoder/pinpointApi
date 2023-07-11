@@ -22,19 +22,11 @@ const createLocation = catchAsync(async (req, res) => {
     })
   );
 
-  console.log(req.body.subCategories)
   const location = await locationService.createLocation({
     partner: req.user._id,
     images,
     title: req.body.title,
     description: req.body.description,
-    mapLocation: {
-      address: req.body.address,
-      city: req.body.city,
-      state: req.body.state,
-      latitude: req.body.lat,
-      longitude: req.body.lng,
-    },
     lastSeen: new Date(),
     subCategories: req.body.subCategories,
   });
@@ -121,7 +113,6 @@ const getLocations = catchAsync(async (req, res) => {
   delete filter.category;
 
   const result = await locationService.queryLocations(filter, options);
-
   res.send(result);
 });
 
@@ -194,6 +185,7 @@ const updateLocation = catchAsync(async (req, res) => {
 const quickArrival = catchAsync(async (req, res) => {
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
+  console.log(req.body)
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
@@ -205,12 +197,12 @@ const quickArrival = catchAsync(async (req, res) => {
     );
   }
 
-  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You're not subscribed to this service"
-    );
-  }
+  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "You're not subscribed to this service"
+  //   );
+  // }
 
   const arrivalImages = await Promise.all(
     req.files.map(async (file) => {
@@ -221,6 +213,7 @@ const quickArrival = catchAsync(async (req, res) => {
 
   const createdArrival = await locationService.createArrivalById({
     location: locationId,
+    address: req.body.history,
     images: arrivalImages,
     isActive: true,
     arrivalText: req.body.arrivalText,
@@ -229,6 +222,8 @@ const quickArrival = catchAsync(async (req, res) => {
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     ...req.body,
+    mapLocation: req.body.history,
+    history: req.body.addressType === "new" ? [...location.history, req.body.history] : location.history,
     arrivalImages,
     isActive: true,
     isArrival: createdArrival._id,
@@ -304,12 +299,12 @@ const quickDeparture = catchAsync(async (req, res) => {
     url: `/profile/${req.user._id}/locations/`,
   });
 
-  if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
-    throw new ApiError(
-      httpStatus.FORBIDDEN,
-      "You're not subscribed to this service"
-    );
-  }
+  // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
+  //   throw new ApiError(
+  //     httpStatus.FORBIDDEN,
+  //     "You're not subscribed to this service"
+  //   );
+  // }
 
   const updatedLocation = await locationService.updateLocationById(locationId, {
     isActive: false,

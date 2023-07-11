@@ -99,6 +99,28 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
           ref: "User",
         },
       ],
+      history: [
+        {
+          latitude: {
+            type: Number,
+          },
+          longitude: {
+            type: Number,
+          },
+          address: {
+            type: String,
+          },
+          city: {
+            type: String,
+          },
+          state: {
+            type: String,
+          },
+          interactiveMapContent: {
+            type: String,
+          },
+        },
+      ]
     },
     {
       timestamps: true,
