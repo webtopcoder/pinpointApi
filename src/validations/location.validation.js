@@ -42,11 +42,6 @@ const updateLocation = {
     .keys({
       title: Joi.string().required(),
       description: Joi.string().allow(""),
-      address: Joi.string().allow(""),
-      city: Joi.string().allow(""),
-      state: Joi.string().allow(""),
-      lat: Joi.string().allow(""),
-      lng: Joi.string().allow(""),
       subCategories: Joi.string().custom(validateObjectIdArrayInFormData), // transform to array of objectIds
     })
     .min(1),

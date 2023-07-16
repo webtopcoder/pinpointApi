@@ -297,6 +297,51 @@ const editProfileData = catchAsync(async (req, res) => {
   return res.json({ success: true, data: user });
 });
 
+const getAllMemebers = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  let filter = pick(req.query, ["q"]);
+  let options = pick(req.query, ["limit", "page", "sort"]);
+
+  const follwers = await followService.getFollowers(userId, {}, {});
+  let followerIDs = new Array();
+  follwers.results.map((item) => {
+    followerIDs.push(item.follower._id)
+  })
+
+  if (filter.q !== undefined && filter.q !== null) {
+    if (filter.q === "") {
+      // Get all data
+      delete filter.q;
+    } else {
+      filter["$or"] = [
+        { firstName: { $regex: filter.q, $options: "i" } },
+        { username: { $regex: filter.q, $options: "i" } },
+        { lastName: { $regex: filter.q, $options: "i" } }
+      ];
+      delete filter.q;
+    }
+  }
+
+
+  options.populate = [
+    {
+      path: "category",
+      populate: {
+        path: "image",
+      },
+    },
+    { path: "profile.avatar" }
+  ];
+
+  filter.status = "active";
+  filter._id = {
+    $nin: followerIDs
+  };
+
+  const result = await userService.getAllMemebers(filter, options);
+  return res.json({ success: true, data: result });
+});
+
 const getAllImages = catchAsync(async (req, res) => {
   const { userId } = req.params;
   const { page, limit } = req.query;
@@ -437,6 +482,7 @@ const markAsRead = catchAsync(async (req, res) => {
 });
 
 module.exports = {
+  getAllMemebers,
   createPost,
   editProfile,
   editPoll,

@@ -59,6 +59,10 @@ router
   .get(auth(true), profileController.getProfileHeaderInfo);
 
 router
+  .route("/:userId/getAllMemebers")
+  .get(auth(true), profileController.getAllMemebers);
+
+router
   .route("/getFavortied/:locationID")
   .get(auth(true), profileController.getFavorited);
 

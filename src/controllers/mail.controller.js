@@ -712,7 +712,7 @@ const sendMessageByAdmin = catchAsync(async (req, res) => {
     message,
   }];
 
-  await mailService.createMail(mailsToSend);
+  await mailService.createMail(false, mailsToSend);
 
   return res
     .status(httpStatus.CREATED)

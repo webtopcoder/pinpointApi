@@ -12,12 +12,10 @@ router
   .route("/:userId")
   .post(
     auth(),
-    validate(followValidation.followUnfollow),
     followController.followOrUnfollow
   )
   .delete(
     auth(),
-    validate(followValidation.followUnfollow),
     followController.followOrUnfollow
   );
 

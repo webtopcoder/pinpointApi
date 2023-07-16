@@ -63,8 +63,6 @@ const deleteComment = async (id) => {
   return result;
 };
 
-
-
 const getDefaultAvatar = async () => {
   const defaultAvatar = await Media.findOne({ mimetype: "default" });
   if (defaultAvatar) {
@@ -161,6 +159,16 @@ const getActivePartners = async (status) => {
       },
     ])
     .select("address category");
+
+  return result;
+};
+
+const getAllMemebers = async (filter, options) => {
+  const result = await User.paginate(filter, {
+    customLabels,
+    sort: defaultSort,
+    ...options,
+  })
 
   return result;
 };
@@ -804,6 +812,7 @@ module.exports = {
   getShoutImages,
   getFavoriteLocations,
   getActivePartners,
+  getAllMemebers,
   getDefaultAvatar,
   getUserByStripeCustomerId,
   getAllComments,

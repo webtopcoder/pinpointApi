@@ -11,7 +11,7 @@ const { ObjectID } = require("bson");
 const createMail = async (notice = false, mailBody) => {
 
   const createdMails = await Mail.create(mailBody);
-
+console.log(mailBody)
   const sendingUser = Array.isArray(mailBody)
     ? mailBody[0].from
     : mailBody.from;

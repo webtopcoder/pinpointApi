@@ -168,13 +168,6 @@ const updateLocation = catchAsync(async (req, res) => {
     title: req.body.title,
     description: req.body.description,
     images,
-    mapLocation: {
-      address: req.body.address,
-      city: req.body.city,
-      state: req.body.state,
-      latitude: req.body.lat,
-      longitude: req.body.lng,
-    },
     subCategories: req.body.subCategories,
   };
 
@@ -185,7 +178,6 @@ const updateLocation = catchAsync(async (req, res) => {
 const quickArrival = catchAsync(async (req, res) => {
   const { locationId } = req.params;
   const location = await locationService.getLocationById(locationId);
-  console.log(req.body)
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
@@ -230,6 +222,15 @@ const quickArrival = catchAsync(async (req, res) => {
     departureAt: req.body.departureAt
   });
 
+  // EventEmitter.emit(events.SEND_NOTIFICATION, {
+  //   recipient: location.partner._id,
+  //   actor: location.partner._id,
+  //   type: "LocationActive",
+  //   title: "Location Active",
+  //   description: `Your location ${location.title} is now active.`,
+  //   url: `/profile/${req.user._id}/locations/`,
+  // });
+
   location.favoriteUsers.map(async item => {
     // const status = await settingService.getSettingStatus({
     //   key: "user:location",
@@ -247,14 +248,7 @@ const quickArrival = catchAsync(async (req, res) => {
     // }
   });
 
-  EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: location.partner._id,
-    actor: location.partner._id,
-    type: "LocationActive",
-    title: "Location Active",
-    description: `Your location ${location.title} is now active.`,
-    url: `/profile/${req.user._id}/locations/`,
-  });
+
 
   res.send(updatedLocation);
 });
@@ -290,14 +284,14 @@ const quickDeparture = catchAsync(async (req, res) => {
     // }
   });
 
-  EventEmitter.emit(events.SEND_NOTIFICATION, {
-    recipient: location.partner._id,
-    actor: location.partner._id,
-    type: "LocationActive",
-    title: "Location Active",
-    description: `Your location ${location.title} is now inactive.`,
-    url: `/profile/${req.user._id}/locations/`,
-  });
+  // EventEmitter.emit(events.SEND_NOTIFICATION, {
+  //   recipient: location.partner._id,
+  //   actor: location.partner._id,
+  //   type: "LocationActive",
+  //   title: "Location Active",
+  //   description: `Your location ${location.title} is now inactive.`,
+  //   url: `/profile/${req.user._id}/locations/`,
+  // });
 
   // if (!req?.user?.partnershipPriceRenewalDate || new Date() > new Date(req?.user?.partnershipPriceRenewalDate)) {
   //   throw new ApiError(
