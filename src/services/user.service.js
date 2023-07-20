@@ -343,7 +343,7 @@ const getUserActivity = async (userId, { page, search }) => {
           },
           {
             $project: {
-              from_user: {
+              user: {
                 username: "$from.username",
                 businessname: "$from.businessname",
                 avatar: "$from.profile.avatar",
@@ -383,6 +383,138 @@ const getUserActivity = async (userId, { page, search }) => {
           },
         ],
         as: "posts",
+      },
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        let: { userId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$user", "$$userId"] },
+              isActive: true,
+            },
+          },
+          {
+            $lookup: {
+              from: Like.collection.name,
+              localField: "like",
+              foreignField: "_id",
+              as: "like",
+            },
+          },
+          {
+            $unwind: "$like",
+          },
+          {
+            $lookup: {
+              from: Comment.collection.name,
+              let: { reviewId: "$_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ["$typeId", "$$reviewId"] },
+                  },
+                },
+                {
+                  $count: "commentCount",
+                },
+              ],
+              as: "commentCount",
+            },
+          },
+          {
+            $addFields: {
+              commentCount: { $arrayElemAt: ["$commentCount.commentCount", 0] },
+            },
+          },
+          {
+            $lookup: {
+              from: Media.collection.name,
+              localField: "images",
+              foreignField: "_id",
+              as: "images",
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "user",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: Media.collection.name,
+                    localField: "profile.avatar",
+                    foreignField: "_id",
+                    as: "profile.avatar",
+                  },
+                },
+                {
+                  $unwind: "$profile.avatar",
+                },
+              ],
+              as: "user",
+            },
+          },
+          {
+            $unwind: "$user",
+          },
+          {
+            $lookup: {
+              from: "locations",
+              localField: "location",
+              foreignField: "_id",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: 'users',
+                    localField: "partner",
+                    foreignField: "_id",
+                    as: "partner",
+                  },
+                },
+                {
+                  $unwind: "$partner",
+                },
+              ],
+              as: "location",
+            },
+          },
+          {
+            $unwind: "$location",
+          },
+          {
+            $project: {
+              user: {
+                username: "$user.username",
+                businessname: "$user.businessname",
+                avatar: "$user.profile.avatar",
+                firstname: "$user.firstName",
+                lastname: "$user.lastName",
+                _id: "$user._id",
+              },
+              content: "$text",
+              rating: "$rating",
+              comment: "$commentCount",
+              location: {
+                title: "$location.title",
+                _id: "$location._id",
+                partner: "$location.partner.businessname",
+              },
+              image: "$images",
+              like: "$like",
+              createdAt: "$createdAt",
+              updatedAt: "$updatedAt",
+              type: "review",
+            },
+          },
+          {
+            $sort: { updatedAt: -1 },
+          },
+        ],
+        as: "reviews",
       },
     },
     {
@@ -481,6 +613,7 @@ const getUserActivity = async (userId, { page, search }) => {
     {
       $project: {
         posts: 1,
+        reviews: 1,
         follows: 1,
       },
     },
@@ -549,16 +682,14 @@ const getUserActivity = async (userId, { page, search }) => {
       images,
     };
 
-  const post = postAndFollowsOfCurrentUser.posts.concat(
-    postAndFollowsOfCurrentUser.follows,
-  );
-
-  post.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
-
-  const limitedPost = post.splice((parseInt(page) - 1) * 5, 5);
+  const { posts, follows, reviews } = postAndFollowsOfCurrentUser;
+  console.log(reviews);
+  const activityData = posts.concat(follows, reviews);
+  activityData.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  const limitedData = activityData.splice((parseInt(page) - 1) * 5, 5);
 
   return {
-    post: limitedPost,
+    post: limitedData,
     images,
   };
 };
