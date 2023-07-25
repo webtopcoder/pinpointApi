@@ -17,6 +17,7 @@ const { uploadMedia } = require("../services/media.service");
 const { EventEmitter, events } = require("../events");
 const { use } = require("passport");
 const { schedule } = require("node-cron");
+const { ObjectId } = require("bson");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
@@ -107,7 +108,7 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const followerCount = (await followService.getFollowers(userId)).totalResults;
+  const followerCount = (await followService.getFollowers(userId, {}, {})).totalResults;
   const locationCount = (
     await locationService.getLocationsByPartnerId(userId, {})
   ).length;
@@ -146,7 +147,40 @@ const getProfileActivity = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const { post, images } = await userService.getUserActivity(user._id, {
+  let followersArray = []
+  followersArray.push(new ObjectId(userId.toString()));
+  const { post, images } = await userService.getUserActivity(user._id, followersArray, {
+    page: page ?? 1,
+    search,
+  });
+
+  return res.json({
+    success: true,
+    about: user.profile?.about,
+    notification: user.profile?.notification,
+    social: user.profile?.social,
+    posts: post,
+    image: images,
+  });
+});
+
+const getProfileSocials = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  let { search, page } = pick(req.query, ["search", "page"]);
+
+  page = page ? parseInt(page) : 1;
+
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const followers = await followService.getFollowers(userId, {}, {});
+  let followersArray = []
+  followers?.results?.filter(obj => obj.status === "active")?.map(async (item) => {
+    followersArray.push(item.follower._id);
+  });
+  const { post, images } = await userService.getUserActivity(user._id, followersArray, {
     page: page ?? 1,
     search,
   });
@@ -489,6 +523,7 @@ module.exports = {
   getProfile,
   getProfileHeaderInfo,
   getProfileActivity,
+  getProfileSocials,
   addProfilePicture,
   editProfileData,
   votePoll,

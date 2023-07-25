@@ -121,6 +121,7 @@ const getFollowers = async (userId, filter, options) => {
   });
 
   return follows;
+
 };
 
 const getFollowById = async (id) => {

@@ -9,7 +9,8 @@ const getFollowers = catchAsync(async (req, res) => {
   const { userId } = req.params;
   let filter = pick(req.query, ["q"]);
   let options = pick(req.query, ["limit", "page", "sort"]);
-  const followers = await followService.getFollowers(userId, filter, options);
+
+  const followers = await followService.getFollowers(userId, options.page == {} ? {} : filter, options.page == {} ? {} : options);
   res.status(httpStatus.OK).send({ success: true, data: followers });
 });
 

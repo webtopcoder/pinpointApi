@@ -71,6 +71,10 @@ router
   .get(auth(true), profileController.updateProfileView);
 
 router
+  .route("/:userId/socials")
+  .get(auth(true), profileController.getProfileSocials);
+
+router
   .route("/:userId/activity")
   .get(auth(true), profileController.getProfileActivity);
 

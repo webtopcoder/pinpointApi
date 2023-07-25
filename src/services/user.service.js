@@ -218,12 +218,18 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
-const getUserActivity = async (userId, { page, search }) => {
+const getUserActivity = async (userId, followersArray, { page, search }) => {
   let postAndFollows = await User.aggregate([
     {
       $match: {
         _id: new ObjectId(userId.toString()),
       },
+
+      // $match: {
+      //   $expr: {
+      //     $in: ["_id", followersArray]
+      //   },
+      // },
     },
     {
       $lookup: {
@@ -245,13 +251,14 @@ const getUserActivity = async (userId, { page, search }) => {
             $match: {
               $expr: {
                 $or: [
-                  { $eq: ["$from", "$$userId"] },
-                  { $eq: ["$to", "$$userId"] },
+                  { $in: ["$from", followersArray] },
+                  { $in: ["$to", followersArray] },
                 ],
               },
               status: "active",
             },
           },
+
           {
             $lookup: {
               from: Like.collection.name,
@@ -391,10 +398,16 @@ const getUserActivity = async (userId, { page, search }) => {
         let: { userId: "$_id" },
         pipeline: [
           {
+            // $match: {
+            //   $expr: { $eq: ["$user", "$$userId"] },
+            //   isActive: true,
+            // },
             $match: {
-              $expr: { $eq: ["$user", "$$userId"] },
+              $expr: {
+                $in: ["$user", followersArray]
+              },
               isActive: true,
-            },
+          },
           },
           {
             $lookup: {
@@ -501,7 +514,8 @@ const getUserActivity = async (userId, { page, search }) => {
               location: {
                 title: "$location.title",
                 _id: "$location._id",
-                partner: "$location.partner.businessname",
+                partner: "$location.partner.username",
+                partner_id: "$location.partner._id",
               },
               image: "$images",
               like: "$like",
@@ -523,14 +537,23 @@ const getUserActivity = async (userId, { page, search }) => {
         let: { userId: "$_id" },
         pipeline: [
           {
+            // $match: {
+            //   $expr: {
+            //     $or: [
+            //       { $eq: ["$follower", "$$userId"] },
+            //       { $eq: ["$following", "$$userId"] },
+            //     ],
+            //   },
+            // },
             $match: {
               $expr: {
                 $or: [
-                  { $eq: ["$follower", "$$userId"] },
-                  { $eq: ["$following", "$$userId"] },
+                  { $in: ["$follower", followersArray] },
+                  { $in: ["$following", followersArray] },
                 ],
               },
             },
+            
           },
           {
             $lookup: {
@@ -683,7 +706,6 @@ const getUserActivity = async (userId, { page, search }) => {
     };
 
   const { posts, follows, reviews } = postAndFollowsOfCurrentUser;
-  console.log(reviews);
   const activityData = posts.concat(follows, reviews);
   activityData.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
   const limitedData = activityData.splice((parseInt(page) - 1) * 5, 5);
