@@ -384,17 +384,25 @@ const getAllImages = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const postImgs = await userService.getPostImages(user._id, {
+  const followers = await followService.getFollowers(userId, {}, {});
+  let followersArray = [];
+  followersArray.push(new ObjectId(userId.toString()));
+
+  followers?.results?.filter(obj => obj.status === "active")?.map(async (item) => {
+    followersArray.push(new ObjectId(item.follower._id.toString()));
+  });
+
+  const postImgs = await userService.getPostImages(followersArray, {
     page: page,
     limit: limit
   });
 
-  const shoutImgs = await userService.getShoutImages(user._id, {
+  const shoutImgs = await userService.getShoutImages(followersArray, {
     page: page,
     limit: limit
   });
 
-  const locationReviewImgs = await locationService.getReviewImages(user._id, {
+  const locationReviewImgs = await locationService.getReviewImages(followersArray, {
     page: page,
     limit: limit,
   });

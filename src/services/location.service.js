@@ -105,11 +105,11 @@ const deleteLocationByID = async (id, updateBody) => {
   return location;
 };
 
-const getLocationsByPartnerId = async (partnerId, filter) => {
+const getLocationsByPartnerId = async (followersArray, filter) => {
 
   await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
 
-  return Location.find({ ...filter, partner: partnerId })
+  return Location.find({ ...filter, partner: { $in: followersArray } })
     .populate("images")
     .populate("subCategories");
 };
@@ -387,18 +387,25 @@ const getAllCheckInCount = async (userId) => {
   return totalValue;
 };
 
-const getReviewImages = async (userId, options) => {
+const getReviewImages = async (followersArray, options) => {
 
-  const locations = await getLocationsByPartnerId(userId, {});
+  const locations = await getLocationsByPartnerId(followersArray, {});
+
   const locationIDs = locations.reduce((acc, location) => {
     acc.push(location._id)
     return acc;
   }, []);
 
+  
 
   const imagesInReview = await Review.aggregate([
     {
       $match: { location: { $in: locationIDs } }
+      // $match: {
+      //   $expr: {
+      //     $in: ["$location", locationIDs]
+      //   },
+      // },
     },
     {
       $lookup: {
@@ -410,7 +417,7 @@ const getReviewImages = async (userId, options) => {
           {
             $match: {
               status: 'active',
-              mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
+              // mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
             },
           },
         ],
@@ -424,6 +431,7 @@ const getReviewImages = async (userId, options) => {
         filepath: "$images.filepath",
       },
     },
+
     {
       $addFields: {
         content: "$text",
@@ -442,6 +450,7 @@ const getReviewImages = async (userId, options) => {
     },
   ]);
 
+  console.log(imagesInReview)
   const newArray = imagesInReview.map(item => {
     return { ...item, type: "Review" };
   });

@@ -407,7 +407,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
                 $in: ["$user", followersArray]
               },
               isActive: true,
-          },
+            },
           },
           {
             $lookup: {
@@ -553,7 +553,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
                 ],
               },
             },
-            
+
           },
           {
             $lookup: {
@@ -716,18 +716,28 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
   };
 };
 
-const getPostImages = async (userId, options) => {
+const getPostImages = async (followersArray, options) => {
+  console.log(followersArray)
   const imagesInPost = await Post.aggregate([
     {
+      // $match: {
+      //   $or: [
+      //     {
+      //       to: new ObjectId(userId),
+      //     },
+      //     {
+      //       from: new ObjectId(userId),
+      //     },
+      //   ],
+      // },
+
       $match: {
-        $or: [
-          {
-            to: new ObjectId(userId),
-          },
-          {
-            from: new ObjectId(userId),
-          },
-        ],
+        $expr: {
+          $or: [
+            { $in: ["$to", followersArray] },
+            { $in: ["$from", followersArray] },
+          ],
+        },
       },
     },
     {
@@ -740,7 +750,7 @@ const getPostImages = async (userId, options) => {
           {
             $match: {
               status: 'active',
-              mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
+              // mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
             },
           },
         ],
@@ -761,16 +771,22 @@ const getPostImages = async (userId, options) => {
       $sort: { createdAt: -1 },
     },
   ]);
+
   const newArray = imagesInPost.map(item => {
     return { ...item, type: "Post" };
   });
   return newArray;
 };
 
-const getShoutImages = async (userId, options) => {
+const getShoutImages = async (followersArray, options) => {
   const imagesInShout = await Shoutout.aggregate([
     {
-      $match: { to: new ObjectId(userId) },
+      // $match: { to: new ObjectId(userId) },
+      $match: {
+        $expr: {
+          $in: ["$to", followersArray]
+        },
+      },
     },
     {
       $lookup: {
@@ -789,7 +805,7 @@ const getShoutImages = async (userId, options) => {
                 {
                   $match: {
                     status: 'active',
-                    mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
+                    // mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
                   },
                 },
               ],
