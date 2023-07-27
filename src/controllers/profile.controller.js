@@ -176,10 +176,13 @@ const getProfileSocials = catchAsync(async (req, res) => {
   }
 
   const followers = await followService.getFollowers(userId, {}, {});
-  let followersArray = []
+  let followersArray = [];
   followers?.results?.filter(obj => obj.status === "active")?.map(async (item) => {
     followersArray.push(item.follower._id);
   });
+
+  
+
   const { post, images } = await userService.getUserActivity(user._id, followersArray, {
     page: page ?? 1,
     search,
@@ -377,7 +380,7 @@ const getAllMemebers = catchAsync(async (req, res) => {
 });
 
 const getAllImages = catchAsync(async (req, res) => {
-  const { userId } = req.params;
+  const { userId, flag } = req.params;
   const { page, limit } = req.query;
   const user = await userService.getUserById(userId);
   if (!user) {
@@ -386,11 +389,13 @@ const getAllImages = catchAsync(async (req, res) => {
 
   const followers = await followService.getFollowers(userId, {}, {});
   let followersArray = [];
-  followersArray.push(new ObjectId(userId.toString()));
 
-  followers?.results?.filter(obj => obj.status === "active")?.map(async (item) => {
-    followersArray.push(new ObjectId(item.follower._id.toString()));
-  });
+  if (flag === 'true')
+    followers?.results?.filter(obj => obj.status === "active")?.map(async (item) => {
+      followersArray.push(new ObjectId(item.follower._id.toString()));
+    });
+  else
+    followersArray.push(new ObjectId(userId.toString()));
 
   const postImgs = await userService.getPostImages(followersArray, {
     page: page,

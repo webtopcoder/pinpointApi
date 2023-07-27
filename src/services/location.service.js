@@ -396,7 +396,7 @@ const getReviewImages = async (followersArray, options) => {
     return acc;
   }, []);
 
-  
+
 
   const imagesInReview = await Review.aggregate([
     {
@@ -417,7 +417,17 @@ const getReviewImages = async (followersArray, options) => {
           {
             $match: {
               status: 'active',
-              // mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
+              $or: [
+                {
+                  mimetype: 'image/jpeg',
+                },
+                {
+                  mimetype: 'image/jpg',
+                },
+                {
+                  mimetype: 'image/png',
+                },
+              ],
             },
           },
         ],
@@ -450,7 +460,6 @@ const getReviewImages = async (followersArray, options) => {
     },
   ]);
 
-  console.log(imagesInReview)
   const newArray = imagesInReview.map(item => {
     return { ...item, type: "Review" };
   });

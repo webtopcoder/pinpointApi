@@ -88,7 +88,7 @@ router
   );
 
 router
-  .route("/:userId/image/all")
+  .route("/:userId/:flag/image/all")
   .get(auth(true), profileController.getAllImages);
 
 module.exports = router;

@@ -258,7 +258,6 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
               status: "active",
             },
           },
-
           {
             $lookup: {
               from: Like.collection.name,
@@ -350,7 +349,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
           },
           {
             $project: {
-              user: {
+              from: {
                 username: "$from.username",
                 businessname: "$from.businessname",
                 avatar: "$from.profile.avatar",
@@ -359,7 +358,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
                 _id: "$from._id",
               },
               comment: "$commentCount",
-              to_user: {
+              to: {
                 username: "$to.username",
                 businessname: "$from.businessname",
                 firstname: "$from.firstName",
@@ -500,7 +499,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
           },
           {
             $project: {
-              user: {
+              from: {
                 username: "$user.username",
                 businessname: "$user.businessname",
                 avatar: "$user.profile.avatar",
@@ -717,7 +716,6 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
 };
 
 const getPostImages = async (followersArray, options) => {
-  console.log(followersArray)
   const imagesInPost = await Post.aggregate([
     {
       // $match: {
@@ -750,7 +748,17 @@ const getPostImages = async (followersArray, options) => {
           {
             $match: {
               status: 'active',
-              // mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
+              $or: [
+                {
+                  mimetype: 'image/jpeg',
+                },
+                {
+                  mimetype: 'image/jpg',
+                },
+                {
+                  mimetype: 'image/png',
+                },
+              ],
             },
           },
         ],
@@ -805,7 +813,17 @@ const getShoutImages = async (followersArray, options) => {
                 {
                   $match: {
                     status: 'active',
-                    // mimetype: 'image/jpeg' || 'image/jpg' || 'image/png'
+                    $or: [
+                      {
+                        mimetype: 'image/jpeg',
+                      },
+                      {
+                        mimetype: 'image/jpg',
+                      },
+                      {
+                        mimetype: 'image/png',
+                      },
+                    ],
                   },
                 },
               ],
