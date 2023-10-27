@@ -8,8 +8,8 @@ const defaultRoutes = [
     route: require("./auth.route"),
   },
   {
-    path: "/base",
-    route: require("./base.route"),
+    path: "/faq",
+    route: require("./faq.route"),
   },
   {
     path: "/share",

@@ -349,7 +349,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
           },
           {
             $project: {
-              from: {
+              user: {
                 username: "$from.username",
                 businessname: "$from.businessname",
                 avatar: "$from.profile.avatar",
@@ -499,7 +499,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
           },
           {
             $project: {
-              from: {
+              user: {
                 username: "$user.username",
                 businessname: "$user.businessname",
                 avatar: "$user.profile.avatar",

@@ -15,7 +15,7 @@ const register = catchAsync(async (req, res) => {
   const adminInfo = await userService.getadmin();
   if (user.role === "partner")
     EventEmitter.emit(events.SEND_NOTIFICATION, {
-      recipient: adminInfo._id,
+      recipient: adminInfo?._id,
       type: "signup",
       title: "New Pending Partner",
       description: `You have new pending partner`,
@@ -97,8 +97,13 @@ const forgotPassword = catchAsync(async (req, res) => {
     user = await userService.getUserByUsername(req.body.emailOrUsername);
   }
 
+  console.log(user);
+
   if (!user) {
-    return res.status(httpStatus.NO_CONTENT).send();
+    console.log(234234234)
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ code: 400, message: "No email existing." });
   }
 
   EventEmitter.emit(events.RESET_PASSWORD, user.id);

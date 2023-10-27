@@ -48,6 +48,12 @@ const getAdditionUser = catchAsync(async (req, res) => {
 const getPartners = catchAsync(async (req, res) => {
   const { email } = req.params;
   const result = await settingService.getPartners(email);
+
+  if (result.length === 0) {
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .json({ code: 400, message: "You don't have any partner." });
+  }
   res.send(result);
 });
 

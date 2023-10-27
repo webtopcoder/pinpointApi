@@ -42,7 +42,6 @@ const shareLink = async (req, res) => {
     <meta content="${title}" property="og:site_name">
     <meta content="summary" name="twitter:card"
     </head>
-   
     <script>
     window.onload = function(event) {
       window.location.replace('${url}')

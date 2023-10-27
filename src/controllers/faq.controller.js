@@ -24,10 +24,11 @@ const getFaqs = catchAsync(async (req, res) => {
       { question: { $regex: filter.q, $options: "i" } },
       { answer: { $regex: filter.q, $options: "i" } },
     ];
-    delete filter.q;
   }
 
+  delete filter.q;
   const result = await faqService.getFaqs(filter, options);
+  console.log(result)
   res.send(result);
 });
 

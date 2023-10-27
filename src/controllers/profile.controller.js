@@ -181,8 +181,6 @@ const getProfileSocials = catchAsync(async (req, res) => {
     followersArray.push(item.follower._id);
   });
 
-  
-
   const { post, images } = await userService.getUserActivity(user._id, followersArray, {
     page: page ?? 1,
     search,
@@ -407,7 +405,7 @@ const getAllImages = catchAsync(async (req, res) => {
     limit: limit
   });
 
-  const locationReviewImgs = await locationService.getReviewImages(followersArray, {
+  const locationReviewImgs = await locationService.getReviewImages(followersArray, flag, {
     page: page,
     limit: limit,
   });
@@ -442,12 +440,7 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
     partner: userId,
   }).populate("reviews");
 
-  const businessRating = (
-    locations?.reduce((acc, location) => {
-      return acc + (location.rating ?? 0);
-    }, 0) / locations.length
-  ).toFixed(1);
-
+  const businessRating = await locationService.getRating(userId);
   const profileViews =
     (await userService.getUserById(userId)).profileViews ?? 0;
 

@@ -387,26 +387,14 @@ const getAllCheckInCount = async (userId) => {
   return totalValue;
 };
 
-const getReviewImages = async (followersArray, options) => {
-
+const getReviewImages = async (followersArray, flag, options) => {
   const locations = await getLocationsByPartnerId(followersArray, {});
+  const locationIDs = locations.map(location => location._id);
 
-  const locationIDs = locations.reduce((acc, location) => {
-    acc.push(location._id)
-    return acc;
-  }, []);
-
-
+  const matchQuery = flag === "true" ? { user: { $in: followersArray } } : { location: { $in: locationIDs } };
 
   const imagesInReview = await Review.aggregate([
-    {
-      $match: { location: { $in: locationIDs } }
-      // $match: {
-      //   $expr: {
-      //     $in: ["$location", locationIDs]
-      //   },
-      // },
-    },
+    { $match: matchQuery },
     {
       $lookup: {
         from: Media.collection.name,
@@ -417,17 +405,7 @@ const getReviewImages = async (followersArray, options) => {
           {
             $match: {
               status: 'active',
-              $or: [
-                {
-                  mimetype: 'image/jpeg',
-                },
-                {
-                  mimetype: 'image/jpg',
-                },
-                {
-                  mimetype: 'image/png',
-                },
-              ],
+              mimetype: { $in: ['image/jpeg', 'image/jpg', 'image/png'] }
             },
           },
         ],
@@ -435,13 +413,11 @@ const getReviewImages = async (followersArray, options) => {
     },
     {
       $project: {
-        text: 1,
         createdAt: 1,
         status: 1,
         filepath: "$images.filepath",
       },
     },
-
     {
       $addFields: {
         content: "$text",
@@ -460,9 +436,11 @@ const getReviewImages = async (followersArray, options) => {
     },
   ]);
 
-  const newArray = imagesInReview.map(item => {
-    return { ...item, type: "Review" };
-  });
+  const newArray = imagesInReview.map(item => ({
+    ...item,
+    type: "Review"
+  }));
+
   return newArray;
 };
 

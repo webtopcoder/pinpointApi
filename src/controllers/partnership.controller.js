@@ -286,7 +286,6 @@ const stripeWebhook = async (req, res) => {
         break;
       }
 
-
       partnershipPriceRenewalDate = new Date(
         updatedSubscription.current_period_end * 1000,
       );
