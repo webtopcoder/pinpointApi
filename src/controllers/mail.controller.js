@@ -637,6 +637,66 @@ const getPendingInvites = catchAsync(async (req, res) => {
 const getIsReadEmails = catchAsync(async (req, res) => {
   const result = await mailService.getIsReadEmails(req.user._id);
   res.send(result);
+
+});
+
+const getUnReadMessages = catchAsync(async (req, res) => {
+  // const result = await mailService.getIsReadMessages(req.user._id);
+  // res.send(result);
+
+  let filter = pick(req.query, []);
+  let options = pick(req.query, ["limit", "page", "sort"]);
+  if (filter.q) {
+    filter.title = { $regex: filter.q, $options: "i" };
+    delete filter.q;
+  }
+
+  // if (options.sort) {
+  //   options.sort = Object.fromEntries(
+  //     options.sort.split(",").map((field) => field.split(":"))
+  //   );
+  // } else {
+  //   options.sort = "-updatedAt";
+  // }
+  // options.userID = req.user._id 
+  filter = {
+    ...filter,
+    to: new ObjectID(req.user._id),
+    is_read: false
+  };
+  options.sort = "-createdAt"
+
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+  ];
+
+  const result = await mailService.getUnReadMessages(filter, options);
+  res.send(result);
+});
+
+const MarkAll = catchAsync(async (req, res) => {
+  const result = await mailService.MarkAll(req.user._id);
+  res.send(result);
 });
 
 const updateMail = catchAsync(async (req, res) => {
@@ -769,6 +829,7 @@ module.exports = {
   getInvitation,
   getPendingInvites,
   getIsReadEmails,
+  getUnReadMessages,
   updateMail,
   bulkActions,
   sendMessageByAdmin,
@@ -778,5 +839,6 @@ module.exports = {
   getEmailing,
   deleteEmailing,
   resentEmailing,
-  bulkActionsEmailing
+  bulkActionsEmailing,
+  MarkAll
 };

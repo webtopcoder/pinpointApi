@@ -57,6 +57,13 @@ router.route("/notices").get(auth(), mailController.getNotices);
 router.route("/pending").get(auth(), mailController.getPendingInvites);
 
 router.route("/isread").get(auth(), mailController.getIsReadEmails);
+router.route("/unreadMessages").get(auth(), mailController.getUnReadMessages);
+router
+  .route("/MarkAll")
+  .get(
+    auth(),
+    mailController.MarkAll
+  );
 
 router
   .route("/bulk-actions")

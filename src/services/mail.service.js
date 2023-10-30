@@ -93,6 +93,21 @@ const queryreplyfromSent = async (user_id) => {
   return fromIDs;
 };
 
+const getUnReadMessages = async (filter, options) => {
+  const unreadMessages = await Mail.paginate(filter, {
+    customLabels,
+    sort: defaultSort,
+    ...options,
+  });
+  return unreadMessages;
+};
+
+const MarkAll = async (userid) => {
+  await Mail.updateMany({ "to": userid }, { $set: { is_read: true } })
+  const result = Mail.find({ "to": userid, is_read: false });
+  return result;
+};
+
 const queryMails = async (filter, options) => {
   const pipeline = [];
   pipeline.push({
@@ -420,6 +435,7 @@ module.exports = {
   resendInvite,
   getPendingInvites,
   getIsReadEmails,
+  getUnReadMessages,
   getMailById,
   bulkDelete,
   bulkUpdate,
@@ -430,5 +446,6 @@ module.exports = {
   deleteEmailingById,
   getEmailById,
   resendEmailingById,
-  bulkActionEmailing
+  bulkActionEmailing,
+  MarkAll
 };
