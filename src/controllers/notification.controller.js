@@ -15,7 +15,6 @@ const getNotificationById = catchAsync(async (req, res) => {
 });
 
 const getNotifications = catchAsync(async (req, res) => {
-
   let filter = pick(req.query, []);
   let options = pick(req.query, ["limit", "page", "sort"]);
   if (filter.q) {
@@ -25,8 +24,11 @@ const getNotifications = catchAsync(async (req, res) => {
   filter = {
     ...filter,
     recipient: req.user._id,
-    is_read: false
   };
+
+  if (!req.query.is_read)
+    filter.is_read = false;
+
   options.sort = "-createdAt"
 
   options.populate = [
@@ -35,7 +37,7 @@ const getNotifications = catchAsync(async (req, res) => {
     { path: "actor", populate: "profile.avatar" },
     { path: "recipient", populate: "profile.avatar" },
   ];
-  
+
   const result = await notificationService.queryNotifications(filter, options);
   res.send(result);
 });
@@ -49,11 +51,27 @@ const clearNotifications = catchAsync(async (req, res) => {
 
 
 const markAsRead = catchAsync(async (req, res) => {
-
   await notificationService.updateNotificationById(req.params.id, {
     is_read: true,
   });
 
+  res.send({ "success": true });
+});
+
+const update = catchAsync(async (req, res) => {
+  if (req.params.flag === "mark")
+    await notificationService.updateNotificationById(req.params.id, {
+      is_read: true,
+    });
+  else await notificationService.deleteNotificationById(req.params.id);
+
+  res.send({ "success": true });
+});
+
+const updateAll = catchAsync(async (req, res) => {
+  if (req.params.flag === "mark")
+    await notificationService.clearNotifications(req.user._id);
+  else await notificationService.deleteNotifications(req.user._id);
 
   res.send({ "success": true });
 });
@@ -62,5 +80,7 @@ module.exports = {
   getNotificationById,
   getNotifications,
   markAsRead,
-  clearNotifications
+  clearNotifications,
+  update,
+  updateAll
 };

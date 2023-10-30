@@ -44,6 +44,11 @@ const clearNotifications = async (userid) => {
   return result;
 };
 
+const deleteNotifications = async (userid) => {
+  const result = await Notification.deleteMany({ "recipient": userid })
+  return result;
+};
+
 const getNotificationById = async (id, populate) => {
   const notification = await Notification.findById(id).populate(populate);
   if (!notification) {
@@ -53,7 +58,6 @@ const getNotificationById = async (id, populate) => {
 };
 
 const updateNotificationById = async (notificationId, updateBody) => {
-
   await Notification.update({ "_id": notificationId }, { $set: updateBody })
   return true;
 };
@@ -74,5 +78,6 @@ module.exports = {
   getNotificationById,
   updateNotificationById,
   deleteNotificationById,
-  clearNotifications
+  clearNotifications,
+  deleteNotifications
 };

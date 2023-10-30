@@ -28,4 +28,12 @@ router
   .route("/:id/mark-as-read")
   .post(auth(), notificationController.markAsRead);
 
+router
+  .route("/:id/:flag/update")
+  .post(auth(), notificationController.update);
+
+router
+  .route("/:flag/updateAll")
+  .post(auth(), notificationController.updateAll);
+
 module.exports = router;
