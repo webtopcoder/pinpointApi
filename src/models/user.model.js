@@ -81,6 +81,10 @@ module.exports = ({ Schema, model, Types }, mongoosePaginate) => {
         address: { type: String, default: "" },
         city: { type: String },
         state: { type: String },
+        // state: { 
+        //   label: { type: String }, 
+        //   value: { type: String } 
+        // },
       },
       category: { type: Types.ObjectId, ref: "Category", required: false },
 

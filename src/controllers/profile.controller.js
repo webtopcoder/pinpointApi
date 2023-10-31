@@ -21,7 +21,16 @@ const { ObjectId } = require("bson");
 
 const editProfile = catchAsync(async (req, res) => {
   const user = await userService.updateUserById(req.user._id, {
-    profile: { ...req.user.profile, ...req.body },
+    ...req.user, ...req.body, profile: {
+      ...req.user.profile, ...req.body.profile
+    }
+  });
+  res.send(user);
+});
+
+const changePassword = catchAsync(async (req, res) => {
+  const user = await userService.updateUserById(req.user._id, {
+    ...req.user, ...req.body
   });
   res.send(user);
 });
@@ -89,7 +98,7 @@ const getProfile = catchAsync(async (req, res) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
-  res.json({ success: true, data: user.profile });
+  res.json({ success: true, data: user });
 });
 
 const getFavorited = catchAsync(async (req, res) => {
@@ -539,5 +548,6 @@ module.exports = {
   updateProfileView,
   getFavorited,
   markAsRead,
-  getEventhostDashboard
+  getEventhostDashboard,
+  changePassword
 };

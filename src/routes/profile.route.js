@@ -30,10 +30,18 @@ router
   .post(auth(), upload.single("avatar"), profileController.addProfilePicture);
 
 router
+  .route("/changePassword")
+  .patch(
+    auth(),
+    // validate(profileValidation.editPartnerProfile),
+    profileController.changePassword
+  );
+
+  router
   .route("/edit")
   .patch(
     auth(),
-    validate(profileValidation.editPartnerProfile),
+    // validate(profileValidation.editPartnerProfile),
     profileController.editProfile
   );
 
