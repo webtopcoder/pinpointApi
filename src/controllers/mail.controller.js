@@ -230,6 +230,11 @@ const reply = catchAsync(async (req, res) => {
   return res.json({ result: result, msg: "Reply successfully!" });
 });
 
+const getEmailsForCount = catchAsync(async (req, res) => {
+  const result = await mailService.getEmailsForCount(req.user._id);
+  res.send(result);
+});
+
 const getInbox = catchAsync(async (req, res) => {
 
   let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
@@ -239,7 +244,7 @@ const getInbox = catchAsync(async (req, res) => {
       options.sort.split(",").map((field) => field.split(":"))
     );
   } else {
-    options.sort = "-updatedAt";
+    options.sort = "-createdAt";
   }
 
   options.userID = req.user._id
@@ -840,5 +845,6 @@ module.exports = {
   deleteEmailing,
   resentEmailing,
   bulkActionsEmailing,
-  MarkAll
+  MarkAll,
+  getEmailsForCount,
 };

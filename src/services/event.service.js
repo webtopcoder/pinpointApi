@@ -528,7 +528,7 @@ module.exports = {
   queryEventSchedule,
   getScheduleById,
   requestAccess,
-  getIndividualSchedule
+  getIndividualSchedule,
   // getlikeLocationCount,
   // getRating,
   // getAllCheckInCount

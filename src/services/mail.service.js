@@ -11,7 +11,6 @@ const { ObjectID } = require("bson");
 const createMail = async (notice = false, mailBody) => {
 
   const createdMails = await Mail.create(mailBody);
-console.log(mailBody)
   const sendingUser = Array.isArray(mailBody)
     ? mailBody[0].from
     : mailBody.from;
@@ -106,6 +105,15 @@ const MarkAll = async (userid) => {
   await Mail.updateMany({ "to": userid }, { $set: { is_read: true } })
   const result = Mail.find({ "to": userid, is_read: false });
   return result;
+};
+
+const getEmailsForCount = async (userid) => {
+  const inbox = await Mail.countDocuments({$or: [{ $and: [{ to: new ObjectID(userid), to_is_deleted: false }] }, { $and: [{ from: new ObjectID(userid) }, { reply: true }, { from_is_deleted: false }] }]});
+  const sent = await Mail.countDocuments({ from: userid, type: 'usual', from_is_deleted: false });
+  const invite = await Mail.countDocuments({ from: userid, type: 'invite', from_is_deleted: false });
+  const trash = await Mail.countDocuments({ $or: [{ to: userid }, { from: userid }], from_is_deleted: true });
+
+  return { inbox, sent, invite, trash };
 };
 
 const queryMails = async (filter, options) => {
@@ -234,7 +242,6 @@ const queryMails = async (filter, options) => {
   ])
 
   const mails = await Mail.aggregatePaginate(aggregateMail, {
-    sort: defaultSort,
     customLabels,
     ...options,
   });
@@ -447,5 +454,6 @@ module.exports = {
   getEmailById,
   resendEmailingById,
   bulkActionEmailing,
-  MarkAll
+  MarkAll,
+  getEmailsForCount
 };

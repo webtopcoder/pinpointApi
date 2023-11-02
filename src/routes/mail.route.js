@@ -74,6 +74,13 @@ router
   );
 
 router
+  .route("/getEmailsByID")
+  .get(
+    auth(),
+    mailController.getEmailsForCount
+  );
+
+router
   .route("/:mailId")
   .delete(auth(), mailController.deleteMail)
   .get(auth(), mailController.readMail)

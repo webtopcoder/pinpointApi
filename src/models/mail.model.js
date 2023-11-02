@@ -28,6 +28,10 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: Number,
         default: 0,
       },
+      parent: {
+        type: Types.ObjectId,
+        ref: "Mail"
+      },
       subject: { type: String },
       message: { type: String },
       files: {
