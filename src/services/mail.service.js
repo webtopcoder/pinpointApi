@@ -108,8 +108,8 @@ const MarkAll = async (userid) => {
 };
 
 const getEmailsForCount = async (userid) => {
-  const inbox = await Mail.countDocuments({$or: [{ $and: [{ to: new ObjectID(userid), to_is_deleted: false }] }, { $and: [{ from: new ObjectID(userid) }, { reply: true }, { from_is_deleted: false }] }]});
-  const sent = await Mail.countDocuments({ from: userid, type: 'usual', from_is_deleted: false });
+  const inbox = await Mail.countDocuments({ $or: [{ $and: [{ to: new ObjectID(userid), to_is_deleted: false }] }, { $and: [{ from: new ObjectID(userid) }, { reply: true }, { from_is_deleted: false }] }] });
+  const sent = await Mail.countDocuments({ from: userid, type: 'usual', isNotice: false, from_is_deleted: false, sent_is_deleted: false });
   const invite = await Mail.countDocuments({ from: userid, type: 'invite', from_is_deleted: false });
   const trash = await Mail.countDocuments({ $or: [{ to: userid }, { from: userid }], from_is_deleted: true });
 
@@ -130,14 +130,6 @@ const queryMails = async (filter, options) => {
         localField: "_id",
         foreignField: "reply",
         as: "replies",
-        pipeline: [
-          {
-            $match: {
-              to: new ObjectID(options.userID),
-              is_read: false,
-            },
-          },
-        ],
       },
     },
     {
@@ -410,6 +402,15 @@ const deleteEmailingById = async (emailId) => {
   return result;
 };
 
+const deleteInviteById = async (mailID) => {
+  const result = await Mail.findById(mailID);
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "result not found");
+  }
+  await result.delete();
+  return result;
+};
+
 const resendEmailingById = async (emailId) => {
   const result = await getEmailById(emailId);
   if (!result) {
@@ -433,6 +434,22 @@ const bulkActionEmailing = async (selectedIds, status) => {
   }
 };
 
+const bulkInvite = async (mailIds, status) => {
+  const objectMailIds = mailIds.map((id) => mongoose.Types.ObjectId(id));
+  if (status === "deleted") {
+    objectMailIds.map(async item => {
+      await deleteInviteById(item)
+    });
+  }
+  else {
+    objectMailIds.map(async item => {
+      await resendInvite(item)
+    });
+  }
+};
+
+
+
 module.exports = {
   createMail,
   createReply,
@@ -455,5 +472,7 @@ module.exports = {
   resendEmailingById,
   bulkActionEmailing,
   MarkAll,
-  getEmailsForCount
+  getEmailsForCount,
+  bulkInvite,
+  deleteInviteById
 };

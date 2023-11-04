@@ -236,7 +236,6 @@ const getEmailsForCount = catchAsync(async (req, res) => {
 });
 
 const getInbox = catchAsync(async (req, res) => {
-
   let filter = pick(req.query, ["q", "isActive", "type", "is_read"]);
   let options = pick(req.query, ["sort", "limit", "page"]);
   if (options.sort) {
@@ -291,6 +290,38 @@ const getInbox = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getInboxById = catchAsync(async (req, res) => {
+
+  let filter = pick(req.params, ["id"]);
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+  ];
+
+  const result = await mailService.queryMails({ _id: new ObjectID(filter.id) }, options);
+  res.send(result);
+});
+
 const getEmailing = catchAsync(async (req, res) => {
 
   let filter = pick(req.query, ["q", "status"]);
@@ -335,12 +366,13 @@ const getSent = catchAsync(async (req, res) => {
       options.sort.split(",").map((field) => field.split(":"))
     );
   } else {
-    options.sort = "-createdAt";
+    options.sort = "createdAt";
   }
 
   filter = {
     from: new ObjectID(req.user._id),
     from_is_deleted: false,
+    sent_is_deleted: false,
     type: "usual",
     isNotice: false,
     ...filter,
@@ -389,6 +421,39 @@ const getSent = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+
+const getSentById = catchAsync(async (req, res) => {
+
+  let filter = pick(req.params, ["id"]);
+  let options = pick(req.query, ["sort", "limit", "page"]);
+  options.populate = [
+    "files",
+    "from",
+    "to",
+    {
+      path: "from",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+    {
+      path: "to",
+      populate: {
+        path: "profile",
+        populate: {
+          path: "avatar",
+        },
+      },
+    },
+  ];
+
+  const result = await mailService.queryMails({ _id: new ObjectID(filter.id) }, options);
+  res.send(result);
+});
+
 const deleteMail = catchAsync(async (req, res) => {
   const { mailId } = req.params;
   const userId = req.user._id;
@@ -418,6 +483,18 @@ const deleteMail = catchAsync(async (req, res) => {
   // await mailService.updateReplyMail({ to: userId }, {
   //   to_is_deleted: true,
   // });
+
+  res.send({ success: true, message: "Deleted successfully!" });
+});
+
+const deleteSentMail = catchAsync(async (req, res) => {
+  const { mailId } = req.params;
+  let mail = await mailService.getMailById(mailId);
+  mail = mail.toJSON();
+
+  await mailService.updateMail(mailId, {
+    sent_is_deleted: true,
+  });
 
   res.send({ success: true, message: "Deleted successfully!" });
 });
@@ -472,7 +549,7 @@ const getReplyById = catchAsync(async (req, res) => {
     to: new ObjectID(req.user._id)
   };
 
-  options.sort = "-createdAt";
+  options.sort = "createdAt";
 
   options.populate = [
     "files",
@@ -646,8 +723,6 @@ const getIsReadEmails = catchAsync(async (req, res) => {
 });
 
 const getUnReadMessages = catchAsync(async (req, res) => {
-  // const result = await mailService.getIsReadMessages(req.user._id);
-  // res.send(result);
 
   let filter = pick(req.query, []);
   let options = pick(req.query, ["limit", "page", "sort"]);
@@ -656,18 +731,11 @@ const getUnReadMessages = catchAsync(async (req, res) => {
     delete filter.q;
   }
 
-  // if (options.sort) {
-  //   options.sort = Object.fromEntries(
-  //     options.sort.split(",").map((field) => field.split(":"))
-  //   );
-  // } else {
-  //   options.sort = "-updatedAt";
-  // }
-  // options.userID = req.user._id 
   filter = {
     ...filter,
     to: new ObjectID(req.user._id),
-    is_read: false
+    is_read: false,
+    to_is_deleted: false
   };
   options.sort = "-createdAt"
 
@@ -743,12 +811,16 @@ const bulkActions = catchAsync(async (req, res) => {
 });
 
 const bulkActionsEmailing = catchAsync(async (req, res) => {
-
   const { action, selectedIds } = req.body;
   await mailService.bulkActionEmailing(selectedIds, action);
   return res.json({ success: true, message: "Action performed successfully!" });
-
 });
+
+const bulkInvite = catchAsync(async (req, res) => {
+  const { action, mailIds } = req.body;
+  await mailService.bulkInvite(mailIds, action);
+  return res.json({ success: true, message: "Action performed successfully!" });
+})
 
 const sendMessageByAdmin = catchAsync(async (req, res) => {
   const { userId } = req.params;
@@ -825,6 +897,7 @@ module.exports = {
   composebyAdmin,
   reply,
   getInbox,
+  getInboxById,
   getSent,
   deleteMail,
   readMail,
@@ -846,5 +919,8 @@ module.exports = {
   resentEmailing,
   bulkActionsEmailing,
   MarkAll,
+  bulkInvite,
   getEmailsForCount,
+  deleteSentMail,
+  getSentById
 };

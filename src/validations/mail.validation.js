@@ -56,6 +56,7 @@ const updateMail = {
   }),
   body: Joi.object().keys({
     is_read: Joi.boolean(),
+    is_star: Joi.boolean(),
   }),
 };
 

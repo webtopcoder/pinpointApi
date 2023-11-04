@@ -34,7 +34,7 @@ const fileFilter = (req, file, cb) => {
     ".ogg",
     ".wav",
   ];
-  if (!allowedExt.includes(ext)) {
+  if (!allowedExt.includes(ext.toLowerCase())) {
     cb(new Error("File type is not supported"), false);
     return;
   }
@@ -63,7 +63,7 @@ const uploadAdmin = multer({
     destination: "./public/avatar",
     filename: (req, file, callBack) => {
       const parsedPath = path.parse(file.originalname);
-      const ext = parsedPath.ext;
+      const ext = (parsedPath.ext).toLowerCase();
       const fileName = `${parsedPath.name.replace(/\s/g, "")}-${Date.now()}-${req.user._id
         }${ext}`;
       callBack(null, fileName);
