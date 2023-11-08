@@ -136,7 +136,10 @@ const getProfileHeaderInfo = catchAsync(async (req, res) => {
       favorites: likesPostCount + likesLocationCount,
       followers: followerCount,
       location: locationCount,
+      fullname: user?.name,
+      aboutme: user.profile.about,
       username: user?.username,
+      socials: user?.profile.social,
       businessname: user?.businessname,
       usertype: user?.role,
       rating: Rating,
@@ -162,6 +165,8 @@ const getProfileActivity = catchAsync(async (req, res) => {
     page: page ?? 1,
     search,
   });
+
+  console.log(post)
 
   return res.json({
     success: true,
