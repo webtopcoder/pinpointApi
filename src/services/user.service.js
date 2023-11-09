@@ -715,13 +715,16 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
     };
 
   const { posts, follows, reviews } = postAndFollowsOfCurrentUser;
+  
   const activityData = posts.concat(follows, reviews);
   activityData.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  const activityTotal = activityData?.length;
   const limitedData = activityData.splice((parseInt(page) - 1) * 5, 5);
 
   return {
     post: limitedData,
     images,
+    activityTotal
   };
 };
 

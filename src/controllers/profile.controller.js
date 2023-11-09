@@ -161,12 +161,10 @@ const getProfileActivity = catchAsync(async (req, res) => {
 
   let followersArray = []
   followersArray.push(new ObjectId(userId.toString()));
-  const { post, images } = await userService.getUserActivity(user._id, followersArray, {
+  const { post, images, activityTotal } = await userService.getUserActivity(user._id, followersArray, {
     page: page ?? 1,
     search,
   });
-
-  console.log(post)
 
   return res.json({
     success: true,
@@ -174,6 +172,7 @@ const getProfileActivity = catchAsync(async (req, res) => {
     notification: user.profile?.notification,
     social: user.profile?.social,
     posts: post,
+    activityTotal,
     image: images,
   });
 });

@@ -570,6 +570,7 @@ const getFollowAndFollowings = async (userId) => {
           { follower: new ObjectId(userId) },
           { following: new ObjectId(userId) },
         ],
+        status: 'active'
       },
     },
     {
