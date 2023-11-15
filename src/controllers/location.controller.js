@@ -58,10 +58,11 @@ const getLocations = catchAsync(async (req, res) => {
     "subCategory",
   ]);
 
+  let options = pick(req.query, ["limit", "page", "sort"]);
+
   let subcategoryFlag;
   filter.subCategory ? subcategoryFlag = true : subcategoryFlag = false;
 
-  let options = pick(req.query, ["limit", "page", "sort", "pagination"]);
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
     delete filter.q;

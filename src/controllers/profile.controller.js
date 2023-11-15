@@ -370,7 +370,6 @@ const getAllMemebers = catchAsync(async (req, res) => {
     }
   }
 
-
   options.populate = [
     {
       path: "category",
@@ -434,7 +433,6 @@ const getAllImages = catchAsync(async (req, res) => {
 });
 
 const getPartnerDashboard = catchAsync(async (req, res) => {
-
   const userId = req.user._id;
   const partnerLocations = await Location.find({
     partner: userId,
@@ -453,6 +451,9 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
     partner: userId,
   }).populate("reviews");
 
+  const likesPostCount = await postService.getlikePostCount(userId);
+  const likesLocationCount = await locationService.getlikeLocationCount(userId);
+
   const businessRating = await locationService.getRating(userId);
   const profileViews =
     (await userService.getUserById(userId)).profileViews ?? 0;
@@ -462,6 +463,7 @@ const getPartnerDashboard = catchAsync(async (req, res) => {
   return res.send({
     partnerLocations,
     activeLocations,
+    likes: likesLocationCount + likesPostCount,
     followers,
     profileViews,
     businessRating,
