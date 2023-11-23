@@ -29,7 +29,9 @@ const createLocation = catchAsync(async (req, res) => {
     description: req.body.description,
     lastSeen: new Date(),
     subCategories: req.body.subCategories,
+    poll: req.body?.question || req.body.options ? { question: req.body.question, options: req.body.options.split(',').map(option => ({ optionText: option })) } : {}
   });
+
   res.status(httpStatus.CREATED).send(location);
 });
 
@@ -68,7 +70,6 @@ const getLocations = catchAsync(async (req, res) => {
     delete filter.q;
   }
   if (filter.category) {
-
     const subcategoriesID = await categoryService.getSubCategoryByCategoryId(
       filter.category
     );
@@ -109,6 +110,7 @@ const getLocations = catchAsync(async (req, res) => {
     "isArrival",
     "arrivalImages",
     "subCategories",
+    "poll"
   ];
 
   delete filter.category;
@@ -126,6 +128,7 @@ const getLocation = catchAsync(async (req, res) => {
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
+
   if (req.user) {
     const userinfo = await userService.getUserById(req.user._id);
     favorited = userinfo.favoriteLocations.includes(req.params.locationId) ? true : false;
@@ -145,32 +148,92 @@ const getExpiredArrivals = catchAsync(async (req, res) => {
   res.send(ExpiredArrivals);
 });
 
+const votePoll = catchAsync(async (req, res) => {
+  const { userId, locationId } = req.params;
+  const { option } = req.body;
+  const user = await userService.getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const location = await locationService.getLocationById(locationId);
+
+  if (location?.poll?.usersVoted.includes(req.user._id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "You already voted");
+  }
+
+  const opentextToFind = option; // The optionText to find
+  const options = location.poll;
+  // Function to find the index of the option with the given optionText
+  const findOptionIndex = (options, opentext) => {
+    return options.findIndex(option => option.optionText === opentext);
+  };
+
+  // Find the index of the option with the given optionText
+  const optionIndex = findOptionIndex(options.options, opentextToFind);
+
+  if (optionIndex !== -1) {
+    // If the option with the given optionText is found, increment its votes
+    options.options[optionIndex].votes++;
+    // Log the updated options object
+    options.usersVoted.push(req.user._id);
+
+  } else {
+    // If the option with the given optionText is not found
+    console.log('Option not found.');
+  }
+
+
+  await locationService.updateLocationById(locationId, { ...location, poll: options });
+
+  // poll.votes[option] += 1;
+
+  // await userService.updateUserById(userId, {
+  //   profile: { ...user.profile, poll },
+  // });
+  res.send(options);
+});
+
 const updateLocation = catchAsync(async (req, res) => {
-  const images = await Promise.all(
-    req.files.map(async (file) => {
-      const media = await uploadMedia(file, req.user._id);
-      return media._id;
-    })
-  );
+  const { title, description, subCategories } = req.body;
   const { locationId } = req.params;
+  const { _id: userId } = req.user;
+
   const location = await locationService.getLocationById(locationId);
   if (!location) {
     throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
   }
 
-  if (!location.partner == req.user._id) {
+  if (String(location.partner._id) !== String(userId)) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
       "You don't have permission to update this location"
     );
   }
 
-  const data = {
-    title: req.body.title,
-    description: req.body.description,
-    images,
-    subCategories: req.body.subCategories,
+  let data = {
+    title,
+    description,
+    subCategories,
+    poll: {}
   };
+
+  if (req.files && req.files.length > 0) {
+    const images = await Promise.all(
+      req.files.map(async (file) => {
+        const media = await uploadMedia(file, userId);
+        return media._id;
+      })
+    );
+    data.images = images;
+  }
+
+  if (req.body.question || req.body.options) {
+    data.poll = {
+      question: req.body.question || "",
+      options: (req.body.options || "").split(',').map(option => ({ optionText: option.trim() }))
+    };
+  }
 
   await locationService.updateLocationById(locationId, data);
   res.send(location);
@@ -248,8 +311,6 @@ const quickArrival = catchAsync(async (req, res) => {
     });
     // }
   });
-
-
 
   res.send(updatedLocation);
 });
@@ -560,5 +621,6 @@ module.exports = {
   unfavoriteLocation,
   getFavoriteLocations,
   checkIn,
-  getExpiredArrivals
+  getExpiredArrivals,
+  votePoll
 };

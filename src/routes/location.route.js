@@ -66,7 +66,7 @@ router
 
 router
   .route("/:locationId/:expand")
-  .get(
+  .get(auth(),
     validate(locationValidation.getLocation),
     locationController.getLocation
   )
@@ -88,5 +88,12 @@ router
     validate(locationValidation.getLocation),
     locationController.getExpiredArrivals
   )
+
+router
+  .route("/:userId/:locationId/poll")
+  .post(
+    auth(),
+    locationController.votePoll
+  );
 
 module.exports = router;

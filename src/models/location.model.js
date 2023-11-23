@@ -1,5 +1,6 @@
 const { toJSON } = require("./plugins");
 const softDelete = require("mongoose-delete");
+const PollSchema = require("./schemas/poll.schema");
 
 module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
   const MapLocationSchema = new Schema(
@@ -42,6 +43,7 @@ module.exports = ({ Schema, Types, model }, mongoosePaginate) => {
         type: String,
         required: true,
       },
+      poll: PollSchema,
       mapLocation: MapLocationSchema,
       images: {
         type: [

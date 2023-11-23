@@ -9,6 +9,8 @@ const createLocation = {
   body: Joi.object().keys({
     title: Joi.string().required(),
     description: Joi.string().allow(""),
+    question: Joi.any(),
+    options: Joi.any(),
     subCategories: Joi.string().custom(validateObjectIdArrayInFormData),
   }),
 };
@@ -43,6 +45,8 @@ const updateLocation = {
       title: Joi.string().required(),
       description: Joi.string().allow(""),
       subCategories: Joi.string().custom(validateObjectIdArrayInFormData), // transform to array of objectIds
+      question: Joi.any(),
+      options: Joi.any(),
     })
     .min(1),
 };

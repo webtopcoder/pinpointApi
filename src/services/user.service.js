@@ -488,6 +488,19 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
                     from: 'users',
                     localField: "partner",
                     foreignField: "_id",
+                    pipeline: [
+                      {
+                        $lookup: {
+                          from: Media.collection.name,
+                          localField: "profile.avatar",
+                          foreignField: "_id",
+                          as: "profile.avatar",
+                        },
+                      },
+                      {
+                        $unwind: "$profile.avatar",
+                      },
+                    ],
                     as: "partner",
                   },
                 },
@@ -520,7 +533,10 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
                 title: "$location.title",
                 _id: "$location._id",
                 partner: "$location.partner.username",
+                partner_firstname: "$location.partner.firstName",
+                partner_lastname: "$location.partner.lastName",
                 partner_id: "$location.partner._id",
+                partner_avatar: "$location.partner.profile.avatar",
               },
               image: "$images",
               like: "$like",
@@ -715,7 +731,7 @@ const getUserActivity = async (userId, followersArray, { page, search }) => {
     };
 
   const { posts, follows, reviews } = postAndFollowsOfCurrentUser;
-  
+
   const activityData = posts.concat(follows, reviews);
   activityData.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
   const activityTotal = activityData?.length;

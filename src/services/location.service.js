@@ -20,6 +20,7 @@ const getLocationById = async (id) => {
     .populate("images")
     .populate("like")
     .populate("isArrival")
+    .populate("poll")
     .populate({
       path: "isArrival",
       populate: [
@@ -173,6 +174,7 @@ const queryLocations = async (filter, options) => {
   });
 
 
+  console.log(locations)
   for (let key = 0; key < locations.results.length; key++) {
     let item = locations.results[key]._doc;
     const reviewlikeCount = await Location.aggregate([
