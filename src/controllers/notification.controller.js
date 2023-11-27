@@ -15,7 +15,7 @@ const getNotificationById = catchAsync(async (req, res) => {
 });
 
 const getNotifications = catchAsync(async (req, res) => {
-  let filter = pick(req.query, []);
+  let filter = pick(req.query, ["is_read"]);
   let options = pick(req.query, ["limit", "page", "sort"]);
   if (filter.q) {
     filter.title = { $regex: filter.q, $options: "i" };
@@ -30,7 +30,6 @@ const getNotifications = catchAsync(async (req, res) => {
     filter.is_read = false;
 
   options.sort = "-createdAt"
-
   options.populate = [
     "recipient",
     "actor",
@@ -38,6 +37,7 @@ const getNotifications = catchAsync(async (req, res) => {
     { path: "recipient", populate: "profile.avatar" },
   ];
 
+  console.log(filter)
   const result = await notificationService.queryNotifications(filter, options);
   res.send(result);
 });
