@@ -194,7 +194,7 @@ const getProfileSocials = catchAsync(async (req, res) => {
     followersArray.push(item.follower._id);
   });
 
-  const { post, images } = await userService.getUserActivity(user._id, followersArray, {
+  const { post, images, activityTotal } = await userService.getUserActivity(user._id, followersArray, {
     page: page ?? 1,
     search,
   });
@@ -205,6 +205,7 @@ const getProfileSocials = catchAsync(async (req, res) => {
     notification: user.profile?.notification,
     social: user.profile?.social,
     posts: post,
+    activityTotal,
     image: images,
   });
 });
