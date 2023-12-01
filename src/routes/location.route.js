@@ -65,9 +65,16 @@ router
   .delete(auth(), locationController.unfavoriteLocation);
 
 router
+  .route("/Bytitle/:title/:expand")
+  .get(auth(),
+    validate(locationValidation.getLocationByTitle),
+    locationController.getLocationByTitle
+  )
+
+router
   .route("/:locationId/:expand")
   .get(auth(),
-    validate(locationValidation.getLocation),
+    validate(locationValidation.getLocationById),
     locationController.getLocation
   )
 

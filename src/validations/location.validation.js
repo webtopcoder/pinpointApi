@@ -29,12 +29,20 @@ const getLocations = {
   }),
 };
 
-const getLocation = {
+const getLocationByTitle = {
   params: Joi.object().keys({
-    locationId: Joi.string().custom(objectId),
+    title: Joi.string().allow(""),
     expand: Joi.boolean()
   }),
 };
+
+const getLocationById = {
+  params: Joi.object().keys({
+    locationId: Joi.required().custom(objectId),
+    expand: Joi.boolean()
+  }),
+};
+
 
 const updateLocation = {
   params: Joi.object().keys({
@@ -82,7 +90,8 @@ const reviewLocation = {
 module.exports = {
   createLocation,
   getLocations,
-  getLocation,
+  getLocationByTitle,
+  getLocationById,
   updateLocation,
   quickArrival,
   quickDeparture,

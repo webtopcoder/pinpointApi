@@ -57,6 +57,54 @@ const getLocationById = async (id) => {
   return originallocation;
 };
 
+
+const getLocationByTitle = async (title) => {
+  await Location.updateMany({ "departureAt": { $lt: new Date() }, isActive: true }, { $set: { isActive: false, isArrival: null } })
+  const originallocation = await Location.findOne({ title: title })
+    .populate({
+      path: "partner",
+      populate: { path: "profile.avatar" },
+    })
+    .populate("images")
+    .populate("like")
+    .populate("isArrival")
+    .populate("poll")
+    .populate({
+      path: "isArrival",
+      populate: [
+        {
+          path: "like",
+        },
+        {
+          path: "images",
+        },
+      ],
+    })
+    .populate({
+      path: "reviews",
+      populate: [
+        {
+          path: "user",
+          populate: {
+            path: "profile.avatar",
+          },
+        },
+        {
+          path: "like",
+        },
+        {
+          path: "images",
+        },
+      ],
+    })
+    .populate("subCategories")
+    .populate({
+      path: "arrivalImages",
+    });
+
+  return originallocation;
+};
+
 const getIsArrival = async (id) => {
   const ArrivalInfo = await Location.findById(id).select('isArrival')
     .populate({
@@ -173,8 +221,6 @@ const queryLocations = async (filter, options) => {
     ...options,
   });
 
-
-  console.log(locations)
   for (let key = 0; key < locations.results.length; key++) {
     let item = locations.results[key]._doc;
     const reviewlikeCount = await Location.aggregate([
@@ -469,6 +515,7 @@ const getRating = async (userId) => {
 
 module.exports = {
   getLocationById,
+  getLocationByTitle,
   getLocationsByPartnerId,
   createLocation,
   updateLocationById,

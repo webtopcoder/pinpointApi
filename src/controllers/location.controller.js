@@ -142,6 +142,28 @@ const getLocation = catchAsync(async (req, res) => {
   res.send({ location: location, expiredArrival: ExpiredArrivals, isFavorite: favorited });
 });
 
+const getLocationByTitle = catchAsync(async (req, res) => {
+  const location = await locationService.getLocationByTitle(req.params.title);
+  if (!location) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Location not found");
+  }
+
+  const IsArrival = await locationService.getIsArrival(location?.id);
+  const ExpiredArrivals = await locationService.getExpiredArrivals(location?.id, req.params.expand, IsArrival);
+  let favorited = false;
+  if (req.user) {
+    const userinfo = await userService.getUserById(req.user._id);
+    favorited = userinfo.favoriteLocations.includes(location?.id) ? true : false;
+  }
+
+  const data = {
+    lastSeen: new Date(),
+  };
+
+  await locationService.updateLocationById(location?.id, data);
+  res.send({ location: location, expiredArrival: ExpiredArrivals, isFavorite: favorited });
+});
+
 const getExpiredArrivals = catchAsync(async (req, res) => {
   const IsArrival = await locationService.getIsArrival(req.params.locationId);
   const ExpiredArrivals = await locationService.getExpiredArrivals(req.params.locationId, IsArrival);
@@ -610,6 +632,7 @@ module.exports = {
   createLocation,
   getLocations,
   getLocation,
+  getLocationByTitle,
   updateLocation,
   quickArrival,
   quickDeparture,
